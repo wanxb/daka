@@ -2,6 +2,7 @@ import { calendar, dateKey, moveDay, total, type Metric, type PracticeRecord } f
 export type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 export interface ChartPoint {
   label: string;
+  description?: string;
   added: number;
   cumulative: number;
   records: number;
@@ -52,7 +53,7 @@ export function statistics(
       map.set(key, bucket);
     }
   }
-  const groups: { label: string; rows: PracticeRecord[] }[] = [];
+  const groups: { label: string; description: string; rows: PracticeRecord[] }[] = [];
   if (period === 'day') {
     selected
       .slice()
@@ -62,7 +63,13 @@ export function statistics(
           a.createdAt - b.createdAt ||
           a.id.localeCompare(b.id),
       )
-      .forEach((r, i) => groups.push({ label: r.localTime || `第${i + 1}条`, rows: [r] }));
+      .forEach((r, i) =>
+        groups.push({
+          label: r.localTime || `第${i + 1}条`,
+          description: r.occurredOn + ' ' + (r.localTime || `第${i + 1}条（未填时间）`),
+          rows: [r],
+        }),
+      );
   } else if (period === 'week' || period === 'month') {
     for (let day = start; day <= end; day = moveDay(day, 1))
       groups.push({
@@ -70,6 +77,7 @@ export function statistics(
           period === 'week'
             ? ['日', '一', '二', '三', '四', '五', '六'][calendar(day).getDay()]
             : String(Number(day.slice(8))),
+        description: day,
         rows: byDay.get(day) || [],
       });
   } else {
@@ -79,6 +87,7 @@ export function statistics(
       const month = dateKey(cursor).slice(0, 7);
       groups.push({
         label: period === 'all' ? month : `${cursor.getMonth() + 1}月`,
+        description: month,
         rows: byMonth.get(month) || [],
       });
       cursor.setMonth(cursor.getMonth() + 1);
@@ -90,6 +99,7 @@ export function statistics(
     running += added;
     return {
       label: group.label,
+      description: group.description,
       added,
       cumulative: running,
       records: group.rows.filter((r) => r[metric] != null).length,

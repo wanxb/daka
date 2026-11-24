@@ -5,6 +5,8 @@ import { newId, type Database, type PracticeRecord } from '../../domain/model';
 Page({
   data: {
     query: '',
+    searchFocus: false,
+    loadError: false,
     tiles: [] as ReturnType<typeof projectTile>[],
     loading: true,
     error: '',
@@ -18,22 +20,26 @@ Page({
   _quickId: '',
   _quickProject: '',
   _alive: true,
+  _loadVersion: 0,
   onShow() {
     this._alive = true;
     void this.load();
   },
   onUnload() {
     this._alive = false;
+    this._loadVersion++;
   },
   async load() {
+    const version = ++this._loadVersion;
     try {
       const db = await prepare();
-      if (!this._alive) return;
+      if (!this._alive || version !== this._loadVersion) return;
       this._db = db;
-      this.setData({ loading: false, error: '' });
+      this.setData({ loading: false, loadError: false, error: '' });
       this.filter();
     } catch (error) {
-      this.setData({ loading: false, error: errorText(error) });
+      if (this._alive && version === this._loadVersion)
+        this.setData({ loading: false, loadError: true, error: errorText(error) });
     }
   },
   filter() {
@@ -53,12 +59,23 @@ Page({
     this.setData({ query: e.detail.value });
     this.filter();
   },
+  clearSearch() {
+    this.setData({ query: '', searchFocus: true });
+    this.filter();
+  },
+  blurSearch() {
+    this.setData({ searchFocus: false });
+  },
+  finishSearch() {
+    wx.hideKeyboard();
+  },
   add() {
-    if (!this._db) return;
+    if (!this._db || this.data.busyId) return;
     this.setData({ toast: '' });
     wx.navigateTo({ url: '/pages/project-edit/index' });
   },
   detail(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busyId) return;
     this.setData({ toast: '' });
     wx.navigateTo({ url: '/pages/project-detail/index?id=' + e.currentTarget.dataset.id });
   },

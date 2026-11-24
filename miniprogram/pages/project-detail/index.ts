@@ -22,6 +22,7 @@ Page({
     metric: 'durationSeconds' as Metric,
     metrics: [] as { id: Metric; label: string }[],
     summaries: [] as { id: Metric; label: string; text: string }[],
+    stackedSummary: false,
     period: 'all' as Period,
     periods: [
       { id: 'day', label: '日' },
@@ -99,10 +100,12 @@ Page({
         loading: false,
         error: '',
       });
+      this.setData({ stackedSummary: this.data.summaries.some((item) => item.text.length > 11) });
       this.chart();
-      this.list();
+      this.list(true);
     } catch (error) {
-      if (this._alive) this.setData({ loading: false, error: errorText(error) });
+      if (this._alive && request === this._request)
+        this.setData({ loading: false, error: errorText(error) });
     }
   },
   chart() {
@@ -130,14 +133,17 @@ Page({
       id: r.id,
       date: r.occurredOn + (r.localTime ? ' ' + r.localTime : ''),
       value: recordText(this.data.project!, r),
-      note: r.note,
+      note:
+        Array.from(r.note).length > 120 ? Array.from(r.note).slice(0, 120).join('') + '…' : r.note,
     }));
   },
-  list() {
+  list(preserveCount = false) {
     if (this.data.expanded) {
-      this._cursor = null;
-      this.setData({ records: [] });
-      this.more();
+      // An edit/delete refresh keeps the user's loaded history window instead of collapsing back to page one.
+      const limit = preserveCount ? Math.max(20, this.data.records.length) : 20;
+      const page = recordPage(this._rows, this._id, null, limit);
+      this._cursor = page.cursor;
+      this.setData({ records: this.viewRows(page.items), hasMore: page.hasMore });
     } else
       this.setData({
         records: this.viewRows(sortRecords(this._selected).slice(0, 5)),
@@ -176,10 +182,10 @@ Page({
     this.setData({ expanded: false });
     this._cursor = null;
     this.list();
-    wx.pageScrollTo({ selector: '#record-section', duration: 0 });
+    wx.pageScrollTo({ selector: '#record-section', offsetTop: -this.data.navHeight, duration: 0 });
   },
   more() {
-    if (!this.data.expanded) return;
+    if (!this.data.expanded || !this.data.hasMore) return;
     const result = recordPage(this._rows, this._id, this._cursor);
     this._cursor = result.cursor;
     const start = this.data.records.length,
@@ -240,8 +246,8 @@ Page({
     if (this.data.deleting) return;
     this.setData({ toast: '' });
     const answer = await wx.showModal({
-      title: '删除这个项目？',
-      content: '项目及其全部打卡记录将从本机删除，无法撤销。',
+      title: '删除本项目？',
+      content: `将删除「${this.data.project?.name || ''}」及 ${this.data.historyCount} 条打卡记录，无法撤销。`,
       confirmText: '删除项目',
       confirmColor: '#c52e3d',
     });

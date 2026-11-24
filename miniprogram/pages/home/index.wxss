@@ -63,7 +63,7 @@
 .tile-main[disabled] {
   background: none;
   color: inherit;
-  opacity: 0.7;
+  opacity: 1;
 }
 .tile-icon {
   position: absolute;
@@ -72,7 +72,7 @@
 }
 .tile-number {
   position: absolute;
-  right: 40px;
+  right: 44px;
   top: 11px;
   display: flex;
   align-items: baseline;
@@ -82,10 +82,10 @@
   font-weight: 600;
   letter-spacing: -0.8px;
   font-variant-numeric: tabular-nums;
-  max-width: calc(100% - 80px);
+  max-width: calc(100% - 84px);
 }
 .tile-number.small {
-  font-size: 19px;
+  font-size: 20px;
   letter-spacing: -0.4px;
 }
 .tile-unit {
@@ -112,7 +112,7 @@
   text-overflow: ellipsis;
 }
 .tile-caption {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.35;
   max-width: 64px;
   text-align: right;
@@ -165,5 +165,45 @@
   }
   .tile-number {
     font-size: 30px;
+  }
+}
+
+/* Clearing keeps keyboard focus, while exceptional data uses a full row without making every card taller. */
+.search-clear {
+  width: 44px;
+  height: 44px;
+  margin: 0 -12px 0 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tile.wide {
+  width: 100%;
+}
+.tile.wide .tile-caption {
+  max-width: 60%;
+}
+.tile-main.is-saving {
+  opacity: 0.7;
+}
+.tile-caption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.tile-detail[disabled],
+.add-tile[disabled] {
+  opacity: 1;
+}
+@media (max-width: 360px) {
+  .tile,
+  .add-tile {
+    width: 100%;
+  }
+  .tile-caption {
+    max-width: 55%;
   }
 }

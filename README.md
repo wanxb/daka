@@ -21,6 +21,14 @@ npm run devtools:refresh  # 触发模拟器编译；返回成功不等于编译�
 CLI 默认 `D:/Tencent/微信web开发者工具/wechatide.cmd`，可用环境变量 `WECHATIDE_CLI` 指向其他安装位置。
 首次连接需在微信开发者工具中允许 Codex；工具需要登录时使用自己的微信扫码。
 
+## 在 VS Code 中查看
+
+- **正式小程序**：`Ctrl+Shift+P` →「任务: 运行任务」→「微信：打开真实小程序」。VS Code 编辑 `miniprogram/`，微信工具运行真实页面；保存后在微信工具编译查看。
+- **浏览器原型**：F5 →「原型：完整交互（非正式小程序）」或「原型：多屏对照（非正式小程序）」。使用 VS Code 内置 JavaScript 调试器启动 Chrome；服务为 `127.0.0.1:8127`，修改原型自动刷新。
+- **本地检查**：`Ctrl+Shift+B`，运行类型、业务测试及格式检查。
+
+浏览器原型读取 `prototype/`，不会显示对正式 WXML/WXSS 的修改；真实微信组件和本地文件功能仍需模拟器/真机。微信连接授权问题也仍需在工具中解决。
+
 ## AppID 与开发环境
 
 `project.config.json` 已配置用户提供的 AppID `wx181a7d368ae8a4c8`，正式源码根为 `miniprogram/`。

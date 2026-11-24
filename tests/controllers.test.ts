@@ -48,7 +48,9 @@ test('正式页面与面板状态流程', async (t) => {
       modalCalls++;
       return { confirm: true, cancel: false };
     },
+    getWindowInfo: () => ({ pixelRatio: 2 }),
     showToast: () => {},
+    hideKeyboard: () => {},
     enableAlertBeforeUnload: () => {},
     disableAlertBeforeUnload: () => {},
     navigateBack: () => {},
@@ -179,7 +181,12 @@ test('正式页面与面板状态流程', async (t) => {
     assert.equal((await service().snapshot()).records.length, 0);
     sheet.noteInput(event({}, '临时内容'));
     sheet.toggleDate();
+    const count = sheet.data.fields.length;
     sheet.close();
+    assert.equal(sheet.data.fields.length, count);
+    sheet.afterLeave();
+    assert.equal(sheet.data.mounted, false);
+    assert.equal(sheet.data.fields.length, 0);
     sheet.open(project);
     assert.equal(sheet.data.note, '');
     assert.equal(sheet.data.dateOpen, false);
@@ -231,6 +238,31 @@ test('正式页面与面板状态流程', async (t) => {
     assert.equal(row.durationSeconds, 1);
     assert.equal(row.quantity, null);
   });
+  await t.test('精确输入完成只更新本次值，非法输入就地保留，保存期间拒绝继续修改', async () => {
+    const project = (await service().snapshot()).projects[0],
+      sheet = make(sheetOptions);
+    sheet.open(project);
+    sheet.precise(event({ index: 0 }));
+    sheet.exactInput(event({ index: 0 }, '2.5'));
+    sheet.confirmExact(event({ index: 0 }));
+    assert.equal(sheet.data.fields[0].canonical, 150);
+    assert.equal(sheet.data.fields[0].precise, false);
+    sheet.precise(event({ index: 0 }));
+    sheet.exactInput(event({ index: 0 }, '121'));
+    sheet.blurExact(event({ index: 0 }));
+    assert.equal(sheet.data.fields[0].precise, true);
+    assert.match(sheet.data.fields[0].error, /范围内/);
+    assert.equal(sheet.data.fields[0].raw, '121');
+    sheet.setData({ busy: true });
+    const before = sheet.data.note;
+    sheet.noteInput(event({}, '不能覆盖提交中的内容'));
+    sheet.exactInput(event({ index: 0 }, '3'));
+    assert.equal(sheet.data.note, before);
+    assert.equal(sheet.data.fields[0].raw, '121');
+    sheet.setData({ busy: false });
+    sheet.close();
+    sheet.afterLeave();
+  });
   await t.test('快速打卡防双击，后续独立操作允许重复记录；搜索保留项目原序', async () => {
     await reset();
     const p = await service().saveProject({
@@ -251,6 +283,26 @@ test('正式页面与面板状态流程', async (t) => {
     assert.equal(home.data.query, '阅');
     home.search(event({}, '跑步'));
     assert.equal(home.data.tiles.length, 0);
+    home.clearSearch();
+    assert.equal(home.data.query, '');
+    assert.equal(home.data.searchFocus, true);
+    assert.equal(home.data.tiles.length, 1);
+  });
+  await t.test('创建前完成聚焦字段归一化，提交期间拒绝配置变更', async () => {
+    await reset();
+    const editor = make(editorOptions);
+    await editor.onLoad({});
+    editor.text(event({ field: 'name' }, '专注'));
+    editor.text(event({ field: 'defaultTime' }, '200'));
+    const saving = editor.save();
+    editor.text(event({ field: 'name' }, '迟到输入'));
+    editor.toggle(event({ field: 'quantityEnabled' }, true));
+    await saving;
+    const db = await service().snapshot();
+    assert.equal(db.projects[0].name, '专注');
+    assert.equal(db.projects[0].defaultTime, 120);
+    assert.equal(db.projects[0].mode, 'duration');
+    assert.equal(db.newProjectDraft, null);
   });
   await t.test('126条记录：预览5，展开20，每批20到126无重复，收起和切周期重置', async () => {
     await reset();
@@ -286,6 +338,8 @@ test('正式页面与面板状态流程', async (t) => {
     assert.equal(detail.data.records.length, 20);
     for (let i = 0; i < 6; i++) detail.onReachBottom();
     assert.equal(detail.data.records.length, 126);
+    await detail.load();
+    assert.equal(detail.data.records.length, 126);
     assert.equal(new Set(detail.data.records.map((r: any) => r.id)).size, 126);
     assert.equal(detail.data.hasMore, false);
     detail.collapse();
@@ -307,6 +361,67 @@ test('正式页面与面板状态流程', async (t) => {
       cursor = page.cursor;
     }
     assert.equal(new Set(ids).size, 4);
+  });
+  await t.test('图表支持Canvas局部触点与普通触点，点选显示原始秒数，滚动不触发读数', async () => {
+    await import('../miniprogram/components/practice-chart/index');
+    const chart = make(componentOptions),
+      ops: string[] = [];
+    const ctx: any = {};
+    for (const name of [
+      'scale',
+      'clearRect',
+      'beginPath',
+      'moveTo',
+      'lineTo',
+      'stroke',
+      'fillText',
+      'fillRect',
+      'arc',
+      'fill',
+    ])
+      ctx[name] = (...args: any[]) => {
+        assert.ok(!args.some((value) => typeof value === 'number' && !Number.isFinite(value)));
+        ops.push(name);
+      };
+    const node: any = { getContext: () => ctx };
+    chart.createSelectorQuery = () => {
+      const query: any = {
+        select: () => query,
+        fields: () => query,
+        boundingClientRect: (callback: any) => {
+          callback({ left: 100, width: 300 });
+          return query;
+        },
+        exec: (callback: any) => {
+          if (callback) callback([{ node, width: 300, height: 200, left: 100, top: 0 }]);
+        },
+      };
+      return query;
+    };
+    chart.setData({
+      points: [{ label: '11月', description: '2026-11', added: 1, cumulative: 1, records: 1 }],
+      mode: 'cumulative',
+      unit: '时',
+      factor: 3600,
+      isTime: true,
+      color: '#6745c6',
+      baseline: 0,
+      empty: false,
+    });
+    chart.startTouch({ touches: [{ x: 200, y: 80 }] });
+    chart.endTouch({ touches: [], changedTouches: [{ x: 200, y: 80 }] });
+    assert.match(chart.data.reading, /2026-11/);
+    assert.match(chart.data.reading, /1秒/);
+    assert.equal(chart.data.selectedIndex, 0);
+    assert.ok(ops.includes('arc'));
+    chart.setData({ reading: '' });
+    chart.startTouch({ touches: [{ clientX: 300, clientY: 80 }] });
+    chart.endTouch({ touches: [], changedTouches: [{ clientX: 300, clientY: 80 }] });
+    assert.match(chart.data.reading, /1秒/);
+    chart.setData({ reading: '' });
+    chart.startTouch({ touches: [{ x: 200, y: 80 }] });
+    chart.endTouch({ touches: [], changedTouches: [{ x: 200, y: 150 }] });
+    assert.equal(chart.data.reading, '');
   });
   await reset();
 });

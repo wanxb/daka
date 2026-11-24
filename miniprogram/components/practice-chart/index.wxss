@@ -1,7 +1,7 @@
 /* Reserve the tooltip line so inspecting a point never shifts the page or the chart. */
 .chart-wrap {
   position: relative;
-  padding-top: 28px;
+  padding-top: 40px;
 }
 .reading {
   position: absolute;
@@ -12,7 +12,7 @@
   text-align: center;
   color: #4d465e;
   font-size: 13px;
-  line-height: 22px;
+  line-height: 18px;
 }
 .chart {
   display: block;
@@ -28,4 +28,10 @@
   color: #696971;
   font-size: 14px;
   pointer-events: none;
+}
+
+/* Two tooltip lines keep a full date and exact amount readable without covering the plot. */
+.reading {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }

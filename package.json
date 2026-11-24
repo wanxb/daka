@@ -10,13 +10,14 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
-    "format": "prettier --write miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json",
-    "format:check": "prettier --check miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json",
+    "format": "prettier --write miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json .vscode/*.json",
+    "format:check": "prettier --check miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json .vscode/*.json",
     "check": "npm run typecheck && npm test && npm run format:check",
     "devtools:status": "node scripts/wechatide.mjs check_wechatide_status --skill-version 0.3.11",
     "devtools:open": "node scripts/wechatide.mjs open_project_window --project . --window-mode fullMode",
     "devtools:refresh": "node scripts/wechatide.mjs simulator_refresh --project .",
-    "check:native": "node scripts/compile-native.mjs"
+    "check:native": "node scripts/compile-native.mjs",
+    "preview:prototype": "node scripts/preview-prototype.mjs"
   },
   "devDependencies": {
     "typescript": "5.9.3",

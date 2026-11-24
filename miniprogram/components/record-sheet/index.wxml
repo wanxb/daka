@@ -1,11 +1,13 @@
 <!-- Native page-container owns back/overlay dismissal; the component never persists unfinished input. -->
 <page-container
+  wx:if="{{mounted}}"
   show="{{opened}}"
   position="bottom"
   round
   duration="200"
   bindclickoverlay="close"
   bindbeforeleave="beforeLeave"
+  bindafterleave="afterLeave"
   overlay-style="background-color:rgba(20,20,30,.4)"
 >
   <scroll-view
@@ -42,6 +44,11 @@
             value="{{item.raw}}"
             maxlength="20"
             focus
+            disabled="{{busy}}"
+            confirm-type="done"
+            cursor-spacing="16"
+            bindconfirm="confirmExact"
+            bindblur="blurExact"
             data-index="{{index}}"
             bindinput="exactInput"
             aria-label="{{item.label}}，单位{{item.unit}}"
@@ -75,22 +82,34 @@
           bindchange="settle"
           aria-label="调节{{item.label}}，{{item.display}}"
         />
+        <view wx:if="{{item.error}}" class="field-error" aria-role="alert">{{item.error}}</view>
       </view>
       <view class="tools" wx:if="{{!dateOpen}}">
-        <button class="tool-button" bindtap="toggleNote" hover-class="pressed">
+        <button class="tool-button" disabled="{{busy}}" bindtap="toggleNote" hover-class="pressed">
           {{noteOpen?'收起备注':'添加备注'}}
         </button>
-        <button class="tool-button" bindtap="toggleDate" hover-class="pressed">
+        <button class="tool-button" disabled="{{busy}}" bindtap="toggleDate" hover-class="pressed">
           {{date === today?'今天':date}}
         </button>
       </view>
       <block wx:else>
         <view class="date-top">
-          <button class="tool-button" bindtap="toggleDate" hover-class="pressed">
+          <button
+            class="tool-button"
+            disabled="{{busy}}"
+            bindtap="toggleDate"
+            hover-class="pressed"
+          >
             {{date === today?'今天':date}}⌃
           </button>
         </view>
-        <picker mode="date" value="{{date}}" end="{{today}}" bindchange="dateChange">
+        <picker
+          disabled="{{busy}}"
+          mode="date"
+          value="{{date}}"
+          end="{{today}}"
+          bindchange="dateChange"
+        >
           <view class="date-row">
             <text>日期</text>
             <text class="date-value">{{date}}</text>
@@ -98,6 +117,7 @@
         </picker>
         <view class="time-row">
           <picker
+            disabled="{{busy}}"
             class="time-picker"
             mode="time"
             value="{{time || '18:00'}}"
@@ -108,16 +128,23 @@
               <text class="date-value">{{time || '选择时间'}}</text>
             </view>
           </picker>
-          <button wx:if="{{time}}" class="clear-time" bindtap="clearTime" aria-label="清除具体时间">
+          <button
+            wx:if="{{time}}"
+            class="clear-time"
+            disabled="{{busy}}"
+            bindtap="clearTime"
+            aria-label="清除具体时间"
+          >
             <ui-icon name="close" tone="muted" size="14" />
           </button>
         </view>
-        <button class="note-toggle" bindtap="toggleNote" hover-class="pressed">
+        <button class="note-toggle" disabled="{{busy}}" bindtap="toggleNote" hover-class="pressed">
           {{noteOpen?'收起备注':'添加备注'}}
         </button>
       </block>
       <textarea
         wx:if="{{noteOpen}}"
+        disabled="{{busy}}"
         class="note"
         value="{{note}}"
         bindinput="noteInput"

@@ -82,7 +82,7 @@
   background: none;
 }
 .icon-hit.selected {
-  background: #f0edf8;
+  background: var(--accent);
 }
 .heading-row {
   position: relative;
@@ -186,4 +186,23 @@
 .cancel {
   width: 100%;
   margin-top: 6px;
+}
+
+/* Shared project accent and tabular digits make grouped controls read as one calm settings surface. */
+.parameter input {
+  font-variant-numeric: tabular-nums;
+}
+.unit-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+.unit-value input {
+  max-width: 120px;
+}
+.color-hit[disabled],
+.icon-hit[disabled] {
+  opacity: 1;
 }

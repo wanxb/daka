@@ -5,7 +5,7 @@
   custom-back
   bind:back="cancel"
 />
-<view class="page-content editor">
+<view class="page-content editor" style="--accent:{{palette[form.color]}}">
   <view wx:if="{{loading}}" class="empty">正在读取…</view>
   <block wx:elif="{{ready}}">
     <view class="preview {{form.color}}">
@@ -15,6 +15,7 @@
     <view class="section-label">项目名称</view>
     <view class="surface name-row">
       <input
+        disabled="{{busy}}"
         value="{{form.name}}"
         data-field="name"
         bindinput="text"
@@ -30,10 +31,11 @@
           wx:for="{{colors}}"
           wx:key="id"
           class="color-hit"
+          disabled="{{busy}}"
           data-field="color"
           data-value="{{item.id}}"
           bindtap="choose"
-          aria-label="{{item.id}}色"
+          aria-label="{{item.label}}"
           aria-pressed="{{form.color === item.id}}"
           hover-class="pressed"
         >
@@ -49,6 +51,7 @@
         <button
           wx:for="{{icons}}"
           wx:key="*this"
+          disabled="{{busy}}"
           class="icon-hit {{form.icon === item?'selected':''}}"
           data-field="icon"
           data-value="{{item}}"
@@ -57,7 +60,7 @@
           aria-pressed="{{form.icon === item}}"
           hover-class="pressed"
         >
-          <ui-icon name="{{item}}" tone="{{form.icon === item?'accent':'muted'}}" size="23" />
+          <ui-icon name="{{item}}" tone="{{form.icon === item?'white':'muted'}}" size="23" />
         </button>
       </view>
     </view>
@@ -67,10 +70,11 @@
         <ui-icon name="clock" />
         <text>时间</text>
         <switch
+          disabled="{{busy}}"
           checked="{{form.timeEnabled}}"
           data-field="timeEnabled"
           bindchange="toggle"
-          color="#6745c6"
+          color="{{palette[form.color]}}"
           aria-label="启用时间记录"
         />
       </view>
@@ -81,6 +85,7 @@
             <button
               wx:for="{{units}}"
               wx:key="*this"
+              disabled="{{busy}}"
               class="segment-hit"
               data-field="timeUnit"
               data-value="{{item}}"
@@ -96,6 +101,7 @@
           <text>时间范围</text>
           <view class="range">
             <input
+              disabled="{{busy}}"
               type="number"
               value="{{form.timeMin}}"
               data-field="timeMin"
@@ -103,10 +109,11 @@
               bindinput="text"
               bindblur="rangeBlur"
               aria-label="时间范围最小值"
-              maxlength="15"
+              maxlength="16"
             />
             <text class="dash">–</text>
             <input
+              disabled="{{busy}}"
               type="number"
               value="{{form.timeMax}}"
               data-field="timeMax"
@@ -114,21 +121,24 @@
               bindinput="text"
               bindblur="rangeBlur"
               aria-label="时间范围最大值"
-              maxlength="15"
+              maxlength="16"
             />
           </view>
         </view>
         <view class="parameter row">
           <text>默认时间</text>
           <input
+            disabled="{{busy}}"
             type="digit"
             value="{{form.defaultTime}}"
             data-field="defaultTime"
             data-kind="time"
             bindinput="text"
             bindblur="defaultBlur"
+            bindconfirm="defaultBlur"
+            confirm-type="done"
             aria-label="默认时间"
-            maxlength="15"
+            maxlength="16"
           />
         </view>
       </block>
@@ -136,29 +146,34 @@
         <ui-icon name="quantity" />
         <text>数量</text>
         <switch
+          disabled="{{busy}}"
           checked="{{form.quantityEnabled}}"
           data-field="quantityEnabled"
           bindchange="toggle"
-          color="#6745c6"
+          color="{{palette[form.color]}}"
           aria-label="启用数量记录"
         />
       </view>
       <block wx:if="{{form.quantityEnabled}}">
-        <view class="parameter row">
+        <view class="parameter row" bindtap="explainUnitLock">
           <text>数量单位</text>
-          <input
-            value="{{form.quantityUnit}}"
-            data-field="quantityUnit"
-            bindinput="text"
-            disabled="{{locked}}"
-            maxlength="8"
-            aria-label="数量单位{{locked?'，已有数量记录，单位固定':''}}"
-          />
+          <view class="unit-value">
+            <ui-icon wx:if="{{locked}}" name="lock" tone="muted" size="13" />
+            <input
+              value="{{form.quantityUnit}}"
+              data-field="quantityUnit"
+              bindinput="text"
+              disabled="{{busy || locked}}"
+              maxlength="8"
+              aria-label="数量单位{{locked?'，已有数量记录，单位固定':''}}"
+            />
+          </view>
         </view>
         <view class="parameter row">
           <text>数量范围</text>
           <view class="range">
             <input
+              disabled="{{busy}}"
               type="number"
               value="{{form.quantityMin}}"
               data-field="quantityMin"
@@ -166,10 +181,11 @@
               bindinput="text"
               bindblur="rangeBlur"
               aria-label="数量范围最小值"
-              maxlength="15"
+              maxlength="16"
             />
             <text class="dash">–</text>
             <input
+              disabled="{{busy}}"
               type="number"
               value="{{form.quantityMax}}"
               data-field="quantityMax"
@@ -177,21 +193,24 @@
               bindinput="text"
               bindblur="rangeBlur"
               aria-label="数量范围最大值"
-              maxlength="15"
+              maxlength="16"
             />
           </view>
         </view>
         <view class="parameter row">
           <text>默认数量</text>
           <input
+            disabled="{{busy}}"
             type="digit"
             value="{{form.defaultQuantity}}"
             data-field="defaultQuantity"
             data-kind="quantity"
             bindinput="text"
             bindblur="defaultBlur"
+            bindconfirm="defaultBlur"
+            confirm-type="done"
             aria-label="默认数量"
-            maxlength="15"
+            maxlength="16"
           />
         </view>
       </block>
@@ -204,7 +223,7 @@
             data-field="primaryMetric"
             data-value="durationSeconds"
             bindtap="choose"
-            disabled="{{!form.timeEnabled}}"
+            disabled="{{busy || !form.timeEnabled}}"
             aria-pressed="{{(form.timeEnabled && !form.quantityEnabled) || (form.primaryMetric === 'durationSeconds' && form.timeEnabled)}}"
           >
             <text
@@ -218,7 +237,7 @@
             data-field="primaryMetric"
             data-value="quantity"
             bindtap="choose"
-            disabled="{{!form.quantityEnabled}}"
+            disabled="{{busy || !form.quantityEnabled}}"
             aria-pressed="{{(form.quantityEnabled && !form.timeEnabled) || (form.primaryMetric === 'quantity' && form.quantityEnabled)}}"
           >
             <text
@@ -233,10 +252,11 @@
         <ui-icon name="bolt" />
         <text>快速打卡</text>
         <switch
+          disabled="{{busy}}"
           checked="{{form.directEntryEnabled}}"
           data-field="directEntryEnabled"
           bindchange="toggle"
-          color="#6745c6"
+          color="{{palette[form.color]}}"
           aria-label="快速打卡，点击卡片按默认值记录"
         />
       </view>

@@ -5,8 +5,12 @@
     id="chart"
     type="2d"
     class="chart"
-    bindtouchstart="inspect"
+    bindtouchstart="startTouch"
+    bindtouchend="endTouch"
+    bindtouchcancel="cancelTouch"
     aria-label="{{mode === 'cumulative'?'累计曲线':'分布图'}}，单位{{unit}}"
   />
-  <view wx:if="{{empty}}" class="empty">还没有记录</view>
+  <view wx:if="{{empty}}" class="empty">
+    {{mode==='distribution'?'本期还没有记录':'还没有记录'}}
+  </view>
 </view>

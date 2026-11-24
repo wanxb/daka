@@ -7,26 +7,38 @@
       placeholder="愚公打卡"
       placeholder-style="color:#696971"
       value="{{query}}"
+      focus="{{searchFocus}}"
+      bindblur="blurSearch"
+      bindconfirm="finishSearch"
       bindinput="search"
       maxlength="100"
       aria-label="搜索项目"
       confirm-type="search"
     />
+    <button
+      wx:if="{{query}}"
+      class="search-clear"
+      bindtap="clearSearch"
+      aria-label="清空搜索"
+      hover-class="pressed"
+    >
+      <ui-icon name="close" tone="muted" size="14" />
+    </button>
   </view>
   <view wx:if="{{error}}" class="error" aria-role="alert">
     {{error}}
     <button class="link" bindtap="load">重试</button>
   </view>
   <view wx:if="{{loading}}" class="empty">正在读取记录…</view>
-  <view wx:elif="{{!error}}" class="tile-grid">
-    <view wx:for="{{tiles}}" wx:key="id" class="tile {{item.color}}">
+  <view wx:elif="{{!loadError}}" class="tile-grid">
+    <view wx:for="{{tiles}}" wx:key="id" class="tile {{item.color}} {{item.wide?'wide':''}}">
       <button
-        class="tile-main"
+        class="tile-main {{busyId === item.id?'is-saving':''}}"
         hover-class="tile-pressed"
         data-id="{{item.id}}"
         bindtap="record"
-        disabled="{{busyId === item.id}}"
-        aria-label="{{item.name}}，累计{{item.number}}{{item.unit}}，{{item.directEntryEnabled?item.caption:'打卡'}}"
+        disabled="{{!!busyId}}"
+        aria-label="{{item.name}}，{{item.summaryLabel}}，{{item.directEntryEnabled?item.caption:'打卡'}}"
       >
         <view class="tile-icon"><ui-icon name="{{item.icon}}" tone="white" size="23" /></view>
         <view class="tile-number {{item.small?'small':''}}">
@@ -35,11 +47,12 @@
         </view>
         <view class="tile-footer">
           <text class="tile-name">{{item.name}}</text>
-          <text class="tile-caption">{{item.caption}}</text>
+          <text class="tile-caption">{{busyId === item.id?'记录中…':item.caption}}</text>
         </view>
       </button>
       <button
         class="tile-detail"
+        disabled="{{!!busyId}}"
         hover-class="tile-pressed"
         data-id="{{item.id}}"
         bindtap="detail"
@@ -51,13 +64,14 @@
     <button
       class="add-tile {{!tiles.length&&!query?'first':''}}"
       bindtap="add"
+      disabled="{{!!busyId}}"
       hover-class="pressed"
     >
       <ui-icon name="plus" tone="accent" size="24" />
       <text>新增项目</text>
     </button>
   </view>
-  <view wx:if="{{!loading && !error && !tiles.length}}" class="empty">
+  <view wx:if="{{!loading && !loadError && !tiles.length}}" class="empty">
     {{query?'没有匹配的项目':'从一件想坚持的事开始'}}
   </view>
 </view>

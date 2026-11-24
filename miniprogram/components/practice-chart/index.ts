@@ -1,4 +1,5 @@
 import { amountText, timeText, type TimeUnit } from '../../domain/model';
+import { axisLabel, niceMaximum, pointIndex, plot } from '../../application/chart-layout';
 import type { ChartPoint } from '../../domain/statistics';
 type CanvasNode = WechatMiniprogram.Canvas;
 interface CanvasResult {
@@ -9,6 +10,21 @@ interface CanvasResult {
   top: number;
 }
 const revisions = new WeakMap<object, number>();
+interface ChartTouch {
+  x?: number;
+  y?: number;
+  clientX?: number;
+  clientY?: number;
+}
+interface ChartGesture {
+  touches: ChartTouch[];
+  changedTouches?: ChartTouch[];
+}
+const gestures = new WeakMap<object, { x: number; y: number; at: number }>();
+const touchPosition = (touch: ChartTouch) => ({
+  x: touch.clientX ?? touch.x ?? NaN,
+  y: touch.clientY ?? touch.y ?? NaN,
+});
 /** A single 2D canvas draws real steps/bars; no interpolation invents unrecorded practice. */
 Component({
   properties: {
@@ -20,10 +36,11 @@ Component({
     color: { type: String, value: '#6745c6' },
     baseline: { type: Number, value: 0 },
   },
-  data: { reading: '', empty: true },
+  data: { reading: '', empty: true, selectedIndex: -1 },
   observers: {
-    'points, mode, factor, color, baseline'() {
-      this.setData({ reading: '' });
+    'points, mode, factor, unit, color, baseline'() {
+      gestures.delete(this);
+      this.setData({ reading: '', selectedIndex: -1 });
       this.draw();
     },
   },
@@ -32,6 +49,7 @@ Component({
       this.draw();
     },
     detached() {
+      gestures.delete(this);
       revisions.set(this, (revisions.get(this) || 0) + 1);
     },
   },
@@ -61,16 +79,18 @@ Component({
           ctx.clearRect(0, 0, width, height);
           const points = this.data.points,
             values = points.map((p) => (this.data.mode === 'cumulative' ? p.cumulative : p.added));
-          const empty = !points.some((p) => p.records > 0) && this.data.baseline === 0;
+          const empty =
+            !points.some((p) => p.records > 0) &&
+            (this.data.mode === 'distribution' || this.data.baseline === 0);
           this.setData({ empty });
           if (empty) return;
-          const left = 54,
-            right = 12,
-            top = 16,
-            bottom = 30,
+          const { left, right, top, bottom } = plot,
             w = width - left - right,
             h = height - top - bottom,
-            max = values.reduce((max, value) => Math.max(max, value), 1) * 1.12;
+            max = niceMaximum(
+              values.reduce((max, value) => Math.max(max, value), 0),
+              this.data.factor,
+            );
           const y = (value: number) => top + h - (value / max) * h,
             step = w / Math.max(points.length, 1),
             x = (i: number) => left + step * (i + 0.5);
@@ -88,13 +108,7 @@ Component({
             ctx.stroke();
             ctx.fillStyle = '#74747c';
             const n = value / this.data.factor;
-            ctx.fillText(
-              n >= 10000
-                ? amountText(Number((n / 10000).toFixed(1))) + '万'
-                : amountText(Number(n.toFixed(1))),
-              left - 8,
-              yy,
-            );
+            ctx.fillText(axisLabel(n), left - 8, yy);
           }
           ctx.fillStyle = this.data.color;
           ctx.strokeStyle = this.data.color;
@@ -122,6 +136,22 @@ Component({
                 Math.max(value > 0 ? 2 : 0, y(0) - y(value)),
               );
             });
+          const selected = this.data.selectedIndex;
+          if (selected >= 0 && selected < points.length) {
+            ctx.beginPath();
+            ctx.moveTo(x(selected), top);
+            ctx.lineTo(x(selected), top + h);
+            ctx.strokeStyle = '#b9b4c4';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x(selected), y(values[selected]), 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = this.data.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
           ctx.fillStyle = '#74747c';
           ctx.textAlign = 'center';
           const indexes = [...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])];
@@ -130,26 +160,53 @@ Component({
               ctx.fillText(points[i].label, x(i), height - 10, Math.max(40, w / 3 - 5));
         });
     },
-    inspect(e: WechatMiniprogram.TouchEvent) {
+    startTouch(e: ChartGesture) {
       const touch = e.touches[0];
-      if (!touch || !this.data.points.length || this.data.empty) return;
+      if (touch) {
+        const point = touchPosition(touch);
+        gestures.set(this, { ...point, at: Date.now() });
+      }
+    },
+    cancelTouch() {
+      gestures.delete(this);
+    },
+    endTouch(e: ChartGesture) {
+      const start = gestures.get(this),
+        touch = e.changedTouches?.[0];
+      gestures.delete(this);
+      if (!start || !touch) return;
+      const end = touchPosition(touch);
+      // Scrolling through the page must not be mistaken for selecting a chart point.
+      if (
+        Math.abs(end.x - start.x) > 8 ||
+        Math.abs(end.y - start.y) > 8 ||
+        Date.now() - start.at > 600
+      )
+        return;
+      this.inspectTouch(touch);
+    },
+    inspectTouch(touch: ChartTouch) {
+      if (!this.data.points.length || this.data.empty) return;
+      const revision = revisions.get(this);
       this.createSelectorQuery()
         .select('#chart')
         .boundingClientRect((rect) => {
-          if (!rect || Array.isArray(rect)) return;
-          const x = touch.clientX - rect.left - 54,
-            w = rect.width - 66,
-            i = Math.min(
-              this.data.points.length - 1,
-              Math.max(0, Math.floor((x / w) * this.data.points.length)),
-            ),
-            point = this.data.points[i];
-          const value = this.data.mode === 'cumulative' ? point.cumulative : point.added;
+          if (!rect || Array.isArray(rect) || revision !== revisions.get(this)) return;
+          // Canvas may expose local x/y; ordinary touch events expose client coordinates instead.
+          const localX = Number.isFinite(touch.x) ? touch.x! : touch.clientX! - rect.left;
+          const i = pointIndex(localX, rect.width, this.data.points.length);
+          if (i == null) return;
+          const point = this.data.points[i],
+            value = this.data.mode === 'cumulative' ? point.cumulative : point.added;
           let text = this.data.isTime
             ? timeText(value, this.data.unit as TimeUnit)
             : amountText(value) + this.data.unit;
           if (text.startsWith('≈')) text += '（' + amountText(value) + '秒）';
-          this.setData({ reading: point.label + ' · ' + text });
+          this.setData({
+            reading: (point.description || point.label) + ' · ' + text,
+            selectedIndex: i,
+          });
+          this.draw();
         })
         .exec();
     },

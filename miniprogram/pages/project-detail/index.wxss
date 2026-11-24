@@ -232,3 +232,31 @@
   width: 100%;
   line-height: 48px;
 }
+
+/* Long totals get a full line; preview notes stay concise and remain fully editable in the record sheet. */
+.summary.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+.summary-value {
+  font-variant-numeric: tabular-nums;
+}
+.main .summary-value.long {
+  font-size: 24px;
+}
+.date-navigation button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.previous-icon {
+  transform: rotate(180deg);
+  display: flex;
+}
+.record-note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

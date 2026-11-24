@@ -350,3 +350,45 @@ test('长中文备注按UTF-8拆页，冷启动还原全部2500条，页大小�
   assert.ok(pages.every(([, text]) => byteLength(text) < 128 * 1024));
   assert.equal((await new LocalRepository(files).snapshot()).records.length, 2500);
 });
+
+test('首页缺失指标不伪装为零，长快速增量保留原文并使用更宽卡片', async () => {
+  const { project } = await setup();
+  const { projectTile } = await import('../miniprogram/application/presentation');
+  const p = {
+    ...project,
+    quantityUnit: '毫升',
+    directEntryEnabled: true,
+    defaultTime: 999999,
+    defaultQuantity: 999999,
+  };
+  const tile = projectTile(p, []);
+  assert.equal(tile.wide, true);
+  assert.match(tile.caption, /999,999毫升/);
+  const missing = projectTile({ ...project, primaryMetric: 'durationSeconds' }, [
+    {
+      ...input(),
+      durationSeconds: null,
+      quantityUnit: '次',
+      createdAt: now,
+      updatedAt: now,
+      revision: 1,
+    },
+  ]);
+  assert.equal(missing.number, '—');
+  assert.equal(missing.summaryLabel, '时间未记录');
+});
+
+test('图表的小数单位坐标不全部变零，命中仅限绘图区，读数包含完整日期', async () => {
+  const { axisLabel, niceMaximum, pointIndex } =
+    await import('../miniprogram/application/chart-layout');
+  const max = niceMaximum(1, 3600);
+  assert.ok(max >= 1);
+  assert.notEqual(axisLabel(max / 3600), '0');
+  assert.equal(pointIndex(0, 300, 10), null);
+  assert.equal(pointIndex(54, 300, 10), 0);
+  assert.equal(pointIndex(288, 300, 10), 9);
+  const { api } = await setup();
+  await api.saveRecord(input());
+  const result = statistics((await api.snapshot()).records, 'quantity', 'week', 0, '2026-11-24');
+  assert.equal(result.points.at(-1)?.description, '2026-11-24');
+});

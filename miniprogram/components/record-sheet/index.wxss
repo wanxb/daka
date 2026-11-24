@@ -189,3 +189,27 @@
 .pressed {
   opacity: 0.65;
 }
+
+/* A numeric button expands only its transparent hit box; the compact 80px rhythm stays intact. */
+.value {
+  overflow: visible;
+  position: relative;
+}
+.value::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: -4px;
+  bottom: -4px;
+}
+.exact {
+  min-height: 36px;
+  font-variant-numeric: tabular-nums;
+}
+.field-error {
+  font-size: 12px;
+  color: #c52e3d;
+  line-height: 1.5;
+  padding: 0 0 8px;
+}

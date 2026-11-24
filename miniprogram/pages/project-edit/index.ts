@@ -20,8 +20,15 @@ Page({
     busy: false,
     error: '',
     locked: false,
+    palette: palettes,
     colors: Object.keys(palettes).map((id) => ({
       id,
+      label: (
+        { purple: '紫色', orange: '橙色', blue: '蓝色', teal: '青色', rose: '玫红色' } as Record<
+          string,
+          string
+        >
+      )[id],
       color: palettes[id as keyof typeof palettes],
     })),
     icons: ['book', 'rope', 'dumbbell', 'piano', 'target'],
@@ -93,52 +100,69 @@ Page({
     }
   },
   text(e: FieldEvent) {
+    if (this.data.busy || !this._ready) return;
     const field = String(e.currentTarget.dataset.field) as keyof ProjectForm;
     this.setData({ [`form.${field}`]: e.detail.value, error: '' });
     this.changed();
   },
   choose(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busy || !this._ready) return;
     const field = String(e.currentTarget.dataset.field);
     this.setData({ [`form.${field}`]: e.currentTarget.dataset.value, error: '' });
     this.changed();
   },
   toggle(e: WechatMiniprogram.CustomEvent<{ value: boolean }>) {
+    if (this.data.busy || !this._ready) return;
     const field = String(e.currentTarget.dataset.field);
     this.setData({ [`form.${field}`]: e.detail.value, error: '' });
     this.changed();
   },
-  rangeBlur(e: FieldEvent) {
-    const kind = e.currentTarget.dataset.kind === 'quantity' ? 'quantity' : 'time',
-      f = this.data.form;
-    const key = f[`${kind}Min`] + '|' + f[`${kind}Max`];
-    if (key === this._rangeKeys[kind]) return;
+  settleRange(kind: 'time' | 'quantity'): boolean {
+    const f = this.data.form,
+      key = f[`${kind}Min`] + '|' + f[`${kind}Max`];
+    if (key === this._rangeKeys[kind]) return false;
     try {
       const [a, b] = range(f[`${kind}Min`], f[`${kind}Max`], kind === 'time' ? '时间' : '数量');
       this._rangeKeys[kind] = key;
       this.setData({
         [`form.${kind === 'time' ? 'defaultTime' : 'defaultQuantity'}`]: String(midpoint(a, b)),
       });
-      this.changed();
+      return true;
     } catch {
-      /* Incomplete ranges remain editable raw strings and are rejected only on explicit save. */
+      return false; /* Incomplete raw ranges stay intact until the user explicitly saves. */
     }
   },
-  defaultBlur(e: FieldEvent) {
-    const kind = e.currentTarget.dataset.kind === 'quantity' ? 'quantity' : 'time',
-      f = this.data.form;
+  settleDefault(kind: 'time' | 'quantity'): boolean {
+    const f = this.data.form,
+      key = kind === 'time' ? 'defaultTime' : 'defaultQuantity';
     try {
       const [a, b] = range(f[`${kind}Min`], f[`${kind}Max`], ''),
-        key = kind === 'time' ? 'defaultTime' : 'defaultQuantity';
-      const n = Number(f[key]);
-      const normalized =
+        n = Number(f[key]);
+      const value = String(
         f[key].trim() !== '' && Number.isFinite(n)
           ? Math.min(b, Math.max(1, a, Math.floor(n)))
-          : midpoint(a, b);
-      this.setData({ [`form.${key}`]: String(normalized) });
-      this.changed();
+          : midpoint(a, b),
+      );
+      if (value === f[key]) return false;
+      this.setData({ [`form.${key}`]: value });
+      return true;
     } catch {
-      /* Never clamp against an invalid range while a user is still typing. */
+      return false; /* Never clamp a default against an invalid range while it is being edited. */
     }
+  },
+  rangeBlur(e: FieldEvent) {
+    if (this.data.busy) return;
+    if (this.settleRange(e.currentTarget.dataset.kind === 'quantity' ? 'quantity' : 'time'))
+      this.changed();
+  },
+  defaultBlur(e: FieldEvent) {
+    if (this.data.busy) return;
+    if (this.settleDefault(e.currentTarget.dataset.kind === 'quantity' ? 'quantity' : 'time'))
+      this.changed();
+  },
+  explainUnitLock() {
+    if (this.data.locked && !this.data.busy)
+      wx.showToast({ title: '已有数量记录，单位已固定', icon: 'none' });
   },
   async cancel() {
     if (this.data.busy) return;
@@ -166,10 +190,17 @@ Page({
   },
   async save() {
     if (this.data.busy || !this._ready) return;
+    // Finalize focused fields before freezing the submitted configuration; blur ordering differs by keyboard/platform.
+    for (const kind of ['time', 'quantity'] as const) {
+      this.settleRange(kind);
+      this.settleDefault(kind);
+    }
+    const submitted = { ...this.data.form };
     this.setData({ busy: true, error: '' });
+    wx.hideKeyboard();
     try {
       if (!this.data.editing) await this.flushDraft();
-      await service().saveProject(this.data.form, this._original?.revision);
+      await service().saveProject(submitted, this._original?.revision);
       this._created = true;
       if (this._timer) clearTimeout(this._timer);
       wx.disableAlertBeforeUnload();

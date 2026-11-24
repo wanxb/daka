@@ -29,7 +29,7 @@ export function projectTile(p: Project, rows: PracticeRecord[]) {
     value = total(rows, metric),
     unit = metric === 'quantity' ? p.quantityUnit : p.timeUnit;
   const amount = metric === 'quantity' ? value : value / factors[p.timeUnit];
-  const number =
+  let number =
     amount >= 1e8
       ? amountText(Number((amount / 1e8).toFixed(1))) + '亿'
       : amount >= 1e4
@@ -43,18 +43,37 @@ export function projectTile(p: Project, rows: PracticeRecord[]) {
     .map((m) =>
       metricText(p, m, m === 'quantity' ? p.defaultQuantity : p.defaultTime * factors[p.timeUnit]),
     );
+  const hasMetric = rows.some((row) => row[metric] != null);
+  const missing = rows.length > 0 && !hasMetric;
+  if (missing) number = '—';
+  const shownUnit = missing ? '' : unit;
+  const caption = p.directEntryEnabled
+    ? '记 ' + defaults.join(' / ')
+    : secondary
+      ? metricText(p, secondary, total(rows, secondary))
+      : rows.length
+        ? rows.length + '条记录'
+        : '尚未记录';
+  const small = number.length > 4;
+  // Conservative glyph widths protect compact cards from collisions; exceptional values get more width, not unreadable type.
+  const weight = (text: string) =>
+    Array.from(text).reduce(
+      (sum, c) => sum + (/[\u2e80-\uffff]/.test(c) ? 1 : /[., :/]/.test(c) ? 0.28 : 0.55),
+      0,
+    );
+  const numberWidth = weight(number) * (small ? 20 : 26) + weight(shownUnit) * 11 + 2;
   return {
     ...p,
     number,
-    unit,
-    small: number.length > 6,
-    caption: p.directEntryEnabled
-      ? '记 ' + defaults.join(' / ')
-      : secondary
-        ? metricText(p, secondary, total(rows, secondary))
-        : rows.length
-          ? rows.length + '条记录'
-          : '尚未记录',
+    unit: shownUnit,
+    small,
+    wide: numberWidth > 74 || weight(caption) * 11 > 128,
+    summaryLabel: missing
+      ? metric === 'quantity'
+        ? '数量未记录'
+        : '时间未记录'
+      : '累计' + metricText(p, metric, value),
+    caption,
   };
 }
 export const errorText = (error: unknown): string =>

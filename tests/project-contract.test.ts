@@ -48,23 +48,29 @@ test('依赖精确锁定，源码中不混入生成的 JavaScript', () => {
 });
 
 // A zero process status must not turn an explicit CLI authorization failure into a successful check.
-test('微信CLI返回ok:false时检查脚本使用失败退出码', { skip: process.platform !== 'win32' }, () => {
-  const directory = mkdtempSync(join(tmpdir(), 'yugong-cli-')),
-    file = join(directory, 'fake.cmd');
-  try {
-    writeFileSync(
-      file,
-      '@echo off\r\necho {"ok":false,"message":"authorization timeout"}\r\nexit /b 0\r\n',
-    );
-    const result = spawnSync(
-      process.execPath,
-      [resolve(root, 'scripts/wechatide.mjs'), 'check_wechatide_status'],
-      { env: { ...process.env, WECHATIDE_CLI: file }, encoding: 'utf8', windowsHide: true },
-    );
-    assert.equal(result.status, 1);
-    assert.equal(JSON.parse(result.stdout).ok, false);
-  } finally {
-    unlinkSync(file);
-    rmdirSync(directory);
-  }
-});
+test(
+  '微信CLI失败或等待授权时，快捷任务不会误判为就绪',
+  { skip: process.platform !== 'win32' },
+  () => {
+    const directory = mkdtempSync(join(tmpdir(), 'yugong-cli-')),
+      file = join(directory, 'fake.cmd');
+    try {
+      for (const [payload, status] of [
+        [{ ok: false, message: 'authorization timeout' }, 1],
+        [{ ok: true, result: { status: 'pending' } }, 2],
+      ] as const) {
+        writeFileSync(file, '@echo off\r\necho ' + JSON.stringify(payload) + '\r\nexit /b 0\r\n');
+        const result = spawnSync(
+          process.execPath,
+          [resolve(root, 'scripts/wechatide.mjs'), 'check_wechatide_status'],
+          { env: { ...process.env, WECHATIDE_CLI: file }, encoding: 'utf8', windowsHide: true },
+        );
+        assert.equal(result.status, status);
+        assert.deepEqual(JSON.parse(result.stdout), payload);
+      }
+    } finally {
+      unlinkSync(file);
+      rmdirSync(directory);
+    }
+  },
+);

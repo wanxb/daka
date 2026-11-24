@@ -45,7 +45,13 @@ child.on('close', (code) => {
   process.exitCode = code ?? 1;
   if (code === 0) {
     try {
-      if (JSON.parse(output.trim()).ok === false) process.exitCode = 1;
+      const result = JSON.parse(output.trim());
+      if (result.ok === false) process.exitCode = 1;
+      else if (result.result?.status === 'pending') {
+        // VS Code dependent tasks must wait for real readiness instead of starting while authorization is pending.
+        process.exitCode = 2;
+        process.stderr.write('微信工具仍在等待确认，完成工具内的提示后再运行此任务。\n');
+      }
     } catch {
       /* Non-JSON help output keeps the native process status. */
     }

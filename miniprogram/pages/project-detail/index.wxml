@@ -7,10 +7,10 @@
     <button class="link" bindtap="load">重新读取</button>
   </view>
   <block wx:if="{{project}}">
-    <view class="summary">
+    <view class="summary {{stackedSummary?'stacked':''}}">
       <view wx:for="{{summaries}}" wx:key="id" class="summary-item {{index===0?'main':''}}">
         <text class="summary-label">{{item.label}}</text>
-        <text class="summary-value">{{item.text}}</text>
+        <text class="summary-value {{item.text.length>18?'long':''}}">{{item.text}}</text>
       </view>
     </view>
     <view class="surface chart-card">
@@ -29,6 +29,7 @@
       </view>
       <view class="chart-mode">
         <button
+          hover-class="pressed"
           class="mode-hit"
           data-mode="cumulative"
           bindtap="mode"
@@ -37,6 +38,7 @@
           <text class="mode-pill {{chartMode==='cumulative'?'active':''}}">累计</text>
         </button>
         <button
+          hover-class="pressed"
           class="mode-hit"
           data-mode="distribution"
           bindtap="mode"
@@ -49,6 +51,7 @@
         <button
           wx:for="{{periods}}"
           wx:key="id"
+          hover-class="pressed"
           class="period-hit"
           bindtap="period"
           data-id="{{item.id}}"
@@ -64,7 +67,7 @@
           aria-label="上一周期"
           hover-class="pressed"
         >
-          ‹
+          <view class="previous-icon"><ui-icon name="chevron" tone="muted" size="16" /></view>
         </button>
         <text>{{periodLabel}}</text>
         <button
@@ -74,7 +77,7 @@
           aria-label="下一周期"
           hover-class="pressed"
         >
-          ›
+          <ui-icon name="chevron" tone="muted" size="16" />
         </button>
       </view>
       <practice-chart
