@@ -1,0 +1,3 @@
+<!-- Form persistence will use a separate draft contract before project creation is enabled. -->
+<app-navigation title="新的打卡" show-back />
+<view class="page-content"><view class="placeholder">项目配置</view></view>

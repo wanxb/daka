@@ -1,0 +1,26 @@
+{
+  "name": "daka-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "本地时间与数量记录小程序",
+  "engines": {
+    "node": ">=20.18.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "format": "prettier --write miniprogram/**/*.ts tests/**/*.ts scripts/**/*.mjs *.json",
+    "format:check": "prettier --check miniprogram/**/*.ts tests/**/*.ts scripts/**/*.mjs *.json",
+    "check": "npm run typecheck && npm test && npm run format:check",
+    "devtools:status": "node scripts/wechatide.mjs check_wechatide_status --skill-version 0.3.11",
+    "devtools:open": "node scripts/wechatide.mjs open_project_window --project . --window-mode fullMode",
+    "devtools:refresh": "node scripts/wechatide.mjs simulator_refresh --project ."
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "miniprogram-api-typings": "5.3.1",
+    "tsx": "4.23.15",
+    "prettier": "3.10.1"
+  }
+}

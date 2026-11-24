@@ -1,0 +1,5 @@
+<!-- Keep the future home header free of a product title and bottom tabs. -->
+<app-navigation />
+<view class="page-content">
+  <view class="placeholder">从记录一件小事开始</view>
+</view>

@@ -1,0 +1,9 @@
+# Generated dependencies and personal IDE settings must stay outside source control.
+node_modules/
+miniprogram/miniprogram_npm/
+project.private.config.json
+.build/
+coverage/
+*.log
+.DS_Store
+Thumbs.db

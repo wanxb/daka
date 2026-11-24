@@ -1,0 +1,7 @@
+# Preserve reviewed prototypes, imported skills and product documents as authored.
+.agents/
+prototype/
+docs/
+node_modules/
+package-lock.json
+project.private.config.json

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>愚公打卡 · 多屏设计稿</title>
+  <style>
+    /* Each frame keeps the same 390px artboard; scaling changes review size, never product layout. */
+    *{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;margin:0;background:#f8f8fb;color:#22222b;padding:42px 36px 60px}header{max-width:1100px;margin:auto auto 34px;display:flex;justify-content:space-between;align-items:flex-end}h1{font-size:29px;letter-spacing:-1px;margin:0 0 9px}header p{font-size:13px;color:#74747f;margin:0}header a{font-size:13px;color:#285cdd;text-decoration:none}.board{display:grid;grid-template-columns:repeat(3,312px);gap:38px 44px;justify-content:center}.screen-label{font-size:13px;margin:0 0 12px 3px;display:flex;justify-content:space-between;color:#535360}.screen-label span{color:#96939f;font-size:11px}.artboard{width:312px;height:675.2px;border-radius:31px;overflow:hidden;box-shadow:0 0 0 1px #dedee6,0 8px 32px #2926450a;background:#f2f2f7}iframe{width:390px;height:844px;border:0;transform:scale(.8);transform-origin:0 0}footer{max-width:1024px;margin:32px auto 0;font-size:12px;color:#7c7987;line-height:1.9}@media(max-width:1100px){.board{grid-template-columns:repeat(2,312px)}}@media(max-width:700px){body{padding:28px 18px}.board{grid-template-columns:312px}header{display:block}header a{display:inline-block;margin-top:15px}}
+  </style>
+</head>
+<body>
+  <header><div><h1>让每一次投入，看得见。</h1><p>愚公打卡 · 第一版视觉与交互方向</p></div><a href="index.html">打开完整交互原型</a></header>
+  <main class="board">
+    <section><p class="screen-label">首页<span>累计优先</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=home" title="首页"></iframe></div></section>
+    <section><p class="screen-label">记录时间<span>滑动调节</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=duration" title="时间面板"></iframe></div></section>
+    <section><p class="screen-label">记录时间与数量<span>统一保存</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=both" title="双项面板"></iframe></div></section>
+    <section><p class="screen-label">项目详情<span>长期积累</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=detail" title="项目详情"></iframe></div></section>
+    <section><p class="screen-label">新增项目<span>轻量配置</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=create" title="新增项目"></iframe></div></section>
+    <section><p class="screen-label">记录数量<span>按项目单位</span></p><div class="artboard"><iframe src="index.html?embed=1&scene=quantity" title="数量面板"></iframe></div></section>
+  </main>
+  <footer>愚公打卡设计评审稿。图中为演示记录，可在完整原型中新增、编辑与删除；不代表用户真实数据。设备、键盘和微信原生界面仍需后续真机验证。</footer>
+</body>
+</html>

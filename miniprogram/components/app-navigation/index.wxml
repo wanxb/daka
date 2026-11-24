@@ -1,0 +1,7 @@
+<!-- Equal side reservations keep the title clear of WeChat's system capsule. -->
+<view style="padding-top: {{top}}px;">
+  <view class="navigation" style="height: {{height}}px; padding-right: {{right}}px; padding-left: {{right}}px;">
+    <button wx:if="{{showBack}}" class="back" bindtap="goBack" aria-label="返回">‹</button>
+    <text class="title">{{title}}</text>
+  </view>
+</view>

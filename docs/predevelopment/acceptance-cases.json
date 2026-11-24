@@ -1,0 +1,495 @@
+{
+  "schema": "practice-acceptance-v1",
+  "asOf": "2026-11-24",
+  "purpose": "人工定义的正式版领域/仓储验收输入与期望；样例自检不等于业务实现测试通过。",
+  "snapshots": [
+    {
+      "id": "duration-only",
+      "projectMode": "duration",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 1800,
+          "quantity": null,
+          "quantityUnit": null
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": 3600,
+          "quantity": null,
+          "quantityUnit": null
+        }
+      ],
+      "expected": {
+        "totals": {
+          "durationSeconds": 5400,
+          "quantity": 0,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": false
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "quantity-only",
+      "projectMode": "quantity",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 1000,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 500,
+          "quantityUnit": "次"
+        }
+      ],
+      "expected": {
+        "totals": {
+          "durationSeconds": 0,
+          "quantity": 1500,
+          "recordCount": 2,
+          "hasDurationData": false,
+          "hasQuantityData": true
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "partial-both",
+      "projectMode": "both",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 600,
+          "quantity": 1000,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 500,
+          "quantityUnit": "次"
+        }
+      ],
+      "period": {
+        "from": "2026-11-23",
+        "to": "2026-11-29"
+      },
+      "expected": {
+        "totals": {
+          "durationSeconds": 600,
+          "quantity": 1500,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        },
+        "period": {
+          "durationSeconds": 0,
+          "quantity": 500,
+          "recordCount": 1
+        },
+        "beforePeriod": {
+          "durationSeconds": 600,
+          "quantity": 1000
+        },
+        "throughPeriod": {
+          "durationSeconds": 600,
+          "quantity": 1500
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "historical-backfill",
+      "projectMode": "both",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 1800,
+          "quantity": 1000,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 500,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "c",
+          "occurredOn": "2026-11-19",
+          "durationSeconds": 1200,
+          "quantity": 200,
+          "quantityUnit": "次"
+        }
+      ],
+      "period": {
+        "from": "2026-11-23",
+        "to": "2026-11-29"
+      },
+      "expected": {
+        "totals": {
+          "durationSeconds": 3000,
+          "quantity": 1700,
+          "recordCount": 3,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        },
+        "period": {
+          "durationSeconds": 0,
+          "quantity": 500,
+          "recordCount": 1
+        },
+        "beforePeriod": {
+          "durationSeconds": 3000,
+          "quantity": 1200
+        },
+        "throughPeriod": {
+          "durationSeconds": 3000,
+          "quantity": 1700
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "historical-edit-snapshot",
+      "projectMode": "both",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 600,
+          "quantity": 1200,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 500,
+          "quantityUnit": "次"
+        }
+      ],
+      "expected": {
+        "totals": {
+          "durationSeconds": 600,
+          "quantity": 1700,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "after-delete-snapshot",
+      "projectMode": "both",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 600,
+          "quantity": 1000,
+          "quantityUnit": "次"
+        }
+      ],
+      "expected": {
+        "totals": {
+          "durationSeconds": 600,
+          "quantity": 1000,
+          "recordCount": 1,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "mode-switch-preserves-history",
+      "projectMode": "quantity",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2026-11-20",
+          "durationSeconds": 600,
+          "quantity": 1000,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-11-24",
+          "durationSeconds": null,
+          "quantity": 500,
+          "quantityUnit": "次"
+        }
+      ],
+      "expected": {
+        "totals": {
+          "durationSeconds": 600,
+          "quantity": 1500,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "year-boundary",
+      "projectMode": "both",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2025-12-31",
+          "durationSeconds": 3600,
+          "quantity": 100,
+          "quantityUnit": "次"
+        },
+        {
+          "id": "b",
+          "occurredOn": "2026-01-01",
+          "durationSeconds": 1800,
+          "quantity": 200,
+          "quantityUnit": "次"
+        }
+      ],
+      "period": {
+        "from": "2026-01-01",
+        "to": "2026-01-31"
+      },
+      "expected": {
+        "totals": {
+          "durationSeconds": 5400,
+          "quantity": 300,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": true
+        },
+        "period": {
+          "durationSeconds": 1800,
+          "quantity": 200,
+          "recordCount": 1
+        },
+        "beforePeriod": {
+          "durationSeconds": 3600,
+          "quantity": 100
+        },
+        "throughPeriod": {
+          "durationSeconds": 5400,
+          "quantity": 300
+        }
+      },
+      "quantityUnit": "次"
+    },
+    {
+      "id": "leap-day",
+      "projectMode": "duration",
+      "records": [
+        {
+          "id": "a",
+          "occurredOn": "2024-02-29",
+          "durationSeconds": 3600,
+          "quantity": null,
+          "quantityUnit": null
+        },
+        {
+          "id": "b",
+          "occurredOn": "2024-03-01",
+          "durationSeconds": 3600,
+          "quantity": null,
+          "quantityUnit": null
+        }
+      ],
+      "period": {
+        "from": "2024-02-01",
+        "to": "2024-02-29"
+      },
+      "expected": {
+        "totals": {
+          "durationSeconds": 7200,
+          "quantity": 0,
+          "recordCount": 2,
+          "hasDurationData": true,
+          "hasQuantityData": false
+        },
+        "period": {
+          "durationSeconds": 3600,
+          "quantity": 0,
+          "recordCount": 1
+        },
+        "beforePeriod": {
+          "durationSeconds": 0,
+          "quantity": 0
+        },
+        "throughPeriod": {
+          "durationSeconds": 3600,
+          "quantity": 0
+        }
+      },
+      "quantityUnit": "次"
+    }
+  ],
+  "commandContracts": [
+    {
+      "id": "retry-same-record-id",
+      "action": "AddRecord同一稳定recordId重试两次",
+      "expected": "只有一条记录；不重复累计；数据不同则冲突，不静默覆盖"
+    },
+    {
+      "id": "undo-delete",
+      "action": "删除并撤销同一记录",
+      "expected": "恢复同一id与createdAt，累计回到删除前，无副本"
+    },
+    {
+      "id": "deleted-project-rejects-late-command",
+      "action": "删除项目后到达保存或撤销",
+      "expected": "拒绝命令；读取旧清单也必须尊重项目删除标记"
+    },
+    {
+      "id": "stale-edit",
+      "action": "用过期expectedRevision更新记录",
+      "expected": "冲突，保留当前面板输入，不覆盖较新数据"
+    },
+    {
+      "id": "slider-exact-value",
+      "action": "数量精确输入750",
+      "expected": "原值750保存，滑块按配置范围中的真实比例定位，无刻度装饰"
+    },
+    {
+      "id": "slider-enabled-metrics-required",
+      "action": "双项新记录清空时间；再编辑历史缺失时间的记录并展开日期或备注",
+      "expected": "新记录拒绝空时间；历史原有null保持，不补默认；无不记入口"
+    },
+    {
+      "id": "slider-integer-travel",
+      "action": "数量1000按方向键调节为1001；拖动并使用Home/End",
+      "expected": "不显示刻度线与刻度数字；拖动连续跟手，数量为整数、按1递增，端点可达；滑动和松手不保存"
+    },
+    {
+      "id": "whole-row-temporal-picker",
+      "action": "展开日期补充项，点击日期和时间文字或行中空白",
+      "expected": "分别打开系统选择器；行名仅日期和时间，不显示选填或左右滑动提示"
+    },
+    {
+      "id": "bottom-date-notes-order",
+      "action": "先开备注再开今天，再反向打开；填写后反复收起展开",
+      "expected": "日期收起时入口在滑块下方同一行，备注在左、今天在右，无加号；日期展开时，整个日期/时间组件在添加备注文字入口及其输入框上方，填写值保留"
+    },
+    {
+      "id": "quantity-unit-history-lock",
+      "action": "首次保存30页后尝试把单位改为次；随后删除/撤销记录",
+      "expected": "单位仍为页，拒绝重解释历史量；30页不是30条记录"
+    },
+    {
+      "id": "range-midpoint",
+      "action": "范围1～10，再改为10～21；手动默认12后关闭并重新开启类型",
+      "expected": "自动默认分别5、15；手动12保留，切换不重算"
+    },
+    {
+      "id": "metric-toggles-preserve-settings",
+      "action": "编辑时间和数量的范围、单位、默认值，分别关闭后重新开启",
+      "expected": "时间、数量分组各有独立开关；原配置完整恢复，全未选只能保留草稿，不能创建"
+    },
+    {
+      "id": "range-validation",
+      "action": "数量范围1～10输入11；已有30页后把范围收窄为1～10再只修改备注",
+      "expected": "新值11拒绝，旧值30保持；修改该数值需在新范围内"
+    },
+    {
+      "id": "time-unit-conversion",
+      "action": "记录1时，切到分再记1分，切到秒再记1秒",
+      "expected": "依次为3600、3660、3661整秒；显示为1时、61分、3661秒，图表和列表一致"
+    },
+    {
+      "id": "time-approximate-edit-preserves-seconds",
+      "action": "1秒记录切到时，保持数值只改备注，再切回秒",
+      "expected": "小时显示可带≈，原值仍1秒，累计不漂移"
+    },
+    {
+      "id": "default-stays-inside-range",
+      "action": "时间范围0～10、数量范围1～100，手动默认60和200后结束编辑",
+      "expected": "默认分别限制为10和100；改范围时重算整数中点，数量初值1～100/50，不提供步长参数"
+    },
+    {
+      "id": "record-dismiss-resets",
+      "action": "修改时间、数量、日期和备注，通过关闭按钮、遮罩或Esc关闭后重开",
+      "expected": "没有继续填写入口，不恢复未保存内容；新记录使用项目默认值、今天、空具体时刻和空备注"
+    },
+    {
+      "id": "record-edit-dismiss-resets",
+      "action": "把历史数量1000改成1001后取消，重新编辑同一记录",
+      "expected": "重新读取1000，未保存修改不恢复，保存前原记录和累计不变"
+    },
+    {
+      "id": "primary-metric-order",
+      "action": "分别设置数量、时间为主要指标，再切换图表当前指标",
+      "expected": "累计概览、页签、打卡面板和记录行均主要指标在前；切图不改变顺序"
+    },
+    {
+      "id": "detail-minimal-chart",
+      "action": "查看累计/分布和日周月年全部范围",
+      "expected": "无看见积累/投入分布标题、分布说明、默认本期汇总或添加/补记入口；点图仍有准确读数"
+    },
+    {
+      "id": "record-history-pagination",
+      "action": "126条记录默认预览，查看全部并滚动到末尾，再收起",
+      "expected": "初始5条，展开20条，随后按20条追加直至126，标识无重复，无额外空白页；收起恢复5条并定位到列表开头"
+    },
+    {
+      "id": "record-history-period-reset",
+      "action": "展开全历史后切换日期范围或项目；查看无记录日期",
+      "expected": "重置分页和旧加载回调；无记录日期显示空态，仍可查看该项目全历史"
+    }
+  ],
+  "invalidInputs": [
+    {
+      "id": "both-empty",
+      "durationSeconds": null,
+      "quantity": null,
+      "expected": "reject"
+    },
+    {
+      "id": "zero",
+      "durationSeconds": 0,
+      "quantity": null,
+      "expected": "reject"
+    },
+    {
+      "id": "fractional-quantity",
+      "durationSeconds": null,
+      "quantity": 1.5,
+      "expected": "reject"
+    },
+    {
+      "id": "negative",
+      "durationSeconds": -60,
+      "quantity": null,
+      "expected": "reject"
+    },
+    {
+      "id": "invalid-calendar",
+      "occurredOn": "2026-02-30",
+      "durationSeconds": 600,
+      "expected": "reject"
+    },
+    {
+      "id": "future-calendar",
+      "occurredOn": "2026-11-25",
+      "durationSeconds": 600,
+      "expected": "reject"
+    }
+  ]
+}

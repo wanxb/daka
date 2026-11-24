@@ -1,0 +1,4 @@
+{
+  "desc": "本地个人记录页面不参与微信搜索收录。",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

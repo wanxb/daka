@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>愚公打卡 · 交互原型</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Review controls live outside the phone so the product keeps its card-only home. -->
+  <aside class="review-panel" aria-label="原型评审导航">
+    <span class="review-mark">愚公打卡</span>
+    <h1>让投入<br>慢慢有形。</h1>
+    <p class="review-description">时间与数量记录工具<br>第一版交互原型 · 2026.11</p>
+    <nav class="review-nav" aria-label="选择预览页面">
+      <button data-demo="home" class="active">首页卡片<span>01</span></button>
+      <button data-demo="duration">记录时间<span>02</span></button>
+      <button data-demo="quantity">记录数量<span>03</span></button>
+      <button data-demo="both">双项记录<span>04</span></button>
+      <button data-demo="detail">累计与统计<span>05</span></button>
+      <button data-demo="create">新增项目<span>06</span></button>
+      <button data-demo="empty">首次使用<span>07</span></button>
+    </nav>
+    <div class="review-foot">
+      <p>点卡片记录，点右上角查看统计。<br>示例数据仅用于体验，刷新可还原。</p>
+      <button data-demo="reset" class="reset-button">重置示例</button>
+      <a href="board.html">查看多屏设计稿</a>
+    </div>
+  </aside>
+
+  <main class="device" aria-label="小程序交互预览">
+    <!-- System chrome is illustrative and intentionally excluded from keyboard navigation. -->
+    <div class="status-bar" aria-hidden="true"><span>9:41</span><div class="system-icons"><i class="signal"></i><i class="wifi"></i><i class="battery"></i></div></div>
+    <div id="app-header" class="app-header"></div>
+    <div id="screen" class="screen"></div>
+    <div id="overlay-root"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div class="home-indicator" aria-hidden="true"></div>
+  </main>
+</body>
+</html>

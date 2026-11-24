@@ -1,0 +1,9 @@
+/* Shared system styling keeps the shell neutral while business UI is developed separately. */
+page {
+  background: #f2f2f7;
+  color: #1c1c1e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+}
+.page-content { padding: 16px; }
+.placeholder { color: #8e8e93; text-align: center; padding: 48px 16px; line-height: 1.6; }

@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/project-detail/index",
+    "pages/project-edit/index"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "backgroundColor": "#f2f2f7",
+    "backgroundTextStyle": "dark"
+  },
+  "renderer": "webview",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": { "app-navigation": "/components/app-navigation/index" }
+}
