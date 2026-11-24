@@ -1,1 +1,5 @@
-{ "navigationBarTitleText": "项目详情" }
+{
+  "navigationBarTitleText": "项目详情",
+  "onReachBottomDistance": 160,
+  "usingComponents": { "practice-chart": "/components/practice-chart/index" }
+}

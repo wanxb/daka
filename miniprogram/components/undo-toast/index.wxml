@@ -1,0 +1,5 @@
+<!-- The absolute repository deadline controls visibility; time in the background never extends undo. -->
+<view wx:if="{{visible}}" class="toast" aria-role="alert">
+  <text class="message">{{message}}</text>
+  <button class="undo" bindtap="undo" disabled="{{busy}}" hover-class="pressed">撤销</button>
+</view>

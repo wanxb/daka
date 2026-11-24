@@ -1,0 +1,7 @@
+<!-- Icons stay decorative because their enclosing controls provide the action and accessibility label. -->
+<image
+  class="icon"
+  src="/assets/icons/{{tone}}/{{name}}.svg"
+  style="width:{{size}}px;height:{{size}}px"
+  aria-hidden="true"
+/>

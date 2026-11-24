@@ -26,14 +26,28 @@ const child = spawn(
   {
     cwd: root,
     shell: true,
-    stdio: 'inherit',
+    stdio: ['inherit', 'pipe', 'inherit'],
     windowsHide: true,
   },
 );
+// The IDE CLI can encode ok:false while exiting 0. Preserve its JSON and expose a truthful shell status.
+let output = '';
+child.stdout.setEncoding('utf8');
+child.stdout.on('data', (chunk) => {
+  process.stdout.write(chunk);
+  output = (output + chunk).slice(-4 * 1024 * 1024);
+});
 child.on('error', (error) => {
   console.error(error.message);
   process.exitCode = 1;
 });
-child.on('exit', (code) => {
+child.on('close', (code) => {
   process.exitCode = code ?? 1;
+  if (code === 0) {
+    try {
+      if (JSON.parse(output.trim()).ok === false) process.exitCode = 1;
+    } catch {
+      /* Non-JSON help output keeps the native process status. */
+    }
+  }
 });

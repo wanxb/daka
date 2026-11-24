@@ -1,0 +1,191 @@
+/* The sheet keeps each metric at 80px; the native slider handles motion without frame-by-frame layout. */
+.sheet-scroll {
+  max-height: 82vh;
+  background: #fafafd;
+  border-radius: 26px 26px 0 0;
+}
+.sheet {
+  padding: 0 22px calc(22px + env(safe-area-inset-bottom));
+  color: #1c1c1e;
+}
+.handle {
+  height: 5px;
+  width: 34px;
+  border-radius: 3px;
+  background: #d0cfd8;
+  margin: 9px auto 12px;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.title {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.close {
+  width: 44px;
+  height: 44px;
+  background: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.close-disc {
+  border-radius: 50%;
+  background: #eaeaf0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close::after,
+.value::after,
+.save::after,
+.tool-button::after,
+.note-toggle::after,
+.clear-time::after {
+  border: 0;
+}
+.metric {
+  min-height: 80px;
+}
+.field-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  font-size: 14px;
+  gap: 8px;
+}
+.value {
+  background: none;
+  color: var(--accent);
+  font-size: 22px;
+  line-height: 36px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  font-weight: 600;
+}
+.value.is-disabled {
+  background: none;
+  color: #696971;
+}
+.exact {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  color: var(--accent);
+  font-size: 22px;
+  height: 36px;
+}
+.unit {
+  font-size: 14px;
+  color: #696971;
+}
+.slider {
+  margin: 0 8px;
+  height: 44px;
+}
+.tools,
+.date-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+.tool-button,
+.note-toggle {
+  background: none;
+  color: #696971;
+  font-size: 13px;
+  min-height: 44px;
+  line-height: 44px;
+  padding: 0;
+  margin: 0;
+}
+.date-top {
+  justify-content: flex-end;
+}
+.date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-top: 1px solid #e7e6ed;
+  font-size: 14px;
+  gap: 16px;
+}
+.date-value {
+  color: var(--accent);
+}
+.time-row {
+  display: flex;
+  align-items: center;
+}
+.time-picker {
+  flex: 1;
+}
+.clear-time {
+  width: 44px;
+  height: 48px;
+  background: none;
+  border-top: 1px solid #e7e6ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+.note-toggle {
+  display: block;
+  text-align: left;
+  width: 100%;
+}
+.note {
+  background: #fff;
+  width: 100%;
+  min-height: 68px;
+  padding: 12px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.save {
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px;
+  min-height: 48px;
+  line-height: 24px;
+  padding: 12px;
+  margin: 12px 0 0;
+}
+.save.is-disabled {
+  opacity: 0.5;
+  background: var(--accent);
+  color: #fff;
+}
+.error {
+  font-size: 13px;
+  color: #c52e3d;
+  line-height: 1.5;
+  padding: 8px 0;
+}
+.pressed {
+  opacity: 0.65;
+}

@@ -1,0 +1,12 @@
+<!-- Readings appear only after a deliberate touch, leaving the default chart free of explanatory copy. -->
+<view class="chart-wrap">
+  <view class="reading" aria-live="polite">{{reading}}</view>
+  <canvas
+    id="chart"
+    type="2d"
+    class="chart"
+    bindtouchstart="inspect"
+    aria-label="{{mode === 'cumulative'?'累计曲线':'分布图'}}，单位{{unit}}"
+  />
+  <view wx:if="{{empty}}" class="empty">还没有记录</view>
+</view>

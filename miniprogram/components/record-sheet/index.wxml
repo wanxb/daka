@@ -1,0 +1,142 @@
+<!-- Native page-container owns back/overlay dismissal; the component never persists unfinished input. -->
+<page-container
+  show="{{opened}}"
+  position="bottom"
+  round
+  duration="200"
+  bindclickoverlay="close"
+  bindbeforeleave="beforeLeave"
+  overlay-style="background-color:rgba(20,20,30,.4)"
+>
+  <scroll-view
+    style="height:calc({{fields.length*80+(dateOpen?188:44)+(noteOpen?100:0)+160}}px + env(safe-area-inset-bottom))"
+    class="sheet-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view
+      class="sheet"
+      style="--accent:{{project.color === 'orange' ? '#bc421c' : project.color === 'blue' ? '#285cce' : project.color === 'teal' ? '#087b75' : project.color === 'rose' ? '#bd3457' : '#6745c6'}}"
+    >
+      <view class="handle" />
+      <view class="heading">
+        <text class="title">{{project.name}}</text>
+        <button
+          class="close"
+          bindtap="close"
+          disabled="{{busy}}"
+          aria-label="关闭打卡面板"
+          hover-class="pressed"
+        >
+          <view class="close-disc"><ui-icon name="close" tone="muted" size="16" /></view>
+        </button>
+      </view>
+      <view wx:for="{{fields}}" wx:key="metric" class="metric">
+        <view class="field-top">
+          <text>{{item.label}}</text>
+          <input
+            wx:if="{{item.precise}}"
+            class="exact"
+            type="digit"
+            value="{{item.raw}}"
+            maxlength="20"
+            focus
+            data-index="{{index}}"
+            bindinput="exactInput"
+            aria-label="{{item.label}}，单位{{item.unit}}"
+          />
+          <button
+            wx:else
+            class="value {{item.disabled || busy?'is-disabled':''}}"
+            bindtap="precise"
+            data-index="{{index}}"
+            disabled="{{item.disabled || busy}}"
+            aria-label="本次{{item.label}}，{{item.display}}，轻点精确输入"
+            hover-class="pressed"
+          >
+            {{item.display}}
+          </button>
+          <text wx:if="{{item.precise}}" class="unit">{{item.unit}}</text>
+        </view>
+        <slider
+          class="slider"
+          min="{{item.min}}"
+          max="{{item.max === item.min ? item.max + 1 : item.max}}"
+          step="1"
+          value="{{item.position}}"
+          disabled="{{item.disabled || item.min === item.max || busy}}"
+          block-size="26"
+          block-color="#ffffff"
+          activeColor="{{project.color === 'orange' ? '#bc421c' : project.color === 'blue' ? '#285cce' : project.color === 'teal' ? '#087b75' : project.color === 'rose' ? '#bd3457' : '#6745c6'}}"
+          backgroundColor="#dedbe5"
+          data-index="{{index}}"
+          bindchanging="slide"
+          bindchange="settle"
+          aria-label="调节{{item.label}}，{{item.display}}"
+        />
+      </view>
+      <view class="tools" wx:if="{{!dateOpen}}">
+        <button class="tool-button" bindtap="toggleNote" hover-class="pressed">
+          {{noteOpen?'收起备注':'添加备注'}}
+        </button>
+        <button class="tool-button" bindtap="toggleDate" hover-class="pressed">
+          {{date === today?'今天':date}}
+        </button>
+      </view>
+      <block wx:else>
+        <view class="date-top">
+          <button class="tool-button" bindtap="toggleDate" hover-class="pressed">
+            {{date === today?'今天':date}}⌃
+          </button>
+        </view>
+        <picker mode="date" value="{{date}}" end="{{today}}" bindchange="dateChange">
+          <view class="date-row">
+            <text>日期</text>
+            <text class="date-value">{{date}}</text>
+          </view>
+        </picker>
+        <view class="time-row">
+          <picker
+            class="time-picker"
+            mode="time"
+            value="{{time || '18:00'}}"
+            bindchange="timeChange"
+          >
+            <view class="date-row">
+              <text>时间</text>
+              <text class="date-value">{{time || '选择时间'}}</text>
+            </view>
+          </picker>
+          <button wx:if="{{time}}" class="clear-time" bindtap="clearTime" aria-label="清除具体时间">
+            <ui-icon name="close" tone="muted" size="14" />
+          </button>
+        </view>
+        <button class="note-toggle" bindtap="toggleNote" hover-class="pressed">
+          {{noteOpen?'收起备注':'添加备注'}}
+        </button>
+      </block>
+      <textarea
+        wx:if="{{noteOpen}}"
+        class="note"
+        value="{{note}}"
+        bindinput="noteInput"
+        maxlength="500"
+        placeholder="备注"
+        auto-height
+        adjust-position
+        aria-label="备注"
+      />
+      <view wx:if="{{error}}" class="error" aria-role="alert">{{error}}</view>
+      <button
+        class="save {{busy?'is-disabled':''}}"
+        loading="{{busy}}"
+        disabled="{{busy}}"
+        bindtap="save"
+        hover-class="pressed"
+      >
+        {{original?'保存修改':'记录'}}
+      </button>
+    </view>
+  </scroll-view>
+</page-container>

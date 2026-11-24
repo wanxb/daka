@@ -1,1 +1,189 @@
-/* The continuous metric settings card will be implemented against the reviewed prototype. */
+/* All separators begin at the text column, protecting the icon gutter from visual clutter. */
+.editor {
+  padding-top: 8px;
+}
+.preview {
+  height: 88px;
+  border-radius: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  font-size: 22px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.purple {
+  background: linear-gradient(115deg, #7959cf, #6440ba);
+}
+.orange {
+  background: linear-gradient(115deg, #bf5028, #b74221);
+}
+.blue {
+  background: linear-gradient(115deg, #3b6bd1, #2d5dc6);
+}
+.teal {
+  background: linear-gradient(115deg, #087f79, #087c77);
+}
+.rose {
+  background: linear-gradient(115deg, #c44266, #b8385c);
+}
+.name-row {
+  padding: 4px 14px;
+}
+.name-row input {
+  height: 48px;
+  width: 100%;
+  font-size: 17px;
+}
+.colors,
+.icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  gap: 4px;
+}
+.colors {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.color-hit {
+  width: 44px;
+  height: 44px;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.swatch {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.swatch.chosen {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.icons {
+  border-top: 1px solid var(--line);
+}
+.icon-hit {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: none;
+}
+.icon-hit.selected {
+  background: #f0edf8;
+}
+.heading-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 14px;
+  gap: 10px;
+}
+.heading-row > text {
+  font-size: 16px;
+  font-weight: 400;
+  flex: 1;
+}
+.heading-row switch {
+  transform: scale(0.83);
+  transform-origin: right center;
+  margin-left: -8px;
+}
+.separator::before,
+.parameter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 42px;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+.parameter {
+  position: relative;
+  padding-left: 42px;
+  padding-right: 14px;
+  min-height: 50px;
+  font-size: 14px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.parameter > text {
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+.parameter input {
+  height: 44px;
+  text-align: right;
+  font-size: 14px;
+  min-width: 0;
+  max-width: 160px;
+  color: var(--ink);
+  background: none;
+  border: 0;
+}
+.parameter input[disabled] {
+  color: var(--secondary);
+}
+.range {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 1;
+  max-width: 180px;
+  gap: 0;
+}
+.range input {
+  width: calc((100% - 24px) / 2);
+  min-width: 0;
+  text-align: right;
+}
+.range .dash {
+  width: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+}
+.compact {
+  gap: 4px;
+}
+.compact .segment-hit {
+  width: 44px;
+}
+.primary-options {
+  gap: 6px;
+}
+.primary-options .segment-hit {
+  width: 54px;
+}
+.segment-hit[disabled] {
+  opacity: 0.35;
+}
+.save {
+  margin-top: 26px;
+  width: 100%;
+}
+.cancel {
+  width: 100%;
+  margin-top: 6px;
+}

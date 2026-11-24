@@ -1,0 +1,9 @@
+/* Inline icon boxes align across cards and form rows without influencing hit targets. */
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.icon {
+  display: block;
+}

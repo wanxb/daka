@@ -1,0 +1,41 @@
+/* A quiet, safe-area-aware confirmation leaves the main page fully usable. */
+.toast {
+  position: fixed;
+  z-index: 30;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  left: 20px;
+  right: 20px;
+  background: #29292eef;
+  color: #fff;
+  border-radius: 16px;
+  min-height: 52px;
+  padding: 4px 8px 4px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 24px #00000015;
+}
+.message {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.undo {
+  flex-shrink: 0;
+  background: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 12px;
+  margin: 0;
+  line-height: 44px;
+}
+.undo::after {
+  border: 0;
+}
+.pressed {
+  opacity: 0.6;
+}

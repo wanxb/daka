@@ -1,9 +1,5 @@
 {
-  "pages": [
-    "pages/home/index",
-    "pages/project-detail/index",
-    "pages/project-edit/index"
-  ],
+  "pages": ["pages/home/index", "pages/project-detail/index", "pages/project-edit/index"],
   "window": {
     "navigationStyle": "custom",
     "backgroundColor": "#f2f2f7",
@@ -13,5 +9,10 @@
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json",
-  "usingComponents": { "app-navigation": "/components/app-navigation/index" }
+  "usingComponents": {
+    "app-navigation": "/components/app-navigation/index",
+    "ui-icon": "/components/ui-icon/index",
+    "record-sheet": "/components/record-sheet/index",
+    "undo-toast": "/components/undo-toast/index"
+  }
 }

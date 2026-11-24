@@ -1,5 +1,65 @@
-<!-- Keep the future home header free of a product title and bottom tabs. -->
+<!-- Each card uses sibling hit targets so opening statistics cannot also create a record. -->
 <app-navigation />
-<view class="page-content">
-  <view class="placeholder">从记录一件小事开始</view>
+<view class="page-content home">
+  <view class="search">
+    <ui-icon name="search" tone="muted" size="18" />
+    <input
+      placeholder="愚公打卡"
+      placeholder-style="color:#696971"
+      value="{{query}}"
+      bindinput="search"
+      maxlength="100"
+      aria-label="搜索项目"
+      confirm-type="search"
+    />
+  </view>
+  <view wx:if="{{error}}" class="error" aria-role="alert">
+    {{error}}
+    <button class="link" bindtap="load">重试</button>
+  </view>
+  <view wx:if="{{loading}}" class="empty">正在读取记录…</view>
+  <view wx:elif="{{!error}}" class="tile-grid">
+    <view wx:for="{{tiles}}" wx:key="id" class="tile {{item.color}}">
+      <button
+        class="tile-main"
+        hover-class="tile-pressed"
+        data-id="{{item.id}}"
+        bindtap="record"
+        disabled="{{busyId === item.id}}"
+        aria-label="{{item.name}}，累计{{item.number}}{{item.unit}}，{{item.directEntryEnabled?item.caption:'打卡'}}"
+      >
+        <view class="tile-icon"><ui-icon name="{{item.icon}}" tone="white" size="23" /></view>
+        <view class="tile-number {{item.small?'small':''}}">
+          <text>{{item.number}}</text>
+          <text class="tile-unit">{{item.unit}}</text>
+        </view>
+        <view class="tile-footer">
+          <text class="tile-name">{{item.name}}</text>
+          <text class="tile-caption">{{item.caption}}</text>
+        </view>
+      </button>
+      <button
+        class="tile-detail"
+        hover-class="tile-pressed"
+        data-id="{{item.id}}"
+        bindtap="detail"
+        aria-label="查看{{item.name}}统计"
+      >
+        <view class="detail-disc"><ui-icon name="chevron" tone="white" size="12" /></view>
+      </button>
+    </view>
+    <button
+      class="add-tile {{!tiles.length&&!query?'first':''}}"
+      bindtap="add"
+      hover-class="pressed"
+    >
+      <ui-icon name="plus" tone="accent" size="24" />
+      <text>新增项目</text>
+    </button>
+  </view>
+  <view wx:if="{{!loading && !error && !tiles.length}}" class="empty">
+    {{query?'没有匹配的项目':'从一件想坚持的事开始'}}
+  </view>
 </view>
+<record-sheet id="record-sheet" bind:saved="saved" />
+<undo-toast message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />

@@ -1,3 +1,161 @@
-<!-- Detail statistics remain a project route rather than a global statistics tab. -->
-<app-navigation title="项目详情" show-back />
-<view class="page-content"><view class="placeholder">暂无项目数据</view></view>
+<!-- Full history uses the main page scroll; chart scope changes restore the five-row preview. -->
+<app-navigation title="{{project.name || '项目详情'}}" show-back bind:layout="navLayout" />
+<view class="page-content detail" style="--accent:{{color}}">
+  <view wx:if="{{loading}}" class="empty">正在读取记录…</view>
+  <view wx:if="{{error}}" class="error" aria-role="alert">
+    {{error}}
+    <button class="link" bindtap="load">重新读取</button>
+  </view>
+  <block wx:if="{{project}}">
+    <view class="summary">
+      <view wx:for="{{summaries}}" wx:key="id" class="summary-item {{index===0?'main':''}}">
+        <text class="summary-label">{{item.label}}</text>
+        <text class="summary-value">{{item.text}}</text>
+      </view>
+    </view>
+    <view class="surface chart-card">
+      <view class="metric-tabs" wx:if="{{metrics.length>1}}">
+        <button
+          wx:for="{{metrics}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="metric"
+          class="metric-tab {{metric===item.id?'active':''}}"
+          aria-pressed="{{metric===item.id}}"
+          hover-class="pressed"
+        >
+          {{item.label}}
+        </button>
+      </view>
+      <view class="chart-mode">
+        <button
+          class="mode-hit"
+          data-mode="cumulative"
+          bindtap="mode"
+          aria-pressed="{{chartMode==='cumulative'}}"
+        >
+          <text class="mode-pill {{chartMode==='cumulative'?'active':''}}">累计</text>
+        </button>
+        <button
+          class="mode-hit"
+          data-mode="distribution"
+          bindtap="mode"
+          aria-pressed="{{chartMode==='distribution'}}"
+        >
+          <text class="mode-pill {{chartMode==='distribution'?'active':''}}">分布</text>
+        </button>
+      </view>
+      <view class="period-options">
+        <button
+          wx:for="{{periods}}"
+          wx:key="id"
+          class="period-hit"
+          bindtap="period"
+          data-id="{{item.id}}"
+          aria-pressed="{{period===item.id}}"
+        >
+          <text class="period-pill {{period===item.id?'active':''}}">{{item.label}}</text>
+        </button>
+      </view>
+      <view class="date-navigation">
+        <button
+          wx:if="{{period!=='all'}}"
+          bindtap="previous"
+          aria-label="上一周期"
+          hover-class="pressed"
+        >
+          ‹
+        </button>
+        <text>{{periodLabel}}</text>
+        <button
+          wx:if="{{period!=='all'}}"
+          bindtap="next"
+          disabled="{{offset>=0}}"
+          aria-label="下一周期"
+          hover-class="pressed"
+        >
+          ›
+        </button>
+      </view>
+      <practice-chart
+        points="{{points}}"
+        mode="{{chartMode}}"
+        factor="{{factor}}"
+        unit="{{unit}}"
+        color="{{color}}"
+        baseline="{{baseline}}"
+        is-time="{{metric === 'durationSeconds'}}"
+      />
+    </view>
+    <view
+      id="record-section"
+      class="record-heading {{expanded?'sticky':''}}"
+      style="top:{{navHeight}}px"
+    >
+      <text>
+        打卡记录
+        <text class="record-count">{{expanded?historyCount:selectedCount}}</text>
+      </text>
+      <button
+        class="link"
+        wx:if="{{historyCount && !expanded}}"
+        bindtap="expand"
+        hover-class="pressed"
+      >
+        查看全部
+      </button>
+      <button class="link" wx:if="{{expanded}}" bindtap="collapse" hover-class="pressed">
+        收起
+      </button>
+    </view>
+    <view class="surface records">
+      <view wx:if="{{!records.length}}" class="empty">
+        {{expanded?'还没有记录':'本期还没有记录'}}
+      </view>
+      <view wx:for="{{records}}" wx:key="id" class="record-row">
+        <button
+          class="record-main"
+          bindtap="editRecord"
+          data-id="{{item.id}}"
+          hover-class="pressed"
+          aria-label="编辑{{item.date}}记录，{{item.value}}"
+        >
+          <view class="record-top">
+            <text class="record-date">{{item.date}}</text>
+            <text class="record-value">{{item.value}}</text>
+          </view>
+          <view wx:if="{{item.note}}" class="record-note">{{item.note}}</view>
+        </button>
+        <button
+          class="record-menu"
+          bindtap="recordMenu"
+          data-id="{{item.id}}"
+          aria-label="编辑或删除记录"
+          hover-class="pressed"
+        >
+          ···
+        </button>
+      </view>
+      <button wx:if="{{expanded&&hasMore}}" class="link more" bindtap="more" hover-class="pressed">
+        加载更多
+      </button>
+      <view wx:if="{{expanded&&!hasMore&&records.length}}" class="end">全部已加载</view>
+    </view>
+    <button class="surface setting-button" bindtap="settings" hover-class="pressed">
+      <ui-icon name="settings" />
+      <text>项目设置</text>
+      <ui-icon name="chevron" tone="muted" size="16" />
+    </button>
+    <button
+      class="delete-button"
+      bindtap="deleteProject"
+      disabled="{{deleting}}"
+      loading="{{deleting}}"
+      hover-class="pressed"
+    >
+      删除本项目
+    </button>
+  </block>
+</view>
+<record-sheet id="record-sheet" bind:saved="saved" />
+<undo-toast message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />

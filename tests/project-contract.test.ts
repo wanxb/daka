@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  mkdtempSync,
+  writeFileSync,
+  unlinkSync,
+  rmdirSync,
+} from 'node:fs';
+import { resolve, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
 const root = resolve(import.meta.dirname, '..');
@@ -35,4 +45,26 @@ test('依赖精确锁定，源码中不混入生成的 JavaScript', () => {
   }
   const files = readdirSync(resolve(root, 'miniprogram'), { recursive: true });
   assert.ok(!files.some((file) => String(file).endsWith('.js')));
+});
+
+// A zero process status must not turn an explicit CLI authorization failure into a successful check.
+test('微信CLI返回ok:false时检查脚本使用失败退出码', { skip: process.platform !== 'win32' }, () => {
+  const directory = mkdtempSync(join(tmpdir(), 'yugong-cli-')),
+    file = join(directory, 'fake.cmd');
+  try {
+    writeFileSync(
+      file,
+      '@echo off\r\necho {"ok":false,"message":"authorization timeout"}\r\nexit /b 0\r\n',
+    );
+    const result = spawnSync(
+      process.execPath,
+      [resolve(root, 'scripts/wechatide.mjs'), 'check_wechatide_status'],
+      { env: { ...process.env, WECHATIDE_CLI: file }, encoding: 'utf8', windowsHide: true },
+    );
+    assert.equal(result.status, 1);
+    assert.equal(JSON.parse(result.stdout).ok, false);
+  } finally {
+    unlinkSync(file);
+    rmdirSync(directory);
+  }
 });
