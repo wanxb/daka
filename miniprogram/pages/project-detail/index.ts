@@ -48,6 +48,7 @@ Page({
     expiresAt: 0,
     navHeight: 88,
     deleting: false,
+    sheetOpen: false,
   },
   _id: '',
   _db: null as Database | null,
@@ -201,12 +202,16 @@ Page({
   editRecord(e: WechatMiniprogram.TouchEvent) {
     const r = this._rows.find((r) => r.id === e.currentTarget.dataset.id);
     if (!r || !this.data.project) return;
-    this.setData({ toast: '' });
+    this.setData({ toast: '', sheetOpen: true });
     this.selectComponent('#record-sheet')?.open(this.data.project, r);
   },
   async saved() {
     await this.load();
     wx.showToast({ title: '已保存修改', icon: 'none' });
+  },
+  sheetClosed() {
+    // Restore the canvas only after the native exit animation has released the overlay.
+    this.setData({ sheetOpen: false });
   },
   async recordMenu(e: WechatMiniprogram.TouchEvent) {
     const id = String(e.currentTarget.dataset.id),
@@ -217,6 +222,7 @@ Page({
       .showActionSheet({ itemList: ['编辑记录', '删除记录'] })
       .catch(() => null);
     if (answer?.tapIndex === 0) {
+      this.setData({ sheetOpen: true });
       this.selectComponent('#record-sheet')?.open(this.data.project, r);
     } else if (answer?.tapIndex === 1) {
       try {

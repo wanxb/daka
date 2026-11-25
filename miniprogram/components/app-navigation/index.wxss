@@ -13,7 +13,7 @@
   font-size: 17px;
   font-weight: 600;
 }
-.back {
+.navigation .back {
   position: absolute;
   left: 8px;
   top: 0;

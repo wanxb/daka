@@ -22,7 +22,9 @@
   font-size: 14px;
   line-height: 1.4;
 }
-.undo {
+.toast .undo {
+  /* Explicit auto width beats style:v2's fixed button width, leaving room for the saved amount. */
+  width: auto;
   flex-shrink: 0;
   background: none;
   color: #fff;

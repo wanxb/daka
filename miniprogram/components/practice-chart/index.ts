@@ -35,9 +35,15 @@ Component({
     isTime: { type: Boolean, value: false },
     color: { type: String, value: '#6745c6' },
     baseline: { type: Number, value: 0 },
+    // Native canvas layers can paint above page-container; detach the node while a record sheet owns focus.
+    obscured: { type: Boolean, value: false },
   },
   data: { reading: '', empty: true, selectedIndex: -1 },
   observers: {
+    obscured(value: boolean) {
+      revisions.set(this, (revisions.get(this) || 0) + 1);
+      if (!value) wx.nextTick(() => this.draw());
+    },
     'points, mode, factor, unit, color, baseline'() {
       gestures.delete(this);
       this.setData({ reading: '', selectedIndex: -1 });
@@ -60,6 +66,7 @@ Component({
   },
   methods: {
     draw() {
+      if (this.data.obscured) return;
       const revision = (revisions.get(this) || 0) + 1;
       revisions.set(this, revision);
       this.createSelectorQuery()
@@ -186,7 +193,7 @@ Component({
       this.inspectTouch(touch);
     },
     inspectTouch(touch: ChartTouch) {
-      if (!this.data.points.length || this.data.empty) return;
+      if (this.data.obscured || !this.data.points.length || this.data.empty) return;
       const revision = revisions.get(this);
       this.createSelectorQuery()
         .select('#chart')

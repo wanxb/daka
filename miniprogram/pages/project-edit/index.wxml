@@ -104,6 +104,7 @@
               disabled="{{busy}}"
               type="number"
               value="{{form.timeMin}}"
+              style="width:{{form.timeMin.length || 1}}ch"
               data-field="timeMin"
               data-kind="time"
               bindinput="text"
@@ -116,6 +117,7 @@
               disabled="{{busy}}"
               type="number"
               value="{{form.timeMax}}"
+              style="width:{{form.timeMax.length || 1}}ch"
               data-field="timeMax"
               data-kind="time"
               bindinput="text"
@@ -161,6 +163,7 @@
             <ui-icon wx:if="{{locked}}" name="lock" tone="muted" size="13" />
             <input
               value="{{form.quantityUnit}}"
+              style="width:{{form.quantityUnit.length || 1}}em"
               data-field="quantityUnit"
               bindinput="text"
               disabled="{{busy || locked}}"
@@ -176,6 +179,7 @@
               disabled="{{busy}}"
               type="number"
               value="{{form.quantityMin}}"
+              style="width:{{form.quantityMin.length || 1}}ch"
               data-field="quantityMin"
               data-kind="quantity"
               bindinput="text"
@@ -188,6 +192,7 @@
               disabled="{{busy}}"
               type="number"
               value="{{form.quantityMax}}"
+              style="width:{{form.quantityMax.length || 1}}ch"
               data-field="quantityMax"
               data-kind="quantity"
               bindinput="text"
@@ -226,11 +231,9 @@
             disabled="{{busy || !form.timeEnabled}}"
             aria-pressed="{{(form.timeEnabled && !form.quantityEnabled) || (form.primaryMetric === 'durationSeconds' && form.timeEnabled)}}"
           >
-            <text
-              class="segment {{(form.timeEnabled && !form.quantityEnabled) || (form.primaryMetric === 'durationSeconds' && form.timeEnabled)?'selected':''}}"
-            >
-              时间
-            </text>
+            <!-- Native text preserves newlines as real line breaks; keep these short pill labels inline. -->
+            <!-- prettier-ignore -->
+            <text class="segment {{(form.timeEnabled && !form.quantityEnabled) || (form.primaryMetric === 'durationSeconds' && form.timeEnabled)?'selected':''}}">时间</text>
           </button>
           <button
             class="segment-hit"
@@ -240,11 +243,8 @@
             disabled="{{busy || !form.quantityEnabled}}"
             aria-pressed="{{(form.quantityEnabled && !form.timeEnabled) || (form.primaryMetric === 'quantity' && form.quantityEnabled)}}"
           >
-            <text
-              class="segment {{(form.quantityEnabled && !form.timeEnabled) || (form.primaryMetric === 'quantity' && form.quantityEnabled)?'selected':''}}"
-            >
-              数量
-            </text>
+            <!-- prettier-ignore -->
+            <text class="segment {{(form.quantityEnabled && !form.timeEnabled) || (form.primaryMetric === 'quantity' && form.quantityEnabled)?'selected':''}}">数量</text>
           </button>
         </view>
       </view>

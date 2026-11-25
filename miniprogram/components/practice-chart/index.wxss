@@ -2,6 +2,8 @@
 .chart-wrap {
   position: relative;
   padding-top: 40px;
+  /* Removing the native canvas under a modal must not move the history list or its scroll position. */
+  min-height: 200px;
 }
 .reading {
   position: absolute;

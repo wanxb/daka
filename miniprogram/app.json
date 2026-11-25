@@ -2,6 +2,7 @@
   "pages": ["pages/home/index", "pages/project-detail/index", "pages/project-edit/index"],
   "window": {
     "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
     "backgroundColor": "#f2f2f7",
     "backgroundTextStyle": "dark"
   },
@@ -11,8 +12,6 @@
   "sitemapLocation": "sitemap.json",
   "usingComponents": {
     "app-navigation": "/components/app-navigation/index",
-    "ui-icon": "/components/ui-icon/index",
-    "record-sheet": "/components/record-sheet/index",
-    "undo-toast": "/components/undo-toast/index"
+    "ui-icon": "/components/ui-icon/index"
   }
 }

@@ -49,7 +49,7 @@
   padding-top: 12px;
   padding-bottom: 12px;
 }
-.color-hit {
+.colors .color-hit {
   width: 44px;
   height: 44px;
   background: none;
@@ -72,7 +72,7 @@
 .icons {
   border-top: 1px solid var(--line);
 }
-.icon-hit {
+.icons .icon-hit {
   width: 44px;
   height: 44px;
   display: flex;
@@ -152,8 +152,10 @@
   gap: 0;
 }
 .range input {
-  width: calc((100% - 24px) / 2);
-  min-width: 0;
+  /* Natural digit widths keep the dash centered between values, with the complete group at the right edge. */
+  min-width: 1ch;
+  max-width: calc((100% - 24px) / 2);
+  flex: 0 1 auto;
   text-align: right;
 }
 .range .dash {
@@ -179,11 +181,11 @@
 .segment-hit[disabled] {
   opacity: 0.35;
 }
-.save {
+.editor .save {
   margin-top: 26px;
   width: 100%;
 }
-.cancel {
+.editor .cancel {
   width: 100%;
   margin-top: 6px;
 }

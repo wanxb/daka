@@ -1,5 +1,9 @@
 {
   "navigationBarTitleText": "项目详情",
   "onReachBottomDistance": 160,
-  "usingComponents": { "practice-chart": "/components/practice-chart/index" }
+  "usingComponents": {
+    "practice-chart": "/components/practice-chart/index",
+    "record-sheet": "/components/record-sheet/index",
+    "undo-toast": "/components/undo-toast/index"
+  }
 }

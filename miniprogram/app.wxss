@@ -102,6 +102,8 @@ textarea {
   justify-content: center;
 }
 .segment {
+  /* WXML text preserves source line breaks; short control labels must remain a single visible line. */
+  white-space: nowrap;
   width: 100%;
   height: 28px;
   line-height: 28px;

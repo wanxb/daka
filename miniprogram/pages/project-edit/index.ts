@@ -39,7 +39,6 @@ Page({
   _created: false,
   _timer: 0,
   _ready: false,
-  _draft: Promise.resolve(),
   _rangeKeys: { time: '', quantity: '' },
   async onLoad(options: Record<string, string | undefined>) {
     try {
@@ -91,9 +90,9 @@ Page({
     }
     if (!this._ready || this.data.editing || this._created) return;
     const form = { ...this.data.form };
-    this._draft = service().saveDraft(form);
     try {
-      await this._draft;
+      // Page free data is cloned per instance; a pending write belongs to this invocation, never the page options.
+      await service().saveDraft(form);
     } catch (error) {
       this.setData({ error: '草稿未保存：' + errorText(error) });
       throw error;

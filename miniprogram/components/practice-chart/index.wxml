@@ -2,6 +2,7 @@
 <view class="chart-wrap">
   <view class="reading" aria-live="polite">{{reading}}</view>
   <canvas
+    wx:if="{{!obscured}}"
     id="chart"
     type="2d"
     class="chart"

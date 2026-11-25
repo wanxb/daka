@@ -88,6 +88,7 @@
         color="{{color}}"
         baseline="{{baseline}}"
         is-time="{{metric === 'durationSeconds'}}"
+        obscured="{{sheetOpen}}"
       />
     </view>
     <view
@@ -95,10 +96,9 @@
       class="record-heading {{expanded?'sticky':''}}"
       style="top:{{navHeight}}px"
     >
-      <text>
-        打卡记录
-        <text class="record-count">{{expanded?historyCount:selectedCount}}</text>
-      </text>
+      <!-- Keep the native text and count inline; source newlines would add an unintended second row. -->
+      <!-- prettier-ignore -->
+      <text>打卡记录<text class="record-count">{{expanded?historyCount:selectedCount}}</text></text>
       <button
         class="link"
         wx:if="{{historyCount && !expanded}}"
@@ -136,7 +136,7 @@
           aria-label="编辑或删除记录"
           hover-class="pressed"
         >
-          ···
+          <ui-icon name="more" tone="muted" size="20" />
         </button>
       </view>
       <button wx:if="{{expanded&&hasMore}}" class="link more" bindtap="more" hover-class="pressed">
@@ -160,5 +160,5 @@
     </button>
   </block>
 </view>
-<record-sheet id="record-sheet" bind:saved="saved" />
+<record-sheet id="record-sheet" bind:saved="saved" bind:closed="sheetClosed" />
 <undo-toast message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />

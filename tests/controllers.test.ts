@@ -362,6 +362,32 @@ test('正式页面与面板状态流程', async (t) => {
     }
     assert.equal(new Set(ids).size, 4);
   });
+  // Saving refreshes data before the sheet finishes leaving; that refresh must not expose a native canvas early.
+  await t.test('历史编辑的画布保持隐藏到面板退场，恢复绘制等待新节点挂载', async () => {
+    const detail = make(detailOptions);
+    const db = await service().snapshot();
+    detail.onLoad({ id: db.projects[0].id });
+    await detail.load();
+    detail.editRecord(event({ id: db.records[0].id }));
+    assert.equal(detail.data.sheetOpen, true);
+    await detail.saved();
+    assert.equal(detail.data.sheetOpen, true);
+    detail.sheetClosed();
+    assert.equal(detail.data.sheetOpen, false);
+
+    await import('../miniprogram/components/practice-chart/index');
+    const chart = make(componentOptions);
+    const ticks: (() => void)[] = [];
+    api.nextTick = (callback: () => void) => ticks.push(callback);
+    let draws = 0;
+    chart.draw = () => draws++;
+    chart.observers.obscured.call(chart, true);
+    assert.equal(ticks.length, 0);
+    chart.observers.obscured.call(chart, false);
+    assert.equal(draws, 0);
+    ticks.shift()!();
+    assert.equal(draws, 1);
+  });
   await t.test('图表支持Canvas局部触点与普通触点，点选显示原始秒数，滚动不触发读数', async () => {
     await import('../miniprogram/components/practice-chart/index');
     const chart = make(componentOptions),

@@ -213,3 +213,62 @@
   line-height: 1.5;
   padding: 0 0 8px;
 }
+
+/* style:v2 gives native buttons a default width; explicit sizing keeps this sheet's edge alignment stable. */
+.field-top .value {
+  width: auto;
+  min-width: 44px;
+  flex: none;
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+}
+.tools .tool-button,
+.date-top .tool-button {
+  width: auto;
+  min-width: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.tools .tool-button {
+  /* Native v2 buttons center children with flex; text-align alone cannot align their labels. */
+  flex: 1;
+  width: 50%;
+  text-align: left;
+}
+.tools .tool-button:last-child,
+.date-top .tool-button {
+  justify-content: flex-end;
+  text-align: right;
+}
+.date-top .tool-button {
+  width: 100%;
+}
+.sheet .note-toggle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+.sheet .close {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  margin: 0;
+}
+.sheet .clear-time {
+  /* Keep the native clear button from taking 184px away from the adjacent time picker. */
+  width: 44px;
+  min-width: 44px;
+  flex: 0 0 44px;
+  padding: 0;
+  margin: 0;
+}
+.sheet .save {
+  width: 100%;
+  display: block;
+}

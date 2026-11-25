@@ -1,1 +1,7 @@
-{ "navigationBarTitleText": "" }
+{
+  "navigationBarTitleText": "",
+  "usingComponents": {
+    "record-sheet": "/components/record-sheet/index",
+    "undo-toast": "/components/undo-toast/index"
+  }
+}
