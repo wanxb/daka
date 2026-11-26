@@ -1,17 +1,28 @@
-<!-- Readings appear only after a deliberate touch, leaving the default chart free of explanatory copy. -->
+<!-- Metric-aware accessible names disambiguate time from quantity without adding visible chart headings. -->
 <view class="chart-wrap">
-  <view class="reading" aria-live="polite">{{reading}}</view>
-  <canvas
-    wx:if="{{!obscured}}"
+  <!-- Only the ordinary image participates in page scrolling; the offscreen Canvas is a rendering buffer. -->
+  <view
     id="chart"
-    type="2d"
     class="chart"
     bindtouchstart="startTouch"
     bindtouchend="endTouch"
     bindtouchcancel="cancelTouch"
-    aria-label="{{mode === 'cumulative'?'累计曲线':'分布图'}}，单位{{unit}}"
-  />
-  <view wx:if="{{empty}}" class="empty">
-    {{mode==='distribution'?'本期还没有记录':'还没有记录'}}
+    aria-label="{{isTime?'时间':'数量'}}{{mode === 'cumulative'?'累计曲线':'分布图'}}，单位{{unit}}"
+  >
+    <image
+      wx:if="{{imageSrc && !empty && !obscured && !renderFailed}}"
+      class="chart-image"
+      src="{{imageSrc}}"
+      mode="scaleToFill"
+      aria-hidden="true"
+    />
   </view>
+  <view class="reading-slot">
+    <view class="reading" aria-live="polite">{{reading}}</view>
+  </view>
+  <canvas wx:if="{{!obscured}}" id="chart-buffer" type="2d" class="chart-buffer" />
+  <view wx:if="{{empty}}" class="empty">
+    {{mode==='distribution'?'所选时段暂无记录':'暂无记录'}}
+  </view>
+  <view wx:if="{{renderFailed && !empty}}" class="empty">图表暂时无法显示</view>
 </view>

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="北极星打卡，用时间和数量记录阅读、运动与练习。回看累计、分布和日历，让每天的投入清楚可见。"
+    />
+    <title>北极星打卡 · 记下今天，看见日积月累</title>
+    <link rel="icon" href="assets/brand.webp" type="image/webp" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="site-header">
+      <nav class="navigation wrap" aria-label="主要导航">
+        <a class="brand" href="#" aria-label="北极星打卡首页"
+          ><img src="assets/brand.webp" width="36" height="36" alt="" /><span>北极星打卡</span></a
+        >
+        <div class="nav-links">
+          <a href="#record">记录</a><a href="#statistics">统计</a><a href="#questions">常见问题</a>
+        </div>
+        <a class="button button-small" href="#miniprogram"
+          >微信扫码使用
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" /></svg
+        ></a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title">记下今天，<br />看见日积月累。</h1>
+          <p class="hero-description">
+            读了30分钟，跳了1000次。<br />用时间和数量，留下每一次投入。
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#miniprogram"
+              >微信扫码使用
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg
+            ></a>
+            <a class="web-demo-link" href="#experience">先在网页试一试</a>
+          </div>
+          <p class="hero-note">一款专注记录与统计的微信小程序</p>
+        </div>
+        <!-- One upright live preview owns the experience; the other frames are inert product illustrations. -->
+        <figure class="hero-product" id="experience" tabindex="-1">
+          <div class="phone phone-secondary">
+            <div class="demo-window static-preview" inert role="img" aria-label="双项记录界面示意">
+              <iframe
+                id="hero-record-demo"
+                class="product-embed"
+                tabindex="-1"
+                aria-hidden="true"
+                src="demo/index.html?embed=1&amp;scene=both"
+                title="试一试：调整跳绳次数和时间"
+                width="390"
+                height="844"
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+          <div class="phone phone-main">
+            <div class="demo-window">
+              <iframe
+                id="hero-home-demo"
+                class="product-embed"
+                src="demo/index.html?embed=1&amp;scene=home&amp;preview=home"
+                title="试一试：点击项目记录或查看统计"
+                width="390"
+                height="844"
+                sandbox="allow-scripts allow-same-origin"
+                loading="eager"
+              ></iframe>
+            </div>
+          </div>
+          <figcaption>前方画面可直接操作，演示记录刷新后重置。</figcaption>
+        </figure>
+      </section>
+
+      <section class="statement wrap" aria-label="产品理念">
+        <p>有些变化，要回头看才发现。</p>
+        <p>
+          翻过的书页，练过的动作，花在喜欢的事上的时间。<br />把它们记下来，慢慢就有了自己的轨迹。
+        </p>
+      </section>
+
+      <section id="record" class="record-section section-anchor" aria-labelledby="record-title">
+        <div class="feature-layout wrap">
+          <div class="record-visual" aria-label="双项记录功能展示">
+            <div class="phone record-phone">
+              <div
+                class="demo-window static-preview"
+                inert
+                role="img"
+                aria-label="时间与数量记录界面示意"
+              >
+                <iframe
+                  id="record-demo"
+                  class="product-embed"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  src="demo/index.html?embed=1&amp;scene=both"
+                  title="操作双项记录：调整数值、添加备注、保存记录"
+                  width="390"
+                  height="844"
+                  sandbox="allow-scripts allow-same-origin"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+          <div class="feature-copy">
+            <h2 id="record-title">10分钟，1000次。<br />一次记清楚。</h2>
+            <p>
+              时间、数量，可以单独记，也可以一起记。<br
+                class="desktop-break"
+              />拖动滑块，或直接输入准确的数值，<br
+                class="desktop-break"
+              />再添一句备注，留住当时的感受。
+            </p>
+            <ul class="quiet-list">
+              <li>
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="8.5" />
+                  <path d="M12 7v5l3 2" /></svg
+                ><span>分钟、小时、天，按习惯选择</span>
+              </li>
+              <li>
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M7 4v16M17 4v16M3 9h18M3 15h18" /></svg
+                ><span>次、页、个、字，用合适的单位</span>
+              </li>
+              <li>
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <rect x="4" y="5" width="16" height="15" rx="3" />
+                  <path d="M8 3v4m8-4v4M4 10h16m-11 5h6" /></svg
+                ><span>选好发生日期，也能补记过去</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="statistics"
+        class="statistics-section section-anchor wrap"
+        aria-labelledby="statistics-title"
+      >
+        <div class="statistics-copy feature-copy">
+          <h2 id="statistics-title">今天的一点，<br />后来的一大段。</h2>
+          <p>
+            累计看走过多远，分布看投入多少，<br
+              class="desktop-break"
+            />日历看每天的节奏。<br />时间和数量各自清楚，也都值得回看。
+          </p>
+        </div>
+        <div class="statistics-stage">
+          <div class="phone statistics-phone" id="statistics-preview">
+            <div class="demo-window">
+              <iframe
+                id="statistics-demo"
+                class="product-embed"
+                src="demo/index.html?embed=1&amp;scene=detail&amp;graph=cumulative&amp;range=month&amp;preview=statistics"
+                title="操作统计：切换图表、查看日期读数和记录"
+                width="390"
+                height="844"
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="personal-section" aria-labelledby="personal-title">
+        <div class="personal-content wrap">
+          <h2 id="personal-title">按自己的节奏，<br />把喜欢的事继续下去。</h2>
+          <div class="personal-details">
+            <p>
+              每天的阅读、每周的运动，或每月的一次练习。<br />设置日、周、月频率，首页就按对应周期显示。
+            </p>
+            <p>挑一个喜欢的颜色和图标，排好项目顺序。<br />下次打开，一眼找到想记录的事。</p>
+          </div>
+          <!-- Existing licensed project icons make the identity recognizably the same product. -->
+          <div class="activity-line" aria-label="可以记录的活动">
+            <span><img src="assets/book.svg" width="25" height="25" alt="" />阅读</span
+            ><span><img src="assets/run.svg" width="25" height="25" alt="" />跑步</span
+            ><span><img src="assets/music.svg" width="25" height="25" alt="" />练琴</span
+            ><span><img src="assets/writing.svg" width="25" height="25" alt="" />写作</span
+            ><span><img src="assets/dumbbell.svg" width="25" height="25" alt="" />健身</span>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="questions"
+        class="faq-section wrap section-anchor"
+        aria-labelledby="questions-title"
+      >
+        <h2 id="questions-title">你可能想知道</h2>
+        <div class="faq-list">
+          <details>
+            <summary>
+              可以用来记录哪些事？<svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <p>
+              阅读的时间和页数、跳绳的次数、运动或练琴的时间，都可以。每个项目独立设置记录方式、数量单位、范围与默认值，时间和数量分别累计。
+            </p>
+          </details>
+          <details>
+            <summary>
+              一天可以记录多次吗？<svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <p>
+              可以。每次记录都会增加当天实际投入与历史累计。例如跳绳1000次，再记500次，当天就是1500次、2条记录。
+            </p>
+          </details>
+          <details>
+            <summary>
+              忘记记录，或记错了怎么办？<svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <p>
+              在首页打开记录面板，选择实际发生的日期即可补记。已有记录可以在项目详情中修改或删除，统计随之更新。新记录与单条删除还提供短时撤销。
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="closing wrap" aria-labelledby="closing-title">
+        <div class="closing-copy">
+          <img src="assets/brand.webp" width="54" height="54" alt="" loading="lazy" />
+          <h2 id="closing-title">从今天的一次投入开始。</h2>
+          <a class="button button-primary" href="#miniprogram"
+            >微信扫码使用
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg
+          ></a>
+        </div>
+        <!-- Keep the official mini-program code intact, with enough white space for WeChat recognition. -->
+        <figure class="mini-code" id="miniprogram" tabindex="-1">
+          <img
+            src="assets/miniprogram-code.jpg"
+            width="258"
+            height="258"
+            alt="北极星打卡正式小程序码，请使用微信扫一扫"
+            loading="lazy"
+          />
+          <figcaption><strong>北极星打卡</strong><span>微信扫一扫，开始记录</span></figcaption>
+        </figure>
+      </section>
+    </main>
+    <footer class="site-footer wrap">
+      <a class="brand" href="#"
+        ><img src="assets/brand.webp" width="28" height="28" alt="" /><span>北极星打卡</span></a
+      >
+      <p>记录投入，回看积累。</p>
+      <a href="#questions">使用说明</a>
+    </footer>
+  </body>
+</html>

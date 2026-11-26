@@ -1,50 +1,33 @@
-# 愚公打卡
+# 北极星打卡
 
-原生 TypeScript / WXML / WXSS，WebView 渲染，基础库初始锁定 3.0.0。
-正式源码为 `miniprogram/`；`prototype/` 仍是独立浏览器评审稿，不打包进小程序。
+**记下今天，看见日积月累。**
 
-## 开发准备
+读了30分钟，跳了1000次。北极星打卡是一款专注「记录」与「统计」的微信小程序，用时间和数量，留下每一次投入。
 
-当前已安装开发依赖并生成 `package-lock.json`。Node.js 20.18+、npm 10+。
-后续重新安装用 `npm ci`，不要手改 lock。运行时无第三方包，不需要“构建 npm”。
+## 把喜欢的事记下来
 
-```powershell
-npm run check             # 类型检查、业务/控制器/工程边界测试、格式检查
-npm test                  # 单次领域、仓储、页面控制器测试
-npm run check:native      # 微信自带离线编译器检查 WXML/WXSS 语法
-npm run format            # 格式化正式 TS/WXML/WXSS/JSON、测试和脚本
-npm run devtools:status   # 微信工具连接、登录和 skill 版本
-npm run devtools:open     # 打开当前工程完整窗口
-npm run devtools:refresh  # 触发模拟器编译；返回成功不等于编译通过
-```
+阅读、运动、练琴、写作……按自己的习惯创建打卡，选择喜欢的颜色与图标。首页一眼看到今天、本周或本月的投入，也能回看从开始到现在的积累。
 
-CLI 默认 `D:/Tencent/微信web开发者工具/wechatide.cmd`，可用环境变量 `WECHATIDE_CLI` 指向其他安装位置。
-首次连接需在微信开发者工具中允许 Codex；工具需要登录时使用自己的微信扫码。
+## 时间、数量，一次记清楚
 
-## 在 VS Code 中查看
+可以只记时间、只记数量，也可以一起记。拖动滑块或直接输入数值，添一句备注；忘记记录时，也能补记过去。开启快速打卡后，常用的量点一下就记好。
 
-- **正式小程序**：`Ctrl+Shift+P` →「任务: 运行任务」→「微信：打开真实小程序」。VS Code 编辑 `miniprogram/`，微信工具运行真实页面；保存后在微信工具编译查看。
-- **浏览器原型**：F5 →「原型：完整交互（非正式小程序）」或「原型：多屏对照（非正式小程序）」。使用 VS Code 内置 JavaScript 调试器启动 Chrome；服务为 `127.0.0.1:8127`，修改原型自动刷新。
-- **本地检查**：`Ctrl+Shift+B`，运行类型、业务测试及格式检查。
+## 回头看看，已经走了多远
 
-浏览器原型读取 `prototype/`，不会显示对正式 WXML/WXSS 的修改；真实微信组件和本地文件功能仍需模拟器/真机。微信连接授权问题也仍需在工具中解决。
+累计看长期积累，分布看每段时间的投入，日历看每天的节奏。时间与数量分别统计，按周、月、年或全部历史回看。
 
-## AppID 与开发环境
+## 产品画面
 
-`project.config.json` 已配置用户提供的 AppID `wx181a7d368ae8a4c8`，正式源码根为 `miniprogram/`。
-仍需确认当前微信具备该小程序的开发者权限，并完成开发者工具连接、登录及模拟器验证。
+<p>
+  <img src="images/product/home.png" alt="首页：彩色项目卡片展示当前投入与历史积累" width="250" />
+  <img src="images/product/record.png" alt="记录：同时填写跳绳数量与练习时间" width="250" />
+  <img src="images/product/statistics.png" alt="统计：查看跳绳的月度累计曲线" width="250" />
+</p>
 
-AppID 可在 [微信公众平台](https://mp.weixin.qq.com/) → 开发管理 → 开发设置 → 开发者 ID 核对。
-手机预览、上传及真机验收使用该 AppID 和有权限的开发者账号；本地检查通过不等于微信编译或真机验收通过。
+*画面中的项目与数值为演示数据。*
 
-## 正式版实现
+## 微信扫码使用
 
-- `pages/home`：首页入口；`pages/project-detail`：项目详情；`pages/project-edit`：新增/设置。
-- `components/app-navigation`：按状态栏及微信胶囊尺寸预留自定义导航，返回无前页时回首页。
-- `domain`：纯规则；`application`：命令/查询编排；`infrastructure`：本地用户文件与恢复；`assets`：正式资源。
-- 三页已接通项目、记录、统计、本地保存与失败恢复，不带演示数据。
-- Canvas2D 累计/分布图，原生 slider，用户文件按项目/月分片；无云开发或服务器。
-- 本地检查已通过，微信连接授权、完整模拟器流程和真机手感尚待验收。
+从今天的一次投入开始。打开微信扫一扫下方小程序码，进入「北极星打卡」查看并使用；在手机上查看时，可保存图片后用微信识别。
 
-开始业务编码前阅读 [产品方案](产品方案-v1-20261124.md)、[记录规范](时间与数量记录规范-v1-20261124.md) 和 [准备入口](docs/predevelopment/README.md)。
-本轮完成范围、验证证据、当前限制与微信连接排查见 [正式版开发验证记录](docs/predevelopment/正式版开发验证-20261124.md)。
+<img src="images/gh_32d36c5a6904_258.jpg" alt="北极星打卡正式小程序码，微信扫一扫开始使用" width="258" height="258" />

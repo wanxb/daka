@@ -1,0 +1,282 @@
+/* Ordinary views scroll/compose safely: no native Canvas layer can cover navigation or record panels. */
+.celebration-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  pointer-events: none;
+}
+.celebration-glass {
+  position: absolute;
+  border-radius: 22px;
+  background: #ffffff14;
+  border: 1px solid #ffffff30;
+  box-sizing: border-box;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: celebration-mark-fade 2400ms ease-out both;
+}
+.celebration-mark {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  margin: -44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: celebration-mark-fade 2400ms ease-out both;
+}
+.celebration-ink {
+  width: 74px;
+  height: 74px;
+  /* Reveal the long hook from its rounded beginning toward the tip; completion is purely decorative. */
+  animation: celebration-ink 500ms 80ms ease-in-out both;
+}
+/* A 10px square improves visibility on phones while retaining the approved roll/tilt projection and origin. */
+.celebration-paper {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  transform-origin: center;
+  animation: celebration-paper 2800ms linear both;
+}
+/* Forty intervals preserve the early spray and cumulative sway, interpolated entirely by WebView. */
+@keyframes celebration-paper {
+  0% {
+    transform: var(--f0);
+    background-color: var(--c0);
+    opacity: var(--o0);
+  }
+  2.5% {
+    transform: var(--f1);
+    background-color: var(--c1);
+    opacity: var(--o1);
+  }
+  5% {
+    transform: var(--f2);
+    background-color: var(--c2);
+    opacity: var(--o2);
+  }
+  7.5% {
+    transform: var(--f3);
+    background-color: var(--c3);
+    opacity: var(--o3);
+  }
+  10% {
+    transform: var(--f4);
+    background-color: var(--c4);
+    opacity: var(--o4);
+  }
+  12.5% {
+    transform: var(--f5);
+    background-color: var(--c5);
+    opacity: var(--o5);
+  }
+  15% {
+    transform: var(--f6);
+    background-color: var(--c6);
+    opacity: var(--o6);
+  }
+  17.5% {
+    transform: var(--f7);
+    background-color: var(--c7);
+    opacity: var(--o7);
+  }
+  20% {
+    transform: var(--f8);
+    background-color: var(--c8);
+    opacity: var(--o8);
+  }
+  22.5% {
+    transform: var(--f9);
+    background-color: var(--c9);
+    opacity: var(--o9);
+  }
+  25% {
+    transform: var(--f10);
+    background-color: var(--c10);
+    opacity: var(--o10);
+  }
+  27.5% {
+    transform: var(--f11);
+    background-color: var(--c11);
+    opacity: var(--o11);
+  }
+  30% {
+    transform: var(--f12);
+    background-color: var(--c12);
+    opacity: var(--o12);
+  }
+  32.5% {
+    transform: var(--f13);
+    background-color: var(--c13);
+    opacity: var(--o13);
+  }
+  35% {
+    transform: var(--f14);
+    background-color: var(--c14);
+    opacity: var(--o14);
+  }
+  37.5% {
+    transform: var(--f15);
+    background-color: var(--c15);
+    opacity: var(--o15);
+  }
+  40% {
+    transform: var(--f16);
+    background-color: var(--c16);
+    opacity: var(--o16);
+  }
+  42.5% {
+    transform: var(--f17);
+    background-color: var(--c17);
+    opacity: var(--o17);
+  }
+  45% {
+    transform: var(--f18);
+    background-color: var(--c18);
+    opacity: var(--o18);
+  }
+  47.5% {
+    transform: var(--f19);
+    background-color: var(--c19);
+    opacity: var(--o19);
+  }
+  50% {
+    transform: var(--f20);
+    background-color: var(--c20);
+    opacity: var(--o20);
+  }
+  52.5% {
+    transform: var(--f21);
+    background-color: var(--c21);
+    opacity: var(--o21);
+  }
+  55% {
+    transform: var(--f22);
+    background-color: var(--c22);
+    opacity: var(--o22);
+  }
+  57.5% {
+    transform: var(--f23);
+    background-color: var(--c23);
+    opacity: var(--o23);
+  }
+  60% {
+    transform: var(--f24);
+    background-color: var(--c24);
+    opacity: var(--o24);
+  }
+  62.5% {
+    transform: var(--f25);
+    background-color: var(--c25);
+    opacity: var(--o25);
+  }
+  65% {
+    transform: var(--f26);
+    background-color: var(--c26);
+    opacity: var(--o26);
+  }
+  67.5% {
+    transform: var(--f27);
+    background-color: var(--c27);
+    opacity: var(--o27);
+  }
+  70% {
+    transform: var(--f28);
+    background-color: var(--c28);
+    opacity: var(--o28);
+  }
+  72.5% {
+    transform: var(--f29);
+    background-color: var(--c29);
+    opacity: var(--o29);
+  }
+  75% {
+    transform: var(--f30);
+    background-color: var(--c30);
+    opacity: var(--o30);
+  }
+  77.5% {
+    transform: var(--f31);
+    background-color: var(--c31);
+    opacity: var(--o31);
+  }
+  80% {
+    transform: var(--f32);
+    background-color: var(--c32);
+    opacity: var(--o32);
+  }
+  82.5% {
+    transform: var(--f33);
+    background-color: var(--c33);
+    opacity: var(--o33);
+  }
+  85% {
+    transform: var(--f34);
+    background-color: var(--c34);
+    opacity: var(--o34);
+  }
+  87.5% {
+    transform: var(--f35);
+    background-color: var(--c35);
+    opacity: var(--o35);
+  }
+  90% {
+    transform: var(--f36);
+    background-color: var(--c36);
+    opacity: var(--o36);
+  }
+  92.5% {
+    transform: var(--f37);
+    background-color: var(--c37);
+    opacity: var(--o37);
+  }
+  95% {
+    transform: var(--f38);
+    background-color: var(--c38);
+    opacity: var(--o38);
+  }
+  97.5% {
+    transform: var(--f39);
+    background-color: var(--c39);
+    opacity: var(--o39);
+  }
+  100% {
+    transform: var(--f40);
+    background-color: var(--c40);
+    opacity: var(--o40);
+  }
+}
+@keyframes celebration-mark-fade {
+  0% {
+    opacity: 0;
+  }
+  16%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes celebration-ink {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+/* Reduced motion keeps a static confirmation and existing accessible toast, without moving paper. */
+@media (prefers-reduced-motion: reduce) {
+  .celebration-paper {
+    display: none;
+  }
+  .celebration-glass,
+  .celebration-mark,
+  .celebration-ink {
+    animation: none;
+  }
+}

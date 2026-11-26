@@ -1,39 +1,54 @@
-/* Reserve the tooltip line so inspecting a point never shifts the page or the chart. */
+/* Fill the shared statistics body; only the optional readout retains a fixed height. */
 .chart-wrap {
   position: relative;
-  padding-top: 40px;
-  /* Removing the native canvas under a modal must not move the history list or its scroll position. */
-  min-height: 200px;
+  /* The image surface shares ordinary page stacking with the opaque fixed navigation. */
+  z-index: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.reading-slot {
+  flex-shrink: 0;
+  height: 24px;
+  padding-top: 4px;
+  box-sizing: border-box;
 }
 .reading {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 2px;
-  min-height: 22px;
-  text-align: center;
-  color: #4d465e;
-  font-size: 13px;
-  line-height: 18px;
+  color: #6b6b73;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
 }
 .chart {
   display: block;
   width: 100%;
-  height: 200px;
+  flex: 1;
+  min-height: 0;
+}
+.chart-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* No native drawing surface may scroll into the toolbar or the record sheet. Its backing pixels still use full DPR. */
+.chart-buffer {
+  position: fixed;
+  left: -10000px;
+  top: -10000px;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 .empty {
   position: absolute;
   left: 0;
   right: 0;
-  top: 112px;
+  top: 44%;
   text-align: center;
-  color: #696971;
-  font-size: 14px;
+  color: #6b6b73;
+  font-size: 13px;
   pointer-events: none;
-}
-
-/* Two tooltip lines keep a full date and exact amount readable without covering the plot. */
-.reading {
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
 }

@@ -1,9 +1,48 @@
-# Generated dependencies and personal IDE settings must stay outside source control.
+# Dependencies and generated exports are reproducible and do not belong in Git.
 node_modules/
 miniprogram/miniprogram_npm/
-project.private.config.json
 .build/
 coverage/
+*.tsbuildinfo
+
+# Device sessions, test evidence and logs can contain local paths or user data.
+/reports/
+/test-results/
+/playwright-report/
 *.log
+npm-debug.log*
+
+# Machine-specific editor and WeChat settings must not override another developer's setup.
+project.private.config.json
+.vscode/
+.idea/
+*.code-workspace
+
+# Keep real credentials local; sanitized example environment files may be shared.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+/private.*.json
+/credentials*.json
+/secrets/
+
+# Disposable caches, temporary files and operating-system metadata.
+.cache/
+.tmp/
+/tmp/
+/temp/
+*.tmp
+*.swp
+*.swo
+*~
 .DS_Store
 Thumbs.db
+Desktop.ini
+__pycache__/
+*.pyc

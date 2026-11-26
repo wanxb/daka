@@ -1,4 +1,7 @@
-import { calendar, dateKey, moveDay, total, type Metric, type PracticeRecord } from './model';
+// Import owners directly so statistics cannot create a cycle through the compatibility entry point.
+import { calendar, dateKey, moveDay } from './calendar';
+import { total } from './records';
+import type { Metric, PracticeRecord } from './types';
 export type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 export interface ChartPoint {
   label: string;
@@ -66,7 +69,7 @@ export function statistics(
       .forEach((r, i) =>
         groups.push({
           label: r.localTime || `第${i + 1}条`,
-          description: r.occurredOn + ' ' + (r.localTime || `第${i + 1}条（未填时间）`),
+          description: r.occurredOn + ' ' + (r.localTime || `第${i + 1}条（未填具体时刻）`),
           rows: [r],
         }),
       );
@@ -112,6 +115,6 @@ export function statistics(
     baseline,
     added: total(selected, metric),
     points,
-    label: period === 'all' ? '全部记录' : period === 'day' ? start : `${start} — ${end}`,
+    label: period === 'all' ? '全部时间' : period === 'day' ? start : `${start} — ${end}`,
   };
 }

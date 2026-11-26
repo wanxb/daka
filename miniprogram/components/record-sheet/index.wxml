@@ -1,4 +1,4 @@
-<!-- Native page-container owns back/overlay dismissal; the component never persists unfinished input. -->
+<!-- Explicit save wording distinguishes persisting a record from changing values or dismissing this session. -->
 <page-container
   wx:if="{{mounted}}"
   show="{{opened}}"
@@ -8,10 +8,10 @@
   bindclickoverlay="close"
   bindbeforeleave="beforeLeave"
   bindafterleave="afterLeave"
-  overlay-style="background-color:rgba(20,20,30,.4)"
+  overlay-style="background-color:#19192748"
 >
   <scroll-view
-    style="height:calc({{fields.length*80+(dateOpen?188:44)+(noteOpen?100:0)+160}}px + env(safe-area-inset-bottom))"
+    style="height:calc({{fields.length*90+187+(dateOpen?152:0)+(noteOpen?96:0)+(original?51:0)}}px + max(31px, env(safe-area-inset-bottom)))"
     class="sheet-scroll"
     scroll-y
     enhanced
@@ -22,37 +22,32 @@
       style="--accent:{{project.color === 'orange' ? '#bc421c' : project.color === 'blue' ? '#285cce' : project.color === 'teal' ? '#087b75' : project.color === 'rose' ? '#bd3457' : '#6745c6'}}"
     >
       <view class="handle" />
+      <!-- Keep the title row's geometry; dismissal belongs to the native overlay and system back action. -->
       <view class="heading">
-        <text class="title">{{project.name}}</text>
-        <button
-          class="close"
-          bindtap="close"
-          disabled="{{busy}}"
-          aria-label="关闭打卡面板"
-          hover-class="pressed"
-        >
-          <view class="close-disc"><ui-icon name="close" tone="muted" size="16" /></view>
-        </button>
+        <text class="title">{{original?'编辑记录':project.name}}</text>
       </view>
       <view wx:for="{{fields}}" wx:key="metric" class="metric">
         <view class="field-top">
-          <text>{{item.label}}</text>
-          <input
-            wx:if="{{item.precise}}"
-            class="exact"
-            type="digit"
-            value="{{item.raw}}"
-            maxlength="20"
-            focus
-            disabled="{{busy}}"
-            confirm-type="done"
-            cursor-spacing="16"
-            bindconfirm="confirmExact"
-            bindblur="blurExact"
-            data-index="{{index}}"
-            bindinput="exactInput"
-            aria-label="{{item.label}}，单位{{item.unit}}"
-          />
+          <text class="field-label">{{item.label}}</text>
+          <!-- Editing replaces only the value in this row; the slider stays visible and no extra confirmation is needed. -->
+          <view wx:if="{{item.precise}}" class="exact-value">
+            <input
+              class="exact"
+              type="{{item.decimals?'digit':'number'}}"
+              value="{{item.raw}}"
+              maxlength="{{item.raw.length>item.inputLength?item.raw.length:item.inputLength}}"
+              focus
+              disabled="{{busy}}"
+              confirm-type="done"
+              cursor-spacing="16"
+              bindconfirm="confirmExact"
+              bindblur="blurExact"
+              data-index="{{index}}"
+              bindinput="exactInput"
+              aria-label="{{item.label}}，单位{{item.unit}}"
+            />
+            <text class="unit">{{item.unit}}</text>
+          </view>
           <button
             wx:else
             class="value {{item.disabled || busy?'is-disabled':''}}"
@@ -62,50 +57,58 @@
             aria-label="本次{{item.label}}，{{item.display}}，轻点精确输入"
             hover-class="pressed"
           >
-            {{item.display}}
-          </button>
-          <text wx:if="{{item.precise}}" class="unit">{{item.unit}}</text>
-        </view>
-        <slider
-          class="slider"
-          min="{{item.min}}"
-          max="{{item.max === item.min ? item.max + 1 : item.max}}"
-          step="1"
-          value="{{item.position}}"
-          disabled="{{item.disabled || item.min === item.max || busy}}"
-          block-size="26"
-          block-color="#ffffff"
-          activeColor="{{project.color === 'orange' ? '#bc421c' : project.color === 'blue' ? '#285cce' : project.color === 'teal' ? '#087b75' : project.color === 'rose' ? '#bd3457' : '#6745c6'}}"
-          backgroundColor="#dedbe5"
-          data-index="{{index}}"
-          bindchanging="slide"
-          bindchange="settle"
-          aria-label="调节{{item.label}}，{{item.display}}"
-        />
-        <view wx:if="{{item.error}}" class="field-error" aria-role="alert">{{item.error}}</view>
-      </view>
-      <view class="tools" wx:if="{{!dateOpen}}">
-        <button class="tool-button" disabled="{{busy}}" bindtap="toggleNote" hover-class="pressed">
-          {{noteOpen?'收起备注':'添加备注'}}
-        </button>
-        <button class="tool-button" disabled="{{busy}}" bindtap="toggleDate" hover-class="pressed">
-          {{date === today?'今天':date}}
-        </button>
-      </view>
-      <block wx:else>
-        <view class="date-top">
-          <button
-            class="tool-button"
-            disabled="{{busy}}"
-            bindtap="toggleDate"
-            hover-class="pressed"
-          >
-            {{date === today?'今天':date}}⌃
+            <text class="number">{{item.number}}</text>
+            <text class="unit">{{item.unit}}</text>
           </button>
         </view>
+        <view class="slider-row {{item.disabled?'is-disabled':''}}">
+          <!-- Only the rail is custom painted; the native slider keeps its continuous thumb and touch handling. -->
+          <view class="slider-track">
+            <view class="slider-fill" style="width:{{item.progress}}%" />
+          </view>
+          <slider
+            class="slider"
+            min="{{item.min}}"
+            max="{{item.max === item.min ? item.max+1:item.max}}"
+            step="1"
+            value="{{item.position}}"
+            disabled="{{item.disabled || item.min === item.max || busy}}"
+            block-size="26"
+            block-color="#ffffff"
+            activeColor="transparent"
+            backgroundColor="transparent"
+            data-index="{{index}}"
+            bindchanging="slide"
+            bindchange="settle"
+            aria-label="调节{{item.label}}，{{item.display}}"
+          />
+        </view>
+      </view>
+      <view class="tools">
+        <button
+          wx:if="{{!dateOpen}}"
+          class="note-toggle"
+          disabled="{{busy}}"
+          bindtap="toggleNote"
+          hover-class="pressed"
+        >
+          <ui-icon name="edit" tone="muted" size="14" />
+          <text>{{note?'备注':'添加备注'}}</text>
+        </button>
+        <button class="date-toggle" disabled="{{busy}}" bindtap="toggleDate" hover-class="pressed">
+          <!-- Match the note entry's icon while leaving the whole date/time row tappable. -->
+          <ui-icon name="clock" tone="muted" size="14" />
+          <text>{{dateDisplay}}</text>
+          <view class="date-chevron {{dateOpen?'open':''}}">
+            <ui-icon name="chevron" tone="muted" size="11" />
+          </view>
+        </button>
+      </view>
+      <view wx:if="{{dateOpen}}" class="date-fields motion-disclosure">
         <picker
           disabled="{{busy}}"
           mode="date"
+          start="{{limits.earliestDate}}"
           value="{{date}}"
           end="{{today}}"
           bindchange="dateChange"
@@ -133,36 +136,51 @@
             class="clear-time"
             disabled="{{busy}}"
             bindtap="clearTime"
-            aria-label="清除具体时间"
+            aria-label="清除具体时刻"
           >
             <ui-icon name="close" tone="muted" size="14" />
           </button>
         </view>
-        <button class="note-toggle" disabled="{{busy}}" bindtap="toggleNote" hover-class="pressed">
-          {{noteOpen?'收起备注':'添加备注'}}
-        </button>
-      </block>
-      <textarea
-        wx:if="{{noteOpen}}"
+      </view>
+      <button
+        wx:if="{{dateOpen}}"
+        class="note-toggle expanded-note"
         disabled="{{busy}}"
-        class="note"
-        value="{{note}}"
-        bindinput="noteInput"
-        maxlength="500"
-        placeholder="备注"
-        auto-height
-        adjust-position
-        aria-label="备注"
-      />
+        bindtap="toggleNote"
+        hover-class="pressed"
+      >
+        <ui-icon name="edit" tone="muted" size="14" />
+        <text>{{note?'备注':'添加备注'}}</text>
+      </button>
+      <!-- Reveal the note as one unit, keeping native textarea geometry and the counter together. -->
+      <view wx:if="{{noteOpen}}" class="motion-disclosure">
+        <textarea
+          wx:if="{{noteOpen}}"
+          disabled="{{busy}}"
+          class="note"
+          value="{{note}}"
+          bindinput="noteInput"
+          maxlength="{{noteMaxlength}}"
+          placeholder="记录想补充的内容"
+          adjust-position
+          aria-label="备注"
+        />
+        <view wx:if="{{noteOpen}}" class="note-count {{noteCount>=limits.note?'at-limit':''}}">
+          {{noteLegacy && note===original.note?'原备注 '+noteCount+' 字':noteCount+'/'+limits.note}}
+        </view>
+      </view>
       <view wx:if="{{error}}" class="error" aria-role="alert">{{error}}</view>
       <button
-        class="save {{busy?'is-disabled':''}}"
+        class="save {{busy || !canSave?'is-disabled':''}}"
         loading="{{busy}}"
-        disabled="{{busy}}"
+        disabled="{{busy || !canSave}}"
         bindtap="save"
         hover-class="pressed"
       >
-        {{original?'保存修改':'记录'}}
+        {{original?'保存修改':'保存记录'}}
+      </button>
+      <button wx:if="{{original}}" class="delete-record" bindtap="removeRecord" disabled="{{busy}}">
+        删除记录
       </button>
     </view>
   </scroll-view>

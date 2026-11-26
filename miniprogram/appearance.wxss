@@ -1,0 +1,41 @@
+/* Generated palette stops are shared by cards, previews and accent controls. */
+.purple {
+  --card-start: #6745c6;
+  --card-end: #785bd5;
+}
+.orange {
+  --card-start: #bc421c;
+  --card-end: #ca4f27;
+}
+.blue {
+  --card-start: #285cce;
+  --card-end: #3b70d5;
+}
+.teal {
+  --card-start: #087b75;
+  --card-end: #157e78;
+}
+.rose {
+  --card-start: #bd3457;
+  --card-end: #cb4261;
+}
+.red {
+  --card-start: #b52e35;
+  --card-end: #bd3841;
+}
+.green {
+  --card-start: #387641;
+  --card-end: #407d49;
+}
+.cyan {
+  --card-start: #08748c;
+  --card-end: #117b92;
+}
+.indigo {
+  --card-start: #4553b8;
+  --card-end: #5360c1;
+}
+.brown {
+  --card-start: #82543b;
+  --card-end: #8c5f46;
+}

@@ -1,0 +1,163 @@
+/* Extracted by responsibility; import order preserves the original cascade and touch geometry. */
+.record-heading {
+  /* A 44px action row plus 8px of bottom padding separates the title from the list without shrinking touch targets. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  margin: 20px 0 0;
+  padding: 0 4px 8px;
+  box-sizing: border-box;
+  background: #f2f2f7;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.3px;
+}
+.record-heading-title {
+  flex: 1;
+  min-width: 0;
+  line-height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.record-heading.sticky {
+  position: sticky;
+  z-index: 10;
+}
+.record-heading .link {
+  /* Native buttons have their own text metrics; flex centering aligns their label with the title's single line. */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 0 0 12px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+.record-heading .link text {
+  line-height: 24px;
+}
+.records {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.records .record-row {
+  width: 100%;
+  min-height: 76px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  margin: 0;
+  position: relative;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  color: #1c1c1e;
+  line-height: 1.4;
+}
+.record-row + .record-row::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: #ededf2;
+}
+.record-content {
+  flex: 1;
+  min-width: 0;
+}
+.record-value {
+  font-size: 15px;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.record-meta {
+  font-size: 11px;
+  color: #6b6b73;
+  margin-top: 5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.records .show-all {
+  /* Explicit centering avoids inherited body line-height pinning short footer labels to the top of their 44px hit area. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+  border-top: 1px solid #ededf2;
+}
+.end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #6b6b73;
+  border-top: 1px solid #e6e6ec;
+  box-sizing: border-box;
+}
+.record-count {
+  font-size: 11px;
+  color: #6b6b73;
+  margin: 10px 4px 0;
+}
+.detail .setting-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 58px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 0 16px;
+  margin: 24px 0 0;
+  color: #1c1c1e;
+  font-size: 15px;
+}
+.setting-button text {
+  flex: 1;
+  text-align: left;
+}
+.detail .delete-button {
+  width: 100%;
+  min-height: 44px;
+  margin: 15px 0 0;
+  padding: 0;
+  background: none;
+  color: #b42318;
+  font-size: 13px;
+}
+
+/* Frequency stays subordinate to the project name and never borrows success/failure colors. */
+.frequency-badge {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b6b73;
+  background: #ededf2;
+  padding: 4px 8px;
+  border-radius: 7px;
+}

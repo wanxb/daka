@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>愚公打卡 · 交互原型</title>
+  <title>北极星打卡 · 交互原型</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="appearance.js" defer></script>
+  <!-- The selected local particle engine loads on demand; production mini-program code is separate. -->
+  <script src="confetti-review.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <!-- Review controls live outside the phone so the product keeps its card-only home. -->
   <aside class="review-panel" aria-label="原型评审导航">
-    <span class="review-mark">愚公打卡</span>
+    <span class="review-mark">北极星打卡</span>
     <h1>让投入<br>慢慢有形。</h1>
     <p class="review-description">时间与数量记录工具<br>第一版交互原型 · 2026.11</p>
     <nav class="review-nav" aria-label="选择预览页面">
@@ -20,11 +23,18 @@
       <button data-demo="quantity">记录数量<span>03</span></button>
       <button data-demo="both">双项记录<span>04</span></button>
       <button data-demo="detail">累计与统计<span>05</span></button>
-      <button data-demo="create">新增项目<span>06</span></button>
-      <button data-demo="empty">首次使用<span>07</span></button>
+      <button data-demo="create">新增打卡<span>06</span></button>
+      <button data-demo="empty">无项目状态<span>07</span></button>
     </nav>
     <div class="review-foot">
-      <p>点卡片记录，点右上角查看统计。<br>示例数据仅用于体验，刷新可还原。</p>
+      <!-- Disposable review actions stay outside the product and reuse its actual record-success path. -->
+      <div class="celebration-review" aria-label="成功特效评审">
+        <!-- Keep replay tools outside the product after the user selected the dimensional effect. -->
+        <p id="confetti-review-status" role="status">成功反馈 · 立体彩纸</p>
+        <button data-demo="celebration-first">播放首次成功特效</button>
+        <button data-demo="celebration-repeat">播放再次打卡特效</button>
+      </div>
+      <p>点卡片记录，点顶部图标或项目名查看统计。<br>示例数据仅用于体验，刷新可还原。</p>
       <button data-demo="reset" class="reset-button">重置示例</button>
       <a href="board.html">查看多屏设计稿</a>
     </div>

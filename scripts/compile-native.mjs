@@ -12,7 +12,7 @@ const compilerRoot =
 const sourceFiles = readdirSync(root, { recursive: true })
   .map(String)
   .map((path) => path.replaceAll('\\', '/'));
-const folder = mkdtempSync(join(tmpdir(), 'yugong-native-'));
+const folder = mkdtempSync(join(tmpdir(), 'beijixing-native-'));
 let failed = false;
 try {
   for (const [ext, name] of [

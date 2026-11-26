@@ -7,38 +7,84 @@
   box-sizing: border-box;
 }
 .title {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
 }
 .navigation .back {
   position: absolute;
-  left: 8px;
+  left: 15px;
   top: 0;
-  width: 44px;
+  width: auto;
+  min-width: 44px;
   height: 100%;
   min-height: 44px;
   padding: 0;
   margin: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 2px;
   background: transparent;
-  color: #007aff;
-  font-size: 32px;
+  color: #285cdd;
+  font-size: 16px;
   line-height: 1;
 }
 .back::after {
   border: 0;
 }
 
-/* Sticky navigation also protects status/capsule space when long history scrolls beneath it. */
+/* Put positioning and the opaque background on the rendered surface instead of relying on host stacking. */
 :host {
   display: block;
-  position: sticky;
+}
+.navigation-surface {
+  position: fixed;
   top: 0;
-  z-index: 20;
+  left: 0;
+  right: 0;
+  z-index: 100;
   background: #f2f2f7;
+}
+
+/* A filled system-blue pill makes Done an explicit action while the hit region remains 44px high. */
+.navigation .leading-action {
+  position: absolute;
+  left: 15px;
+  top: 0;
+  height: 100%;
+  min-height: 44px;
+  width: auto;
+  min-width: 64px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.leading-action text {
+  padding: 0 16px;
+  min-height: 32px;
+  line-height: 32px;
+  border-radius: 16px;
+  background: #285cdd;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.navigation .leading-action[disabled] {
+  background: transparent;
+  opacity: 0.55;
+}
+.action-pressed {
+  opacity: 0.7;
 }

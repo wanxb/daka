@@ -1,14 +1,15 @@
+// The coordinator alone owns write ordering, recovery consent and atomic manifest publication.
 import {
   emptyDatabase,
-  makeProject,
-  positive,
-  projectForm,
+  readFrequency,
   requireId,
-  total,
-  validDate,
   PracticeError,
   type Database,
 } from '../domain/model';
+import { byteLength, checksum, decode, encode, type Reference, type Manifest } from './file-codec';
+import { assertDatabase } from './database-validation';
+// Retain the public byte counter for existing tooling without duplicating the storage encoding policy.
+export { byteLength } from './file-codec';
 /** Drivers expose only relative paths inside this application's user-data root. Missing files return null. */
 export interface FileDriver {
   read(path: string): Promise<string | null>;
@@ -16,115 +17,7 @@ export interface FileDriver {
   list(path: string): Promise<string[]>;
   remove(path: string): Promise<void>;
 }
-interface Reference {
-  path: string;
-  kind: 'projects' | 'records';
-}
-interface Manifest {
-  schemaVersion: 1;
-  generation: number;
-  refs: Reference[];
-  newProjectDraft: Database['newProjectDraft'];
-  undo: Database['undo'];
-}
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
-export function byteLength(text: string): number {
-  let length = 0;
-  for (const char of text) {
-    const n = char.codePointAt(0)!;
-    length += n <= 0x7f ? 1 : n <= 0x7ff ? 2 : n <= 0xffff ? 3 : 4;
-  }
-  return length;
-}
-// This checksum detects accidental truncation/corruption; it is deliberately not an authentication scheme.
-function checksum(text: string): string {
-  let hash = 2166136261;
-  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
-  return (hash >>> 0).toString(16);
-}
-function encode(data: unknown): string {
-  const payload = JSON.stringify(data);
-  return JSON.stringify({ bytes: byteLength(payload), checksum: checksum(payload), payload });
-}
-function decode<T>(text: string): T {
-  const entry = JSON.parse(text);
-  if (
-    typeof entry.payload !== 'string' ||
-    entry.bytes !== byteLength(entry.payload) ||
-    entry.checksum !== checksum(entry.payload)
-  )
-    throw new Error('checksum');
-  return JSON.parse(entry.payload) as T;
-}
-function assertDatabase(db: Database): void {
-  if (db.newProjectDraft != null) {
-    const draft = db.newProjectDraft;
-    requireId(draft.id);
-    for (const key of [
-      'name',
-      'color',
-      'icon',
-      'primaryMetric',
-      'timeUnit',
-      'timeMin',
-      'timeMax',
-      'defaultTime',
-      'quantityUnit',
-      'quantityMin',
-      'quantityMax',
-      'defaultQuantity',
-    ] as const) {
-      if (typeof draft[key] !== 'string' || draft[key].length > 2000)
-        throw new Error('draft fields');
-    }
-    for (const key of ['timeEnabled', 'quantityEnabled', 'directEntryEnabled'] as const)
-      if (typeof draft[key] !== 'boolean') throw new Error('draft switches');
-  }
-  if (db.undo != null) {
-    if (!['create', 'delete'].includes(db.undo.type) || !Number.isFinite(db.undo.expiresAt))
-      throw new Error('undo fields');
-    assertDatabase({ ...db, records: [db.undo.record], newProjectDraft: null, undo: null });
-  }
-  const ids = new Set<string>();
-  for (const p of db.projects) {
-    requireId(p.id);
-    if (ids.has(p.id)) throw new Error('duplicate project');
-    ids.add(p.id);
-    makeProject(projectForm(p), p.updatedAt, p);
-    positive(p.revision, 'revision');
-    if (!Number.isFinite(p.createdAt) || !Number.isFinite(p.updatedAt))
-      throw new Error('project date');
-  }
-  const recordIds = new Set<string>();
-  for (const r of db.records) {
-    requireId(r.id);
-    if (!ids.has(r.projectId) || recordIds.has(r.id) || !validDate(r.occurredOn))
-      throw new Error('record identity');
-    recordIds.add(r.id);
-    if (r.durationSeconds == null && r.quantity == null) throw new Error('empty record');
-    if (r.durationSeconds != null) positive(r.durationSeconds, 'seconds');
-    if (r.quantity != null) {
-      positive(r.quantity, 'quantity');
-      const p = db.projects.find((p) => p.id === r.projectId)!;
-      if (!p.quantityUnitLocked || r.quantityUnit !== p.quantityUnit)
-        throw new Error('quantity unit');
-    }
-    if (
-      typeof r.note !== 'string' ||
-      Array.from(r.note).length > 500 ||
-      !Number.isFinite(r.createdAt) ||
-      !Number.isFinite(r.updatedAt) ||
-      (r.localTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(r.localTime))
-    )
-      throw new Error('record fields');
-    positive(r.revision, 'revision');
-  }
-  for (const p of db.projects) {
-    const rows = db.records.filter((r) => r.projectId === p.id);
-    total(rows, 'durationSeconds');
-    total(rows, 'quantity');
-  }
-}
 /** A serialized copy-on-write repository: only a verified manifest publishes newly written immutable pages. */
 export class LocalRepository {
   private state: Database | null = null;
@@ -150,6 +43,30 @@ export class LocalRepository {
     await this.ready();
     return clone(this.state!);
   }
+  /** The first committed manifest is the durable initialization receipt, including after all cards are deleted.
+   * Existing manifests, drafts and deletion markers belong to returning users; never seed over them.
+   */
+  async initializeNewUser(create: () => Pick<Database, 'projects' | 'records'>): Promise<void> {
+    const operation = this.queue.then(async () => {
+      await this.ready();
+      if (this.generation > 0 || this.tombstones.size > 0) return;
+      const next = { ...clone(this.state!), ...create() };
+      assertDatabase(next);
+      try {
+        // Publish the projects, all records and the receipt together; orphan pages never count as success.
+        await this.commit(next);
+      } catch (error) {
+        // Lost callbacks may follow a durable manifest. Reload before retrying to avoid duplicate fixtures.
+        this.state = null;
+        this.loading = null;
+        throw error instanceof PracticeError
+          ? error
+          : new PracticeError('IO', '尚未确认是否保存成功，请保留当前输入并重试。');
+      }
+    });
+    this.queue = operation.catch(() => undefined);
+    return operation;
+  }
   acknowledgeRecovery(): void {
     this.recoveryRequired = false;
   }
@@ -164,7 +81,10 @@ export class LocalRepository {
         requireId(marker.id);
         this.tombstones.add(marker.id);
       } catch {
-        throw new PracticeError('CORRUPT', '项目删除标记无法读取，请保留本地数据后重试。');
+        throw new PracticeError(
+          'CORRUPT',
+          '无法确认项目的删除状态，请勿清除小程序数据，稍后重试。',
+        );
       }
     }
     const candidates: { manifest: Manifest; db: Database }[] = [];
@@ -203,6 +123,10 @@ export class LocalRepository {
         db.projects = db.projects.filter((p) => !this.tombstones.has(p.id));
         db.records = db.records.filter((r) => !this.tombstones.has(r.projectId));
         if (db.undo && this.tombstones.has(db.undo.record.projectId)) db.undo = null;
+        // Upgrade missing additive fields in memory only; normal transactions publish them with existing atomicity.
+        for (const project of db.projects) project.frequency = readFrequency(project.frequency);
+        if (db.newProjectDraft)
+          db.newProjectDraft.frequency = readFrequency(db.newProjectDraft.frequency);
         assertDatabase(db);
         candidates.push({ manifest, db });
       } catch (error) {
@@ -211,7 +135,7 @@ export class LocalRepository {
       }
     }
     if (!candidates.length && invalid)
-      throw new PracticeError('CORRUPT', '本地数据校验失败，已停止写入以保护现有记录。');
+      throw new PracticeError('CORRUPT', '本地数据检查未通过，已暂停保存以保护现有记录。');
     candidates.sort((a, b) => b.manifest.generation - a.manifest.generation);
     this.state = candidates[0]?.db || emptyDatabase();
     this.generation = candidates[0]?.manifest.generation || 0;
@@ -221,11 +145,11 @@ export class LocalRepository {
     const operation = this.queue.then(async () => {
       await this.ready();
       if (this.recoveryRequired)
-        throw new PracticeError('RECOVERY', '检测到损坏的存储副本，请先确认恢复提示。');
+        throw new PracticeError('RECOVERY', '检测到本地数据异常，请先处理数据恢复提示。');
       const next = clone(this.state!),
         result = change(next);
       if (next.projects.some((p) => this.tombstones.has(p.id)))
-        throw new PracticeError('MISSING', '已删除项目不能重新使用。');
+        throw new PracticeError('MISSING', '此项目已删除，请返回首页。');
       assertDatabase(next);
       try {
         await this.commit(next);
@@ -236,7 +160,7 @@ export class LocalRepository {
         this.loading = null;
         throw error instanceof PracticeError
           ? error
-          : new PracticeError('IO', '本地保存未确认，请保留当前输入并重试。');
+          : new PracticeError('IO', '尚未确认是否保存成功，请保留当前输入并重试。');
       }
     });
     this.queue = operation.catch(() => undefined);
@@ -246,9 +170,9 @@ export class LocalRepository {
     requireId(id);
     const operation = this.queue.then(async () => {
       await this.ready();
-      if (this.recoveryRequired) throw new PracticeError('RECOVERY', '请先确认本地数据恢复提示。');
+      if (this.recoveryRequired) throw new PracticeError('RECOVERY', '请先处理本地数据恢复提示。');
       if (!this.state!.projects.some((p) => p.id === id))
-        throw new PracticeError('MISSING', '项目已经不存在。');
+        throw new PracticeError('MISSING', '此项目已不存在，请返回首页。');
       const marker = encode({ id }),
         path = `deleted-projects/${id}.json`;
       try {
@@ -258,7 +182,7 @@ export class LocalRepository {
         // A durable deletion marker overrides any stale in-memory project, even after an uncertain callback.
         this.state = null;
         this.loading = null;
-        throw new PracticeError('IO', '删除尚未确认，请重新查看项目。');
+        throw new PracticeError('IO', '尚未确认是否删除成功，请重新查看项目。');
       }
       this.tombstones.add(id);
       const next = clone(this.state!);
@@ -284,7 +208,7 @@ export class LocalRepository {
     const reserve = (text: string) => {
       used += byteLength(text);
       if (used > this.capacityBytes)
-        throw new PracticeError('SPACE', '本地空间接近容量上限，请保留现有记录后重试。');
+        throw new PracticeError('SPACE', '本地数据接近存储上限，已暂停保存。请勿清除小程序数据。');
     };
     const page = async (prefix: string, kind: Reference['kind'], data: unknown) => {
       const content = encode(data),

@@ -1,2 +1,2 @@
-/** Launch deliberately performs no writes: opening the shell must never create demo records. */
+/** Business pages initialize first-use cards through prepare(), keeping launch free of competing writes. */
 App({});

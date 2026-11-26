@@ -1,0 +1,124 @@
+/* Extracted by responsibility; import order preserves the original cascade and touch geometry. */
+/* A seven-column calendar retains 44px touch height; fills, today's border and selection use separate layers. */
+.calendar-navigation {
+  margin: 6px 0 0;
+  height: 44px;
+}
+.chart-card .calendar-navigation button {
+  width: 44px;
+  height: 44px;
+}
+.calendar-navigation button::before {
+  display: none;
+}
+.heat-weekdays,
+.heat-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+.heat-weekdays {
+  height: 30px;
+  align-items: center;
+  font-size: 11px;
+  color: #85828e;
+}
+.heat-weekdays text {
+  width: 14.285714%;
+  text-align: center;
+}
+.chart-card .heat-day {
+  width: 14.285714%;
+  height: 44px;
+  min-height: 44px;
+  padding: 4px;
+  margin: 0;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: 10px;
+  color: #303038;
+  font-size: 12px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.heat-day text {
+  position: relative;
+  z-index: 1;
+}
+.heat-fill {
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+.heat-selection {
+  position: absolute;
+  inset: 1px;
+  border: 1.5px solid var(--accent);
+  border-radius: 11px;
+  box-sizing: border-box;
+}
+.chart-card .heat-day.strong {
+  color: #fff;
+}
+.chart-card .heat-day.unavailable {
+  color: #c4c2cc;
+}
+.heat-legend {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  color: #85828e;
+  font-size: 10px;
+}
+.heat-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+}
+/* Selection never inserts a new row: this matches the approved chart footer's fixed readout geometry. */
+.calendar-reading {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  line-height: 34px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: #6b6b73;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Shared compact geometry keeps history stable; standard plots use the full remaining body. */
+.statistics-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.calendar-body > view {
+  flex-shrink: 0;
+}
+.calendar-body .calendar-footer {
+  /* The readout shares the legend row, so no obsolete second-row space is reserved. */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  height: 34px;
+}
+.calendar-footer .heat-legend {
+  flex-shrink: 0;
+}
+.standard-body .standard-chart {
+  display: block;
+  flex: 1;
+  min-height: 0;
+}

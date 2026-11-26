@@ -2,7 +2,7 @@
   "name": "daka-miniprogram",
   "version": "0.1.0",
   "private": true,
-  "description": "本地时间与数量记录小程序",
+  "description": "北极星打卡：本地时间与数量记录小程序",
   "engines": {
     "node": ">=20.18.0",
     "npm": ">=10"
@@ -10,14 +10,18 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
-    "format": "prettier --write miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json .vscode/*.json",
-    "format:check": "prettier --check miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json .vscode/*.json",
-    "check": "npm run typecheck && npm test && npm run format:check",
+    "format": "prettier --write miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json",
+    "format:check": "prettier --check miniprogram/**/*.{ts,wxml,wxss,json} tests/**/*.ts scripts/**/*.mjs *.json",
+    "check": "npm run typecheck && npm run check:structure && npm test && npm run format:check",
+    "check:structure": "node scripts/check-project.mjs",
+    "assets:sync": "node scripts/sync-prototype-icons.mjs",
     "devtools:status": "node scripts/wechatide.mjs check_wechatide_status --skill-version 0.3.11",
     "devtools:open": "node scripts/wechatide.mjs open_project_window --project . --window-mode fullMode",
     "devtools:refresh": "node scripts/wechatide.mjs simulator_refresh --project .",
     "check:native": "node scripts/compile-native.mjs",
-    "preview:prototype": "node scripts/preview-prototype.mjs"
+    "preview:prototype": "node scripts/preview-prototype.mjs",
+    "preview:site": "node scripts/preview-site.mjs",
+    "build:site": "node scripts/build-site.mjs"
   },
   "devDependencies": {
     "typescript": "5.9.3",

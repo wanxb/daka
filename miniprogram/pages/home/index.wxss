@@ -1,16 +1,32 @@
-/* Compact two-column cards preserve the reference proportions; details have an independent 44px hit area. */
+@import 'celebration.wxss';
+/* Geometry, weights and palette stops mirror the prototype; exceptional data may use a full row. */
 .home {
   padding-top: 4px;
+  /* Empty space below a short grid must remain tappable through the bottom safe area. */
+  min-height: calc(100vh - var(--nav-height, 88px));
+}
+/* Fade the pressed surface without scaling the card or competing with arranging/dragging transforms. */
+.tile-main,
+.tile-detail {
+  transition:
+    background-color 120ms ease-out,
+    opacity 120ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile-main,
+  .tile-detail {
+    transition: none;
+  }
 }
 .search {
-  background: #e6e6ed;
-  border-radius: 12px;
-  height: 44px;
   display: flex;
   align-items: center;
-  padding: 0 12px;
   gap: 8px;
+  height: 44px;
   margin-bottom: 20px;
+  padding: 0 12px;
+  background: #e5e5ec;
+  border-radius: 13px;
 }
 .search input {
   flex: 1;
@@ -18,192 +34,349 @@
   height: 44px;
   font-size: 16px;
 }
+.search .search-clear {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  margin: 0 -12px 0 0;
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Two columns and roughly three visible rows mirror the approved daily-first prototype. */
 .tile-grid {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 .tile,
-.add-tile {
+.tile-grid .add-tile {
   width: calc((100% - 12px) / 2);
-  height: 88px;
-  border-radius: 19px;
+  height: var(--tile-height, 208px);
+  border-radius: 22px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+}
+.tile {
   color: #fff;
 }
-.purple {
-  background: linear-gradient(115deg, #7959cf, #6440ba);
+/* Keep all card artwork on one surface so the border and content move together in edit mode. */
+.tile-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--card-start), var(--card-end));
 }
-.orange {
-  background: linear-gradient(115deg, #bf5028, #b74221);
-}
-.blue {
-  background: linear-gradient(115deg, #3b6bd1, #2d5dc6);
-}
-.teal {
-  background: linear-gradient(115deg, #087f79, #087c77);
-}
-.rose {
-  background: linear-gradient(115deg, #c44266, #b8385c);
-}
+/* Flexible middle space keeps the daily baseline aligned without overlapping the tiny plot or footer. */
 .tile-main {
   position: absolute;
-  top: 0;
   left: 0;
+  right: 0;
+  top: 44px;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 44px);
+  padding: 0 15px 14px;
+  margin: 0;
   background: none;
   color: inherit;
-  padding: 0;
   text-align: left;
   line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-.tile-main[disabled] {
+.tile .tile-main[disabled],
+.tile .tile-detail[disabled] {
   background: none;
   color: inherit;
   opacity: 1;
 }
-.tile-icon {
-  position: absolute;
-  left: 14px;
-  top: 14px;
-}
-.tile-number {
-  position: absolute;
-  right: 44px;
-  top: 11px;
+.tile-heading {
   display: flex;
-  align-items: baseline;
-  gap: 2px;
-  font-size: 26px;
-  line-height: 1.1;
-  font-weight: 600;
-  letter-spacing: -0.8px;
-  font-variant-numeric: tabular-nums;
-  max-width: calc(100% - 84px);
-}
-.tile-number.small {
-  font-size: 20px;
-  letter-spacing: -0.4px;
-}
-.tile-unit {
-  font-size: 11px;
-  letter-spacing: 0;
-  flex-shrink: 0;
-}
-.tile-footer {
-  position: absolute;
-  left: 14px;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  gap: 7px;
+  height: 24px;
+  flex: none;
+  padding-right: 8px;
+  flex: 1;
+  min-width: 0;
 }
 .tile-name {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 550;
   min-width: 0;
-  flex: 1;
   overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.tile-caption {
+.tile-metrics {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 46px;
+  gap: 3px;
+  padding-top: clamp(0px, calc((var(--tile-height) - 144px) * 0.18), 11px);
+  box-sizing: border-box;
+}
+.tile-day-label {
   font-size: 11px;
-  line-height: 1.35;
-  max-width: 64px;
-  text-align: right;
-  overflow-wrap: anywhere;
+  line-height: 14px;
+  color: #ffffffe6;
 }
-.tile .tile-detail {
+.tile-number {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1.1;
+  white-space: nowrap;
+  font-size: 32px;
+  font-weight: 650;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+.tile-number.wide-unit {
+  font-size: 28px;
+}
+.tile-number.small {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+.tile-unit {
+  /* Full time-unit captions use regular weight so the recorded amount remains the card's emphasis. */
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  flex: none;
+}
+/* Seven daily bars and strictly horizontal/vertical quantity steps have no goal or cross-project scale. */
+.tile-trend {
+  position: relative;
+  height: clamp(12px, calc(var(--tile-height) - 144px), 28px);
+  margin: 0 2px;
+  flex: none;
+  color: #ffffffe0;
+}
+.trend-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 100%;
+}
+.trend-bar {
+  width: 8.5%;
+  border-radius: 2px;
+  background: currentColor;
+}
+.step-horizontal,
+.step-vertical {
+  position: absolute;
+  background: currentColor;
+}
+.step-horizontal {
+  height: 1.5px;
+}
+.step-vertical {
+  width: 1.5px;
+}
+.step-dot {
   position: absolute;
   right: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(50%, -25%);
+}
+.tile-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 16px;
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: #ffffffd9;
+}
+.tile-caption {
+  font-size: 10px;
+  color: #fff;
+  text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* The whole 44px header is a sibling detail button; no title tap can reach the recording button. */
+.tile .tile-detail {
+  position: absolute;
+  left: 0;
+  right: 0;
   top: 0;
-  width: 44px;
+  width: 100%;
   height: 44px;
+  padding: 8px 15px 0;
+  margin: 0;
+  box-sizing: border-box;
   background: none;
+  color: inherit;
+  text-align: left;
+  line-height: 1.2;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 }
+
 .detail-disc {
+  flex: none;
   width: 18px;
   height: 18px;
-  background: #ffffff19;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
 }
 .tile-pressed {
   background: #0000000a;
 }
 .tile-grid .add-tile {
-  background: #e7e6ef;
-  color: #675685;
+  background: #e8e7ef;
+  color: #716b84;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 13px 14px;
-  font-size: 15px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
+  margin: 0;
 }
-.tile-grid .add-tile.first {
-  width: 100%;
-  height: 120px;
-  padding: 20px;
-}
-@media (min-width: 600px) {
-  .tile,
-  .add-tile {
-    height: 104px;
-  }
-  .tile-number {
-    font-size: 30px;
-  }
-}
-
-/* Clearing keeps keyboard focus, while exceptional data uses a full row without making every card taller. */
-.search .search-clear {
-  width: 44px;
-  height: 44px;
-  margin: 0 -12px 0 0;
-  background: none;
+.add-disc {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #dcdbe6;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
+/* Wide legacy values get a full row; ordinary 320–430px phones keep the two-column layout. */
 .tile.wide {
   width: 100%;
-}
-.tile.wide .tile-caption {
-  max-width: 60%;
 }
 .tile-main.is-saving {
   opacity: 0.7;
 }
-.tile-caption {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-.tile-detail[disabled],
-.add-tile[disabled] {
+.tile-grid .add-tile[disabled] {
+  background: #e8e7ef;
+  color: #716b84;
   opacity: 1;
 }
-@media (max-width: 360px) {
+@media (max-width: 319px) {
   .tile,
-  .add-tile {
+  .tile-grid .add-tile {
     width: 100%;
   }
-  .tile-caption {
-    max-width: 55%;
+}
+
+/* Editing is explicit: only this user-triggered mode wiggles; deletion retains its separate 44px target. */
+/* Done lives in the fixed navigation; the grid needs only a small top gutter while arranging. */
+.home.is-arranging-home {
+  padding-top: 16px;
+}
+.tile-motion {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.tile.is-arranging {
+  transition: transform 220ms cubic-bezier(0.22, 0.8, 0.3, 1);
+  will-change: transform;
+  overflow: visible;
+}
+.is-arranging .tile-motion {
+  animation: card-wiggle 180ms ease-in-out infinite alternate;
+}
+.tile.is-dragging {
+  transition: none;
+  z-index: 8;
+  box-shadow: 0 12px 28px #19192735;
+}
+.is-dragging .tile-motion {
+  animation: none;
+}
+/* The empty slot stays behind the lifted card; the card itself follows the finger without easing. */
+.drag-placeholder {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 22px;
+  border: 2px dashed #285cdd66;
+  background: #285cdd09;
+  pointer-events: none;
+}
+.tile.is-dragging.is-settling {
+  transition: transform 220ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.home .arrange-hit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  background: transparent;
+  border-radius: inherit;
+}
+.home .remove-card {
+  min-width: 44px;
+  max-width: 44px;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 44px;
+  height: 44px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.remove-disc {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #eeeef3;
+  box-shadow: 0 1px 5px #19192726;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Scoped selectors override style:v2's fixed button width; disabled overlays must stay transparent. */
+.home .arrange-hit[disabled],
+.home .remove-card[disabled] {
+  background: transparent;
+}
+@keyframes card-wiggle {
+  from {
+    transform: rotate(-0.65deg);
+  }
+  to {
+    transform: rotate(0.65deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-arranging .tile-motion {
+    animation: none;
+  }
+  .tile.is-arranging,
+  .tile.is-dragging.is-settling {
+    transition: none;
+    transition-delay: 0ms !important;
   }
 }

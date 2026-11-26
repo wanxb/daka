@@ -1,17 +1,28 @@
-<!-- Each card uses sibling hit targets so opening statistics cannot also create a record. -->
-<app-navigation />
-<view class="page-content home">
-  <view class="search">
-    <ui-icon name="search" tone="muted" size="18" />
+<!-- Card copy distinguishes opening the disposable panel from immediately saving a quick record. -->
+<app-navigation
+  bind:layout="layout"
+  action-text="{{arranging?(arrangeSaving?'保存中…':'完成'):''}}"
+  action-disabled="{{arrangeSaving || !!draggingId}}"
+  bind:action="finishArrange"
+/>
+<view
+  class="page-content home {{arranging?'is-arranging-home':''}}"
+  style="--tile-height:{{tileHeight}}px;--nav-height:{{navigationHeight}}px;"
+  data-arrange-blank="{{true}}"
+  bindtap="cancelArrange"
+>
+  <!-- Search returns with its preserved query after the navigation's Done action ends arranging. -->
+  <view wx:if="{{!arranging}}" class="search">
+    <ui-icon name="search" tone="muted" size="20" />
     <input
-      placeholder="愚公打卡"
-      placeholder-style="color:#696971"
+      placeholder="北极星打卡"
+      placeholder-style="color:#6b6b73"
       value="{{query}}"
       focus="{{searchFocus}}"
       bindblur="blurSearch"
       bindconfirm="finishSearch"
       bindinput="search"
-      maxlength="100"
+      maxlength="{{limits.search*2}}"
       aria-label="搜索项目"
       confirm-type="search"
     />
@@ -29,51 +40,152 @@
     {{error}}
     <button class="link" bindtap="load">重试</button>
   </view>
-  <view wx:if="{{loading}}" class="empty">正在读取记录…</view>
-  <view wx:elif="{{!loadError}}" class="tile-grid">
-    <view wx:for="{{tiles}}" wx:key="id" class="tile {{item.color}} {{item.wide?'wide':''}}">
-      <button
-        class="tile-main {{busyId === item.id?'is-saving':''}}"
-        hover-class="tile-pressed"
-        data-id="{{item.id}}"
-        bindtap="record"
-        disabled="{{!!busyId}}"
-        aria-label="{{item.name}}，{{item.summaryLabel}}，{{item.directEntryEnabled?item.caption:'打卡'}}"
-      >
-        <view class="tile-icon"><ui-icon name="{{item.icon}}" tone="white" size="23" /></view>
-        <view class="tile-number {{item.small?'small':''}}">
-          <text>{{item.number}}</text>
-          <text class="tile-unit">{{item.unit}}</text>
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <!-- Only the page/grid background is a cancel target; card descendants keep their own actions. -->
+  <view wx:elif="{{!loadError}}" class="tile-grid" data-arrange-blank="{{true}}">
+    <!-- The dragged item reserves its prospective slot while its neighbors visibly make room. -->
+    <view
+      wx:if="{{draggingId}}"
+      class="drag-placeholder"
+      style="{{placeholderStyle}}"
+      aria-hidden="true"
+    />
+    <view
+      wx:for="{{tiles}}"
+      wx:key="id"
+      class="tile {{item.color}} {{item.wide?'wide':''}} {{arranging?'is-arranging':''}} {{draggingId === item.id?'is-dragging':''}} {{settling && draggingId === item.id?'is-settling':''}}"
+      style="{{draggingId === item.id?dragStyle:(shiftStyles[item.id] || '')}}"
+      data-id="{{item.id}}"
+      bindlongpress="enterArrange"
+    >
+      <!-- One transform parent keeps the surface, delete button and hit targets in exact phase. -->
+      <view class="tile-motion" style="animation-delay:{{motionDelays[item.id] || 0}}ms;">
+        <view class="tile-surface">
+          <button
+            class="tile-main {{busyId === item.id?'is-saving':''}}"
+            hover-class="tile-pressed"
+            data-id="{{item.id}}"
+            bindtap="record"
+            disabled="{{!!busyId || arranging}}"
+            aria-label="{{item.name}}，{{item.summaryLabel}}，{{item.recordActionLabel}}"
+          >
+            <!-- The recording surface starts below the header, so title taps cannot record. -->
+            <view class="tile-metrics">
+              <text class="tile-day-label">{{item.todayLabel}}</text>
+              <view class="tile-number {{item.small?'small':''}} {{item.wideUnit?'wide-unit':''}}">
+                <text>{{item.number}}</text>
+                <text class="tile-unit">{{item.unit}}</text>
+              </view>
+            </view>
+            <!-- Ordinary views scroll with the page; these frequency buckets never allocate a native canvas. -->
+            <view class="tile-trend" aria-role="img" aria-label="{{item.trend.label}}">
+              <view wx:if="{{item.trend.kind === 'bars'}}" class="trend-bars">
+                <view
+                  wx:for="{{item.trend.bars}}"
+                  wx:for-item="bar"
+                  wx:key="index"
+                  class="trend-bar"
+                  style="width:{{bar.width}}%;height:{{bar.height}}%;opacity:{{bar.opacity}};"
+                />
+              </view>
+              <block wx:else>
+                <block wx:for="{{item.trend.steps}}" wx:for-item="step" wx:key="index">
+                  <view
+                    class="step-horizontal"
+                    style="left:{{step.left}}%;top:{{step.previousY}}%;width:{{step.width}}%;"
+                  />
+                  <view
+                    wx:if="{{step.height > 0}}"
+                    class="step-vertical"
+                    style="left:{{step.right}}%;top:{{step.y}}%;height:{{step.height}}%;"
+                  />
+                </block>
+                <view class="step-dot" style="top:{{item.trend.dotTop}}%;" />
+              </block>
+            </view>
+            <view class="tile-footer">
+              <text>共 {{item.lifetimeText}}</text>
+              <text wx:if="{{busyId === item.id || item.caption}}" class="tile-caption">
+                {{busyId === item.id?'保存中…':item.caption}}
+              </text>
+            </view>
+          </button>
+          <button
+            class="tile-detail"
+            disabled="{{!!busyId || arranging}}"
+            hover-class="tile-pressed"
+            data-id="{{item.id}}"
+            bindtap="detail"
+            aria-label="查看{{item.name}}统计"
+          >
+            <view class="tile-heading">
+              <ui-icon name="{{item.icon}}" tone="white" size="19" />
+              <text class="tile-name">{{item.name}}</text>
+            </view>
+            <view class="detail-disc"><ui-icon name="chevron" tone="white" size="12" /></view>
+          </button>
         </view>
-        <view class="tile-footer">
-          <text class="tile-name">{{item.name}}</text>
-          <text class="tile-caption">{{busyId === item.id?'记录中…':item.caption}}</text>
-        </view>
-      </button>
-      <button
-        class="tile-detail"
-        disabled="{{!!busyId}}"
-        hover-class="tile-pressed"
-        data-id="{{item.id}}"
-        bindtap="detail"
-        aria-label="查看{{item.name}}统计"
-      >
-        <view class="detail-disc"><ui-icon name="chevron" tone="white" size="12" /></view>
-      </button>
+        <!-- Edit-only sibling targets intercept all taps and touches, including releases after a long press. -->
+        <button
+          wx:if="{{arranging}}"
+          class="arrange-hit"
+          data-id="{{item.id}}"
+          disabled="{{arrangeSaving}}"
+          catchtap="moveCard"
+          catchtouchstart="dragStart"
+          catchtouchmove="dragMove"
+          catchtouchend="dragEnd"
+          catchtouchcancel="cancelDrag"
+          aria-label="移动{{item.name}}，可拖动或轻点调整位置"
+        />
+        <button
+          wx:if="{{arranging}}"
+          class="remove-card"
+          data-id="{{item.id}}"
+          catchtap="removeCard"
+          disabled="{{arrangeSaving || !!draggingId}}"
+          aria-label="删除{{item.name}}"
+          hover-class="pressed"
+        >
+          <view class="remove-disc"><ui-icon name="close" tone="ink" size="12" /></view>
+        </button>
+      </view>
     </view>
+    <!-- Keep the capacity reason visible even when search hides existing projects; storage enforces the same limit. -->
     <button
-      class="add-tile {{!tiles.length&&!query?'first':''}}"
+      wx:if="{{!arranging}}"
+      class="add-tile"
       bindtap="add"
-      disabled="{{!!busyId}}"
+      disabled="{{!!busyId || arranging || projectLimitReached}}"
       hover-class="pressed"
     >
-      <ui-icon name="plus" tone="accent" size="24" />
-      <text>新增项目</text>
+      <view class="add-disc"><ui-icon name="plus" tone="muted" size="22" /></view>
+      <text>{{projectLimitReached?'已达'+limits.projects+'个上限':'新增打卡'}}</text>
     </button>
   </view>
   <view wx:if="{{!loading && !loadError && !tiles.length}}" class="empty">
-    {{query?'没有匹配的项目':'从一件想坚持的事开始'}}
+    {{query?'未找到相关项目':'从一件想坚持的事开始'}}
   </view>
 </view>
-<record-sheet id="record-sheet" bind:saved="saved" />
-<undo-toast message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />
+<!-- The native panel must finish leaving before the success artwork can cover its originating card. -->
+<record-sheet id="record-sheet" bind:saved="saved" bind:closed="recordClosed" />
+<!-- Decorative views never capture input or add duplicate success announcements for screen readers. -->
+<view wx:if="{{celebration}}" class="celebration-stage" aria-hidden="true">
+  <view
+    class="celebration-glass"
+    style="left:{{celebration.rect.left}}px;top:{{celebration.rect.top}}px;width:{{celebration.rect.width}}px;height:{{celebration.rect.height}}px;"
+  />
+  <view
+    wx:for="{{celebration.papers}}"
+    wx:key="id"
+    class="celebration-paper"
+    style="left:{{celebration.x}}px;top:{{celebration.y}}px;{{item.style}}"
+  >
+    <!-- The single projected square follows the same roll/tilt matrix as the approved particle renderer. -->
+  </view>
+  <view class="celebration-mark" style="left:{{celebration.x}}px;top:{{celebration.y}}px;">
+    <image class="celebration-ink" src="/assets/celebration-check.svg" mode="aspectFit" />
+  </view>
+</view>
+<!-- A stable component anchor supports checking transient executing states without changing stored records. -->
+<undo-toast id="undo-toast" message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />

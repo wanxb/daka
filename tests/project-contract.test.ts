@@ -52,7 +52,7 @@ test(
   '微信CLI失败或等待授权时，快捷任务不会误判为就绪',
   { skip: process.platform !== 'win32' },
   () => {
-    const directory = mkdtempSync(join(tmpdir(), 'yugong-cli-')),
+    const directory = mkdtempSync(join(tmpdir(), 'beijixing-cli-')),
       file = join(directory, 'fake.cmd');
     try {
       for (const [payload, status] of [

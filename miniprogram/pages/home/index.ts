@@ -1,31 +1,53 @@
 import { prepare, service } from '../../application/service';
 import { errorText, projectTile, recordText } from '../../application/presentation';
-import { newId, type Database, type PracticeRecord } from '../../domain/model';
-/** Home retains its own search/scroll state while all durable commands go through the application layer. */
+import { newId, canQuickRecord, dateKey, type PracticeRecord } from '../../domain/model';
+import { inputLimits, limitText } from '../../domain/input-limits';
+import { homeData, homeState } from './state';
+import { arrangingMethods } from './arranging';
+import { feedbackMethods } from './feedback';
+/** The page composes cohesive actions without changing native handler names or lifecycle ordering. */
 Page({
-  data: {
-    query: '',
-    searchFocus: false,
-    loadError: false,
-    tiles: [] as ReturnType<typeof projectTile>[],
-    loading: true,
-    error: '',
-    busyId: '',
-    toast: '',
-    expiresAt: 0,
+  data: homeData,
+  ...homeState,
+  ...arrangingMethods,
+  ...feedbackMethods,
+  /** Use the measured native chrome and safe area so three rows fit without assuming an iPhone notch. */
+  layout(e?: WechatMiniprogram.CustomEvent<{ height: number }>) {
+    if (e) this._navigationHeight = e.detail.height;
+    const info = wx.getWindowInfo();
+    const bottom = info.safeArea ? Math.max(36, info.screenHeight - info.safeArea.bottom) : 36;
+    const available = info.windowHeight - this._navigationHeight - 4 - 44 - 20 - 24 - bottom;
+    this.setData({
+      navigationHeight: this._navigationHeight,
+      tileHeight: Math.max(144, Math.min(208, Math.floor(available / 3))),
+    });
   },
-  _db: null as Database | null,
-  _lastTap: 0,
-  _tapProject: '',
-  _quickId: '',
-  _quickProject: '',
-  _alive: true,
-  _loadVersion: 0,
+  onResize() {
+    this.stopCelebration();
+    this.cancelDrag();
+    this.layout();
+  },
   onShow() {
     this._alive = true;
+    this._visible = true;
     void this.load();
   },
+  onHide() {
+    this._visible = false;
+    this.stopCelebration();
+    // Backgrounding abandons only an unfinished sort; confirmed deletions have already committed.
+    this.cancelDrag();
+    this.setData({ arranging: false });
+  },
+  onPageScroll(e: WechatMiniprogram.Page.IPageScrollOption) {
+    // Viewport coordinates become stale as soon as the page moves; do not make artwork follow another card.
+    this.stopCelebration();
+    this._scrollTop = e.scrollTop;
+    if (this._drag) this.previewDrag();
+  },
   onUnload() {
+    this.stopCelebration();
+    this.cancelDrag();
     this._alive = false;
     this._loadVersion++;
   },
@@ -35,6 +57,13 @@ Page({
       const db = await prepare();
       if (!this._alive || version !== this._loadVersion) return;
       this._db = db;
+      if (this.data.arranging) {
+        const current = db.projects.map((p) => p.id);
+        this._orderIds = this._orderIds
+          .filter((id) => current.includes(id))
+          .concat(current.filter((id) => !this._orderIds.includes(id)));
+        this._originalOrder = current;
+      }
       this.setData({ loading: false, loadError: false, error: '' });
       this.filter();
     } catch (error) {
@@ -43,21 +72,42 @@ Page({
     }
   },
   filter() {
-    const q = this.data.query.normalize('NFKC').trim().toLocaleLowerCase();
+    const today = dateKey();
+    if (this._tileSource !== this._db || this._tileDay !== today) {
+      const groups = new Map<string, PracticeRecord[]>();
+      // One history pass replaces the previous project-count × record-count scan on every keystroke.
+      for (const record of this._db?.records || []) {
+        const rows = groups.get(record.projectId) || [];
+        rows.push(record);
+        groups.set(record.projectId, rows);
+      }
+      this._tileCache = (this._db?.projects || []).map((p) =>
+        projectTile(p, groups.get(p.id) || [], today),
+      );
+      this._tileSource = this._db;
+      this._tileDay = today;
+    }
+    const q = (this.data.arranging ? '' : this.data.query)
+      .normalize('NFKC')
+      .trim()
+      .toLocaleLowerCase();
     this.setData({
-      tiles: (this._db?.projects || [])
-        .filter((p) => p.name.normalize('NFKC').toLocaleLowerCase().includes(q))
-        .map((p) =>
-          projectTile(
-            p,
-            this._db!.records.filter((r) => r.projectId === p.id),
-          ),
-        ),
+      // Count all projects, including those hidden by the current search; old over-limit stores stay intact.
+      projectLimitReached: (this._db?.projects.length || 0) >= inputLimits.projects,
+      tiles: (this.data.arranging
+        ? this._orderIds
+            .map((id) => this._tileCache.find((p) => p.id === id))
+            .filter((p): p is NonNullable<typeof p> => !!p)
+        : this._tileCache
+      ).filter((p) => p.name.normalize('NFKC').toLocaleLowerCase().includes(q)),
     });
   },
   search(e: WechatMiniprogram.CustomEvent<{ value: string }>) {
-    this.setData({ query: e.detail.value });
+    const query = limitText(e.detail.value, inputLimits.search);
+    this.setData({ query });
     this.filter();
+    if (query !== e.detail.value) return query;
+    return undefined;
   },
   clearSearch() {
     this.setData({ query: '', searchFocus: true });
@@ -70,21 +120,30 @@ Page({
     wx.hideKeyboard();
   },
   add() {
-    if (!this._db || this.data.busyId) return;
+    if (!this._db || this.data.busyId || this.data.arranging) return;
+    if (this._db.projects.length >= inputLimits.projects) {
+      wx.showToast({ title: `体验版最多${inputLimits.projects}个打卡项目`, icon: 'none' });
+      return;
+    }
+    this.stopCelebration();
     this.setData({ toast: '' });
     wx.navigateTo({ url: '/pages/project-edit/index' });
   },
   detail(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.busyId) return;
+    if (this.data.busyId || this.data.arranging || Date.now() < this._suppressTapUntil) return;
+    this.stopCelebration();
     this.setData({ toast: '' });
     wx.navigateTo({ url: '/pages/project-detail/index?id=' + e.currentTarget.dataset.id });
   },
   async record(e: WechatMiniprogram.TouchEvent) {
     const id = String(e.currentTarget.dataset.id),
       p = this._db?.projects.find((p) => p.id === id);
-    if (!p || this.data.busyId) return;
+    if (!p || this.data.busyId || this.data.arranging || Date.now() < this._suppressTapUntil)
+      return;
+    this.stopCelebration();
     this.setData({ toast: '' });
-    if (!p.directEntryEnabled) {
+    if (!p.directEntryEnabled || !canQuickRecord(p)) {
+      this._sheetOpen = true;
       this.selectComponent('#record-sheet')?.open(p);
       return;
     }
@@ -102,21 +161,15 @@ Page({
       this._quickId = '';
       await this.load();
       this.notify('已记录 ' + recordText(p, record));
+      this.celebrateRecord(record);
     } catch (error) {
       this.setData({ error: errorText(error) });
     } finally {
       this.setData({ busyId: '' });
     }
   },
-  async saved(e: WechatMiniprogram.CustomEvent<{ record: PracticeRecord; editing: boolean }>) {
-    await this.load();
-    const p = this._db?.projects.find((p) => p.id === e.detail.record.projectId);
-    if (p) this.notify('已记录 ' + recordText(p, e.detail.record));
-  },
-  notify(message: string) {
-    this.setData({ toast: message, expiresAt: this._db?.undo?.expiresAt || 0 });
-  },
   async undo() {
+    this.stopCelebration();
     try {
       await service().undo();
       this.setData({ toast: '' });

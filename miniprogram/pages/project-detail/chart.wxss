@@ -1,0 +1,122 @@
+/* Extracted by responsibility; import order preserves the original cascade and touch geometry. */
+.chart-card {
+  /* Fixed shared geometry prevents segment changes from moving the card bottom or following history. */
+  height: 462px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 24px;
+  padding: 17px 16px 14px;
+  margin-top: 16px;
+}
+.chart-card.single-metric {
+  /* With no secondary summary or tabs, one explicit gap keeps the total close to its visualization. */
+  margin-top: 24px;
+}
+.chart-mode {
+  flex-shrink: 0;
+  height: 36px;
+  box-sizing: border-box;
+  display: flex;
+  padding: 2px;
+  border-radius: 10px;
+  background: #eeeef3;
+  margin-bottom: 16px;
+}
+.chart-mode .mode-hit {
+  height: 44px;
+  flex: 1;
+  min-width: 0;
+  margin: -6px 0;
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+}
+.mode-pill {
+  width: 100%;
+  height: 32px;
+  line-height: 32px;
+  font-size: 13px;
+  border-radius: 8px;
+  color: #6b6b73;
+  text-align: center;
+  white-space: nowrap;
+}
+.mode-pill.active {
+  background: #fff;
+  color: #1c1c1e;
+  box-shadow: 0 1px 3px #00000013;
+  font-weight: 600;
+}
+.period-options {
+  display: flex;
+  height: 36px;
+  box-sizing: border-box;
+  background: #eeeef3;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 17px;
+}
+.period-options .period-hit {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  margin: -7px 0;
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.period-pill {
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: #6b6b73;
+  text-align: center;
+}
+.period-pill.active {
+  background: #fff;
+  color: #1c1c1e;
+  box-shadow: 0 1px 4px #00000013;
+  font-weight: 600;
+}
+.date-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  height: 32px;
+  margin-bottom: 5px;
+}
+.date-navigation > text {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b6b73;
+}
+.chart-card .date-navigation button {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* The visible navigation glyph stays 32px wide while the invisible touch surface reaches 44px. */
+.date-navigation button::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.date-navigation button[disabled] {
+  opacity: 0.4;
+}

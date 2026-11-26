@@ -2,8 +2,13 @@
 Component({
   properties: {
     title: { type: String, value: '' },
+    // Pages own the action; the navigation supplies a fixed, safe-area-aware leading button.
+    actionText: { type: String, value: '' },
+    actionDisabled: { type: Boolean, value: false },
     showBack: { type: Boolean, value: false },
     customBack: { type: Boolean, value: false },
+    // Editors use the prototype's visible Cancel label while retaining their draft-aware back handler.
+    backText: { type: String, value: '' },
   },
   data: { top: 0, height: 44, right: 96 },
   lifetimes: {
@@ -23,6 +28,10 @@ Component({
     },
   },
   methods: {
+    /** Action events never fall through to navigation or the page's back handler. */
+    leadingAction() {
+      if (!this.data.actionDisabled) this.triggerEvent('action');
+    },
     goBack() {
       // Editors may intercept only their own back button to preserve explicit save/cancel semantics.
       if (this.data.customBack) {

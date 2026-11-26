@@ -1,53 +1,49 @@
-/* All separators begin at the text column, protecting the icon gutter from visual clutter. */
+/* Sizes and hierarchy come from the approved editor; configuration still uses independent raw draft fields. */
 .editor {
-  padding-top: 8px;
+  padding-top: 0;
 }
 .preview {
-  height: 88px;
+  height: 89px;
+  box-sizing: border-box;
   border-radius: 20px;
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 22px;
-  font-size: 22px;
-  font-weight: 600;
+  gap: 13px;
+  padding: 17px 18px;
+  margin-bottom: 22px;
+  background: linear-gradient(120deg, var(--card-start), var(--card-end));
+}
+.preview-name {
+  display: block;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.4px;
   overflow-wrap: anywhere;
 }
-.purple {
-  background: linear-gradient(115deg, #7959cf, #6440ba);
-}
-.orange {
-  background: linear-gradient(115deg, #bf5028, #b74221);
-}
-.blue {
-  background: linear-gradient(115deg, #3b6bd1, #2d5dc6);
-}
-.teal {
-  background: linear-gradient(115deg, #087f79, #087c77);
-}
-.rose {
-  background: linear-gradient(115deg, #c44266, #b8385c);
+.preview-mode {
+  display: block;
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 6px;
 }
 .name-row {
-  padding: 4px 14px;
+  padding: 9px 14px;
+  min-height: 54px;
+  box-sizing: border-box;
 }
 .name-row input {
-  height: 48px;
+  height: 36px;
   width: 100%;
   font-size: 17px;
 }
-.colors,
-.icons {
-  display: flex;
+.colors {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 9.5px;
   gap: 4px;
-}
-.colors {
-  padding-top: 12px;
-  padding-bottom: 12px;
 }
 .colors .color-hit {
   width: 44px;
@@ -56,8 +52,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: none;
+  margin: 0 auto;
+  padding: 0;
 }
 .swatch {
+  /* A 32px disc plus the 40px selection ring fits inside the native button's 44px clipping box. */
+  position: relative;
+  flex-shrink: 0;
   height: 32px;
   width: 32px;
   border-radius: 50%;
@@ -65,12 +67,24 @@
   align-items: center;
   justify-content: center;
 }
-.swatch.chosen {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+.swatch.chosen::after {
+  /* An explicit circular border avoids platform-dependent outline geometry and never changes layout. */
+  content: '';
+  position: absolute;
+  inset: -4px;
+  box-sizing: border-box;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
 }
 .icons {
-  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 9px;
+  gap: 5px;
+  border-top: 1px solid #ededf2;
 }
 .icons .icon-hit {
   width: 44px;
@@ -78,23 +92,60 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 11px;
   background: none;
+  margin: 0 auto;
+  padding: 0;
 }
-.icon-hit.selected {
-  background: var(--accent);
+.icon-disc {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-disc.selected {
+  background: #f0edf8;
+}
+/* The disclosure belongs to the appearance card; opening it must not resemble a save or navigation action. */
+.appearance-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 0;
+  border-top: 1px solid #ededf2;
+  background: transparent;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.appearance-arrow {
+  display: flex;
+  transition: transform 180ms ease;
+}
+.appearance-arrow.expanded {
+  transform: rotate(180deg);
 }
 .heading-row {
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 56px;
+  min-height: 52px;
   padding: 0 14px;
   gap: 10px;
+}
+.heading-row.metric-heading {
+  min-height: 56px;
 }
 .heading-row > text {
   font-size: 16px;
   font-weight: 400;
+  line-height: 1.4;
   flex: 1;
 }
 .heading-row switch {
@@ -110,13 +161,13 @@
   left: 42px;
   right: 0;
   height: 1px;
-  background: var(--line);
+  background: #ededf2;
 }
 .parameter {
   position: relative;
   padding-left: 42px;
   padding-right: 14px;
-  min-height: 50px;
+  min-height: 52px;
   font-size: 14px;
 }
 .row {
@@ -126,7 +177,7 @@
   gap: 12px;
 }
 .parameter > text {
-  color: var(--secondary);
+  color: #6b6b73;
   flex-shrink: 0;
 }
 .parameter input {
@@ -134,13 +185,14 @@
   text-align: right;
   font-size: 14px;
   min-width: 0;
-  max-width: 160px;
-  color: var(--ink);
+  max-width: 190px;
+  color: #1c1c1e;
   background: none;
   border: 0;
+  font-variant-numeric: tabular-nums;
 }
 .parameter input[disabled] {
-  color: var(--secondary);
+  color: #6b6b73;
 }
 .range {
   display: flex;
@@ -148,26 +200,28 @@
   justify-content: flex-end;
   min-width: 0;
   flex: 1;
-  max-width: 180px;
-  gap: 0;
+  gap: 12px;
+}
+/* Prototype range inputs keep an additional 5px of vertical clearance on each side. */
+.parameter.range-row {
+  min-height: 62px;
 }
 .range input {
-  /* Natural digit widths keep the dash centered between values, with the complete group at the right edge. */
   min-width: 1ch;
-  max-width: calc((100% - 24px) / 2);
+  max-width: 90px;
   flex: 0 1 auto;
   text-align: right;
 }
 .range .dash {
-  width: 24px;
-  flex-shrink: 0;
+  width: 12px;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--secondary);
+  color: #6b6b73;
 }
 .compact {
-  gap: 4px;
+  gap: 6px;
 }
 .compact .segment-hit {
   width: 44px;
@@ -176,35 +230,79 @@
   gap: 6px;
 }
 .primary-options .segment-hit {
-  width: 54px;
+  width: 44px;
 }
 .segment-hit[disabled] {
-  opacity: 0.35;
+  opacity: 0.4;
 }
 .editor .save {
   margin-top: 26px;
+  margin-bottom: 15px;
   width: 100%;
+  min-height: 52px;
+  border-radius: 15px;
 }
-.editor .cancel {
-  width: 100%;
-  margin-top: 6px;
+/* Keep the retention notice readable above the action; narrow screens may wrap without clipping the disclosure. */
+.storage-notice {
+  margin-top: 20px;
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
 }
-
-/* Shared project accent and tabular digits make grouped controls read as one calm settings surface. */
-.parameter input {
-  font-variant-numeric: tabular-nums;
+.editor .storage-notice + .save {
+  margin-top: 10px;
 }
 .unit-value {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
   min-width: 0;
 }
 .unit-value input {
-  max-width: 120px;
+  max-width: 100px;
+}
+.unit-lock-note {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #6b6b73;
+  padding: 0 14px 12px;
 }
 .color-hit[disabled],
 .icon-hit[disabled] {
   opacity: 1;
+}
+
+/* The 28px visual options retain 44px hit targets, matching units without mixing their responsibilities. */
+.frequency-options {
+  gap: 4px;
+}
+.frequency-options .segment-hit {
+  width: 44px;
+}
+/* Selection settles inside the existing bounds, so the circular ring and touch targets cannot shift. */
+.icon-disc {
+  transition: background-color 160ms ease-out;
+}
+.swatch.chosen,
+.icon-disc.selected {
+  animation: appearance-select 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+@keyframes appearance-select {
+  from {
+    transform: scale(0.92);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .swatch.chosen,
+  .icon-disc.selected {
+    animation: none;
+  }
+  .icon-disc,
+  .appearance-arrow {
+    transition: none;
+  }
 }

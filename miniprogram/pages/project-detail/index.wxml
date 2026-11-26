@@ -1,151 +1,248 @@
-<!-- Full history uses the main page scroll; chart scope changes restore the five-row preview. -->
-<app-navigation title="{{project.name || '项目详情'}}" show-back bind:layout="navLayout" />
+<!-- Empty and selected-day copy must describe the actual record scope, independently of full-history expansion. -->
+<app-navigation
+  id="detail-navigation"
+  title="{{showNavTitle?project.name:''}}"
+  show-back
+  bind:layout="navLayout"
+/>
 <view class="page-content detail" style="--accent:{{color}}">
-  <view wx:if="{{loading}}" class="empty">正在读取记录…</view>
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
   <view wx:if="{{error}}" class="error" aria-role="alert">
     {{error}}
-    <button class="link" bindtap="load">重新读取</button>
+    <button class="link" bindtap="load">重试</button>
   </view>
   <block wx:if="{{project}}">
-    <view class="summary {{stackedSummary?'stacked':''}}">
-      <view wx:for="{{summaries}}" wx:key="id" class="summary-item {{index===0?'main':''}}">
-        <text class="summary-label">{{item.label}}</text>
-        <text class="summary-value {{item.text.length>18?'long':''}}">{{item.text}}</text>
-      </view>
+    <view class="detail-heading">
+      <view class="project-badge"><ui-icon name="{{project.icon}}" tone="white" size="24" /></view>
+      <text class="project-title">{{project.name}}</text>
+      <!-- This neutral badge explains the default scope without implying a completion target. -->
+      <text class="frequency-badge">{{frequencyLabel}}</text>
     </view>
-    <view class="surface chart-card">
-      <view class="metric-tabs" wx:if="{{metrics.length>1}}">
-        <button
-          wx:for="{{metrics}}"
-          wx:key="id"
-          data-id="{{item.id}}"
-          bindtap="metric"
-          class="metric-tab {{metric===item.id?'active':''}}"
-          aria-pressed="{{metric===item.id}}"
-          hover-class="pressed"
-        >
-          {{item.label}}
-        </button>
-      </view>
+    <view class="lifetime-caption">{{summaries[0].label}}</view>
+    <view class="lifetime-number {{summaries[0].number.length>12?'long':''}}">
+      <text>{{summaries[0].number}}</text>
+      <text class="lifetime-unit">{{summaries[0].unit}}</text>
+    </view>
+    <!-- Visible metrics include historical values from disabled types; only a genuine single-metric detail drops this row. -->
+    <view wx:if="{{metrics.length>1}}" class="lifetime-secondary">{{secondarySummary}}</view>
+    <view class="metric-tabs" wx:if="{{metrics.length>1}}">
+      <button
+        wx:for="{{metrics}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="metric"
+        class="metric-tab {{metric===item.id?'active':''}}"
+        aria-pressed="{{metric===item.id}}"
+        hover-class="pressed"
+      >
+        <text>{{item.label}}</text>
+      </button>
+    </view>
+    <view class="chart-card {{metrics.length===1?'single-metric':''}}">
+      <!-- Lead with long-term accumulation, then period distribution and date-based review. -->
       <view class="chart-mode">
         <button
-          hover-class="pressed"
           class="mode-hit"
           data-mode="cumulative"
           bindtap="mode"
           aria-pressed="{{chartMode==='cumulative'}}"
+          hover-class="pressed"
         >
           <text class="mode-pill {{chartMode==='cumulative'?'active':''}}">累计</text>
         </button>
         <button
-          hover-class="pressed"
           class="mode-hit"
           data-mode="distribution"
           bindtap="mode"
           aria-pressed="{{chartMode==='distribution'}}"
+          hover-class="pressed"
         >
           <text class="mode-pill {{chartMode==='distribution'?'active':''}}">分布</text>
         </button>
-      </view>
-      <view class="period-options">
         <button
-          wx:for="{{periods}}"
-          wx:key="id"
-          hover-class="pressed"
-          class="period-hit"
-          bindtap="period"
-          data-id="{{item.id}}"
-          aria-pressed="{{period===item.id}}"
-        >
-          <text class="period-pill {{period===item.id?'active':''}}">{{item.label}}</text>
-        </button>
-      </view>
-      <view class="date-navigation">
-        <button
-          wx:if="{{period!=='all'}}"
-          bindtap="previous"
-          aria-label="上一周期"
+          class="mode-hit"
+          data-mode="calendar"
+          bindtap="mode"
+          aria-pressed="{{chartMode==='calendar'}}"
           hover-class="pressed"
         >
-          <view class="previous-icon"><ui-icon name="chevron" tone="muted" size="16" /></view>
-        </button>
-        <text>{{periodLabel}}</text>
-        <button
-          wx:if="{{period!=='all'}}"
-          bindtap="next"
-          disabled="{{offset>=0}}"
-          aria-label="下一周期"
-          hover-class="pressed"
-        >
-          <ui-icon name="chevron" tone="muted" size="16" />
+          <text class="mode-pill {{chartMode==='calendar'?'active':''}}">日历</text>
         </button>
       </view>
-      <practice-chart
-        points="{{points}}"
-        mode="{{chartMode}}"
-        factor="{{factor}}"
-        unit="{{unit}}"
-        color="{{color}}"
-        baseline="{{baseline}}"
-        is-time="{{metric === 'durationSeconds'}}"
-        obscured="{{sheetOpen}}"
-      />
+      <!-- Calendar cells are ordinary views, so page scrolling and native sheets never compete with a canvas layer. -->
+      <view wx:if="{{chartMode==='calendar'}}" class="statistics-body calendar-body">
+        <view class="date-navigation calendar-navigation">
+          <button
+            bindtap="calendarMonth"
+            data-delta="-1"
+            disabled="{{!calendarPrevious}}"
+            aria-label="上个月"
+            hover-class="pressed"
+          >
+            <ui-icon name="back" tone="{{project.color}}" size="16" />
+          </button>
+          <text>{{calendarLabel}}</text>
+          <button
+            bindtap="calendarMonth"
+            data-delta="1"
+            disabled="{{!calendarNext}}"
+            aria-label="下个月"
+            hover-class="pressed"
+          >
+            <ui-icon name="chevron" tone="{{project.color}}" size="16" />
+          </button>
+        </view>
+        <view class="heat-weekdays" aria-hidden="true">
+          <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+        </view>
+        <view
+          class="heat-grid"
+          aria-role="group"
+          aria-label="每日{{metric==='quantity'?'数量':'时间'}}记录日历"
+        >
+          <button
+            wx:for="{{calendarCells}}"
+            wx:key="date"
+            class="heat-day {{item.level===4?'strong':''}} {{item.disabled?'unavailable':''}}"
+            data-date="{{item.date}}"
+            bindtap="calendarDay"
+            disabled="{{item.disabled}}"
+            aria-hidden="{{!item.inside}}"
+            aria-pressed="{{calendarDate===item.date}}"
+            aria-label="{{item.future?item.date+'，未来日期':item.reading}}"
+            hover-class="pressed"
+          >
+            <view
+              class="heat-fill"
+              style="background:{{item.disabled?'transparent':item.background}};border-color:{{item.today?color:'transparent'}}"
+            ></view>
+            <view wx:if="{{calendarDate===item.date}}" class="heat-selection"></view>
+            <text>{{item.inside?(item.missing?'—':item.day):''}}</text>
+          </button>
+        </view>
+        <!-- Readout and legend share one baseline; the reserved footer keeps all three cards the same height. -->
+        <view class="calendar-footer">
+          <view class="calendar-reading" aria-role="status">{{calendarReading}}</view>
+          <view class="heat-legend">
+            <text>少</text>
+            <view
+              wx:for="{{calendarLegend}}"
+              wx:key="level"
+              class="heat-swatch"
+              style="background:{{item.color}}"
+              aria-label="{{item.label}}"
+            ></view>
+            <text>多</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="statistics-body standard-body">
+        <view class="period-options">
+          <button
+            wx:for="{{periods}}"
+            wx:key="id"
+            class="period-hit"
+            bindtap="period"
+            data-id="{{item.id}}"
+            aria-pressed="{{period===item.id}}"
+            hover-class="pressed"
+          >
+            <text class="period-pill {{period===item.id?'active':''}}">{{item.label}}</text>
+          </button>
+        </view>
+        <view class="date-navigation">
+          <button
+            bindtap="previous"
+            disabled="{{period==='all'}}"
+            aria-label="{{period==='week'?'上一周':period==='month'?'上个月':'上一年'}}"
+            hover-class="pressed"
+          >
+            <ui-icon name="back" tone="{{project.color}}" size="16" />
+          </button>
+          <text>{{periodLabel}}</text>
+          <button
+            bindtap="next"
+            disabled="{{period==='all' || offset>=0}}"
+            aria-label="{{period==='week'?'下一周':period==='month'?'下个月':'下一年'}}"
+            hover-class="pressed"
+          >
+            <ui-icon name="chevron" tone="{{project.color}}" size="16" />
+          </button>
+        </view>
+        <practice-chart
+          id="practice-chart"
+          class="standard-chart"
+          points="{{points}}"
+          mode="{{chartMode}}"
+          factor="{{factor}}"
+          unit="{{unit}}"
+          color="{{color}}"
+          baseline="{{baseline}}"
+          is-time="{{metric === 'durationSeconds'}}"
+          obscured="{{sheetOpen}}"
+          focus-baseline="{{period!=='all'}}"
+        />
+      </view>
     </view>
     <view
       id="record-section"
       class="record-heading {{expanded?'sticky':''}}"
       style="top:{{navHeight}}px"
     >
-      <!-- Keep the native text and count inline; source newlines would add an unintended second row. -->
+      <!-- Native text preserves source newlines; a single-line label keeps both header baselines aligned. -->
       <!-- prettier-ignore -->
-      <text>打卡记录<text class="record-count">{{expanded?historyCount:selectedCount}}</text></text>
+      <text class="record-heading-title">{{chartMode==='calendar' && calendarDate && !expanded?calendarDateLabel+'的记录':'打卡记录'}}</text>
       <button
+        wx:if="{{chartMode==='calendar' && calendarDate && !expanded}}"
         class="link"
-        wx:if="{{historyCount && !expanded}}"
+        bindtap="calendarClear"
+        hover-class="pressed"
+      >
+        <text>查看本月</text>
+      </button>
+      <button wx:if="{{expanded}}" class="link" bindtap="collapse" hover-class="pressed">
+        <text>收起</text>
+      </button>
+    </view>
+    <view class="records">
+      <view wx:if="{{!records.length}}" class="empty">
+        {{expanded?'暂无记录':chartMode==='calendar' &&
+        calendarDate?'当天暂无记录':'所选时段暂无记录'}}
+      </view>
+      <button
+        wx:for="{{records}}"
+        wx:key="id"
+        class="record-row"
+        bindtap="editRecord"
+        bindlongpress="recordMenu"
+        data-id="{{item.id}}"
+        hover-class="pressed"
+        aria-label="编辑{{item.date}}记录，{{item.value}}"
+      >
+        <view class="record-content">
+          <view class="record-value">{{item.value}}</view>
+          <view class="record-meta">{{item.meta}}</view>
+        </view>
+        <ui-icon name="chevron" tone="muted" size="15" />
+      </button>
+      <button
+        wx:if="{{!expanded && (historyCount>5 || selectedCount!==historyCount)}}"
+        class="show-all"
         bindtap="expand"
         hover-class="pressed"
       >
-        查看全部
+        查看全部记录
       </button>
-      <button class="link" wx:if="{{expanded}}" bindtap="collapse" hover-class="pressed">
-        收起
-      </button>
-    </view>
-    <view class="surface records">
-      <view wx:if="{{!records.length}}" class="empty">
-        {{expanded?'还没有记录':'本期还没有记录'}}
-      </view>
-      <view wx:for="{{records}}" wx:key="id" class="record-row">
-        <button
-          class="record-main"
-          bindtap="editRecord"
-          data-id="{{item.id}}"
-          hover-class="pressed"
-          aria-label="编辑{{item.date}}记录，{{item.value}}"
-        >
-          <view class="record-top">
-            <text class="record-date">{{item.date}}</text>
-            <text class="record-value">{{item.value}}</text>
-          </view>
-          <view wx:if="{{item.note}}" class="record-note">{{item.note}}</view>
-        </button>
-        <button
-          class="record-menu"
-          bindtap="recordMenu"
-          data-id="{{item.id}}"
-          aria-label="编辑或删除记录"
-          hover-class="pressed"
-        >
-          <ui-icon name="more" tone="muted" size="20" />
-        </button>
-      </view>
-      <button wx:if="{{expanded&&hasMore}}" class="link more" bindtap="more" hover-class="pressed">
+      <button wx:if="{{expanded && hasMore}}" class="show-all" bindtap="more" hover-class="pressed">
         加载更多
       </button>
-      <view wx:if="{{expanded&&!hasMore&&records.length}}" class="end">全部已加载</view>
+      <view wx:if="{{expanded && !hasMore && records.length}}" class="end">已显示全部记录</view>
     </view>
-    <button class="surface setting-button" bindtap="settings" hover-class="pressed">
-      <ui-icon name="settings" />
+    <view class="record-count">
+      {{expanded?'已显示 '+records.length+' / ':''}}共 {{expanded?historyCount:selectedCount}}
+      条记录
+    </view>
+    <button class="setting-button" bindtap="settings" hover-class="pressed">
       <text>项目设置</text>
       <ui-icon name="chevron" tone="muted" size="16" />
     </button>
@@ -156,9 +253,15 @@
       loading="{{deleting}}"
       hover-class="pressed"
     >
-      删除本项目
+      删除项目
     </button>
   </block>
 </view>
-<record-sheet id="record-sheet" bind:saved="saved" bind:closed="sheetClosed" />
-<undo-toast message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />
+<record-sheet
+  id="record-sheet"
+  bind:saved="saved"
+  bind:closed="sheetClosed"
+  bind:deleted="deleted"
+/>
+<!-- Share the same stable component anchor as home for transient undo-state verification. -->
+<undo-toast id="undo-toast" message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />

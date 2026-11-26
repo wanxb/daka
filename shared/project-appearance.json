@@ -1,0 +1,160 @@
+{
+  "colors": [
+    {
+      "id": "purple",
+      "label": "紫色",
+      "start": "#6745c6",
+      "end": "#785bd5"
+    },
+    {
+      "id": "orange",
+      "label": "暖橙",
+      "start": "#bc421c",
+      "end": "#ca4f27"
+    },
+    {
+      "id": "blue",
+      "label": "蓝色",
+      "start": "#285cce",
+      "end": "#3b70d5"
+    },
+    {
+      "id": "teal",
+      "label": "青绿",
+      "start": "#087b75",
+      "end": "#157e78"
+    },
+    {
+      "id": "rose",
+      "label": "玫红",
+      "start": "#bd3457",
+      "end": "#cb4261"
+    },
+    {
+      "id": "red",
+      "label": "红色",
+      "start": "#b52e35",
+      "end": "#bd3841"
+    },
+    {
+      "id": "green",
+      "label": "草绿",
+      "start": "#387641",
+      "end": "#407d49"
+    },
+    {
+      "id": "cyan",
+      "label": "湖蓝",
+      "start": "#08748c",
+      "end": "#117b92"
+    },
+    {
+      "id": "indigo",
+      "label": "靛蓝",
+      "start": "#4553b8",
+      "end": "#5360c1"
+    },
+    {
+      "id": "brown",
+      "label": "棕色",
+      "start": "#82543b",
+      "end": "#8c5f46"
+    }
+  ],
+  "projectIcons": [
+    {
+      "id": "book",
+      "label": "阅读",
+      "source": "book-open"
+    },
+    {
+      "id": "study",
+      "label": "学习",
+      "source": "graduation-cap"
+    },
+    {
+      "id": "dumbbell",
+      "label": "健身",
+      "source": "barbell"
+    },
+    {
+      "id": "music",
+      "label": "音乐",
+      "source": "music-notes"
+    },
+    {
+      "id": "target",
+      "label": "目标",
+      "source": "target"
+    },
+    {
+      "id": "run",
+      "label": "跑步",
+      "source": "sneaker"
+    },
+    {
+      "id": "sleep",
+      "label": "睡眠",
+      "source": "moon-stars"
+    },
+    {
+      "id": "bicycle",
+      "label": "骑行",
+      "source": "bicycle"
+    },
+    {
+      "id": "swim",
+      "label": "游泳",
+      "source": "waves"
+    },
+    {
+      "id": "basketball",
+      "label": "篮球",
+      "source": "basketball"
+    },
+    {
+      "id": "writing",
+      "label": "写作",
+      "source": "pencil-line"
+    },
+    {
+      "id": "language",
+      "label": "语言学习",
+      "source": "translate"
+    },
+    {
+      "id": "meditation",
+      "label": "冥想",
+      "source": "flower-lotus"
+    },
+    {
+      "id": "water",
+      "label": "饮水",
+      "source": "drop"
+    },
+    {
+      "id": "art",
+      "label": "绘画",
+      "source": "palette"
+    }
+  ],
+  "controls": {
+    "plus": "plus",
+    "chevron": "caret-right",
+    "back": "caret-left",
+    "close": "x",
+    "search": "magnifying-glass",
+    "check": "check",
+    "clock": "clock",
+    "quantity": "hash",
+    "chart": "chart-bar",
+    "bolt": "lightning",
+    "edit": "pencil-simple",
+    "expand": "caret-down"
+  },
+  "projectIconAliases": {
+    "rope": "run",
+    "walk": "run",
+    "piano": "music"
+  }
+}

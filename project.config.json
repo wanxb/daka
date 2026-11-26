@@ -1,6 +1,6 @@
 {
-  "description": "时间与数量记录；原生 WebView 本地开发骨架",
-  "projectname": "daka",
+  "description": "北极星打卡：时间与数量记录小程序",
+  "projectname": "北极星打卡",
   "appid": "wx181a7d368ae8a4c8",
   "compileType": "miniprogram",
   "miniprogramRoot": "miniprogram/",
@@ -13,7 +13,29 @@
     "minifyWXSS": true,
     "minifyWXML": true,
     "useCompilerPlugins": ["typescript"],
-    "packNpmManually": false
+    "packNpmManually": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmRelationList": [],
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
-  "packOptions": { "ignore": [{ "type": "suffix", "value": ".md" }], "include": [] }
+  "packOptions": {
+    "ignore": [
+      {
+        "value": ".md",
+        "type": "suffix"
+      }
+    ],
+    "include": []
+  },
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
 }

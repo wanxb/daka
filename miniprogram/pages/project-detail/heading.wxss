@@ -1,0 +1,91 @@
+/* Extracted by responsibility; import order preserves the original cascade and touch geometry. */
+/* Match prototype hierarchy: badge, primary total, quiet secondary, underlined metric tabs and inset segmented controls. */
+.detail {
+  padding-top: 0;
+}
+.detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 9px 0 23px;
+}
+.project-badge {
+  height: 42px;
+  width: 42px;
+  flex: none;
+  border-radius: 13px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project-title {
+  font-size: 29px;
+  letter-spacing: -1px;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.lifetime-caption {
+  font-size: 12px;
+  color: #6b6b73;
+  margin-bottom: 5px;
+}
+.lifetime-number {
+  font-size: 39px;
+  line-height: 1.15;
+  letter-spacing: -1.8px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.lifetime-number.long {
+  font-size: 30px;
+}
+.lifetime-unit {
+  /* Full unit names stay subordinate to the total while retaining a clear four-pixel separation. */
+  font-size: 16px;
+  letter-spacing: 0;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.lifetime-secondary {
+  /* Only two visible metrics render this row, so single-metric details reserve no secondary-summary space. */
+  min-height: 20px;
+  font-size: 14px;
+  color: #6b6b73;
+  margin: 9px 0 24px;
+}
+.metric-tabs {
+  display: flex;
+  gap: 20px;
+  height: 36px;
+  margin: 18px 0 14px;
+}
+.metric-tabs .metric-tab {
+  width: auto;
+  min-width: 30px;
+  height: 44px;
+  margin: -4px 0 0;
+  padding: 0 0 6px;
+  background: none;
+  color: #6b6b73;
+  font-size: 15px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.metric-tab.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+.metric-tab.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 2px;
+  background: var(--accent);
+}

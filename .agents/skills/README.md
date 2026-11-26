@@ -11,8 +11,11 @@
 | CloudBase 基础依赖 | `cloudbase-platform` | 同一腾讯云仓库，包含开发及部署协议引用 |
 | UI/UX Pro Max | `ui-ux-pro-max` | 从本机已安装的 `C:/Users/Administrator/.codex/skills/ui-ux-pro-max` 完整复制；保留现有版本及数据、脚本 |
 | Anthropic 前端设计 | `frontend-design` | https://github.com/anthropics/skills/tree/main/skills/frontend-design |
+| 官网精修与评审 | `impeccable` | https://github.com/pbakaus/impeccable/tree/main/.agents/skills/impeccable ，2026-11-26安装 |
+| 品牌官网设计 | `design-taste-frontend` | https://github.com/leonxlnx/taste-skill/tree/main/skills/taste-skill ，2026-11-26安装；其脚本要求Node 22+ |
+| 落地页文案 | `copywriting` | https://github.com/coreyhaines31/marketingskills/tree/main/skills/copywriting ，2026-11-26安装 |
 
-共 12 个顶层技能目录；微信开发者工具包另带 9 个场景子技能。
+共 15 个顶层技能目录；微信开发者工具包另带 9 个场景子技能。
 
 ## 使用约定
 

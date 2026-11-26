@@ -9,7 +9,11 @@ const assets = new Map([
   ['/index.html', 'index.html'],
   ['/board.html', 'board.html'],
   ['/app.js', 'app.js'],
+  ['/appearance.js', 'appearance.js'],
   ['/styles.css', 'styles.css'],
+  // Only the selected local particle engine is exposed; arbitrary project paths remain inaccessible.
+  ['/confetti-review.js', 'confetti-review.js'],
+  ['/vendor/tsparticles-confetti-4.6.0.min.js', 'vendor/tsparticles-confetti-4.6.0.min.js'],
 ]);
 const clients = new Set();
 const reload =

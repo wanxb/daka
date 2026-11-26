@@ -38,6 +38,55 @@
 .undo::after {
   border: 0;
 }
+/* Executing undo disables repeat taps; override style:v2's white disabled surface without losing that guard. */
+.toast .undo[disabled] {
+  background: transparent;
+  color: #fff;
+  opacity: 0.65;
+}
+/* A compact visible frame stays inside the transparent 44px target; it must not enlarge the toast. */
+.toast .undo {
+  position: relative;
+  isolation: isolate;
+  min-width: 52px;
+  padding: 0 10px;
+  border-radius: 8px;
+}
+.undo::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 8px 2px;
+  border: 1px solid #ffffff55;
+  border-radius: 7px;
+  background: #ffffff16;
+  pointer-events: none;
+}
 .pressed {
   opacity: 0.6;
+}
+/* Confirmation appears only after persistence; CSS never extends the authoritative undo deadline. */
+.toast {
+  animation: confirmation-in 220ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.undo {
+  transition: opacity 120ms ease-out;
+}
+@keyframes confirmation-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+  .undo {
+    transition: none;
+  }
 }

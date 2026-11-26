@@ -1,17 +1,33 @@
-/* The sheet keeps each metric at 80px; the native slider handles motion without frame-by-frame layout. */
+/* Components isolate styles, so disclosure rules must be imported here as well as on pages. */
+@import '../../motion.wxss';
+/* Match the approved 398px dual-metric sheet; native controls retain 44px hit areas and safe-area clearance. */
 .sheet-scroll {
-  max-height: 82vh;
+  max-height: 91vh;
   background: #fafafd;
-  border-radius: 26px 26px 0 0;
+  border-radius: 30px 30px 0 0;
 }
 .sheet {
-  padding: 0 22px calc(22px + env(safe-area-inset-bottom));
+  padding: 0 22px max(31px, env(safe-area-inset-bottom));
   color: #1c1c1e;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.sheet button {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-weight: 400;
+}
+.sheet button::after {
+  border: 0;
 }
 .handle {
   height: 5px;
   width: 34px;
-  border-radius: 3px;
+  border-radius: 4px;
   background: #d0cfd8;
   margin: 9px auto 12px;
 }
@@ -19,104 +35,157 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
+  height: 44px;
+  margin-bottom: 12px;
 }
 .title {
   font-size: 23px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
   overflow-wrap: anywhere;
-}
-.close {
-  width: 44px;
-  height: 44px;
-  background: none;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-.close-disc {
-  border-radius: 50%;
-  background: #eaeaf0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.close::after,
-.value::after,
-.save::after,
-.tool-button::after,
-.note-toggle::after,
-.clear-time::after {
-  border: 0;
 }
 .metric {
   min-height: 80px;
+  margin: 0 0 10px;
 }
 .field-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 36px;
-  font-size: 14px;
-  gap: 8px;
+  height: 36px;
+  gap: 12px;
 }
-.value {
-  background: none;
-  color: var(--accent);
-  font-size: 22px;
+.field-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #696271;
+  flex: none;
+}
+.field-top .value {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  width: auto;
+  min-height: 44px;
+  min-width: 44px;
+  flex: none;
+  margin-left: auto;
+  color: #1c1c1e;
+  white-space: nowrap;
   line-height: 36px;
-  min-height: 36px;
-  margin: 0;
-  padding: 0;
-  text-align: right;
+}
+.number {
+  font-size: 25px;
   font-weight: 600;
+  letter-spacing: -0.6px;
+  font-variant-numeric: tabular-nums;
+}
+.unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b6b73;
 }
 .value.is-disabled {
-  background: none;
-  color: #696971;
+  color: #9c95a4;
+}
+.slider-row {
+  position: relative;
+  height: 44px;
+}
+/* Painting a 4px rail avoids platform-dependent native track thickness without replacing gesture handling. */
+.slider-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 23px;
+  height: 4px;
+  border-radius: 4px;
+  background: #dedbe5;
+  pointer-events: none;
+  overflow: hidden;
+}
+.slider-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+}
+.slider-row.is-disabled {
+  opacity: 0.45;
+}
+.slider {
+  margin: 0;
+  height: 44px;
+  /* The native rail sits near the host's top; align it to the prototype's centered 44px touch row. */
+  transform: translateY(16px);
+}
+.exact-value {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 }
 .exact {
   flex: 1;
   min-width: 0;
-  text-align: right;
-  color: var(--accent);
-  font-size: 22px;
-  height: 36px;
-}
-.unit {
-  font-size: 14px;
-  color: #696971;
-}
-.slider {
-  margin: 0 8px;
   height: 44px;
+  text-align: right;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  color: #1c1c1e;
+  background: none;
+  border: 0;
+  font-variant-numeric: tabular-nums;
 }
-.tools,
-.date-top {
+.tools {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   min-height: 44px;
 }
-.tool-button,
-.note-toggle {
-  background: none;
-  color: #696971;
-  font-size: 13px;
+.sheet .note-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  width: auto;
+  flex: 1;
+  min-width: 44px;
   min-height: 44px;
-  line-height: 44px;
-  padding: 0;
-  margin: 0;
+  color: #8c8495;
+  font-size: 12px;
+  text-align: left;
 }
-.date-top {
+.sheet .date-toggle {
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  flex: none;
+  color: #6b6b73;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.date-chevron {
+  display: flex;
+  transform: rotate(90deg);
+}
+.date-chevron.open {
+  transform: rotate(270deg);
+}
+.date-fields {
+  margin-bottom: 12px;
 }
 .date-row {
   display: flex;
@@ -125,7 +194,7 @@
   min-height: 48px;
   border-top: 1px solid #e7e6ed;
   font-size: 14px;
-  gap: 16px;
+  gap: 15px;
 }
 .date-value {
   color: var(--accent);
@@ -136,139 +205,98 @@
 }
 .time-picker {
   flex: 1;
+  min-width: 0;
 }
-.clear-time {
+.sheet .clear-time {
   width: 44px;
+  min-width: 44px;
   height: 48px;
-  background: none;
+  flex: 0 0 44px;
   border-top: 1px solid #e7e6ed;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
-  padding: 0;
 }
-.note-toggle {
-  display: block;
-  text-align: left;
+.sheet .expanded-note {
   width: 100%;
 }
 .note {
-  background: #fff;
+  /* Keep the sheet stable during disclosure and typing; longer notes scroll inside the native input. */
+  display: block;
   width: 100%;
-  min-height: 68px;
+  height: 68px;
   padding: 12px;
+  border: 1px solid #e0dfe8;
   border-radius: 12px;
+  background: #fff;
   box-sizing: border-box;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1c1c1e;
+  margin-bottom: 4px;
 }
-.save {
+.note-count {
+  color: #8c8495;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: right;
+  margin: 0 2px 8px;
+}
+.note-count.at-limit {
+  color: #6b6b73;
+}
+.sheet .save {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  margin-top: 13px;
+  border-radius: 14px;
   background: var(--accent);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 14px;
-  min-height: 48px;
-  line-height: 24px;
-  padding: 12px;
-  margin: 12px 0 0;
+  line-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.save.is-disabled {
+.sheet .save.is-disabled {
   opacity: 0.5;
   background: var(--accent);
   color: #fff;
 }
-.error {
-  font-size: 13px;
-  color: #c52e3d;
+.sheet .delete-record {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-height: 44px;
+  margin-top: 7px;
+  color: #b42318;
+  font-size: 14px;
+  line-height: 44px;
+}
+.error,
+.field-error {
+  font-size: 12px;
   line-height: 1.5;
-  padding: 8px 0;
+  color: #b42318;
+  margin: 10px 0 0;
 }
 .pressed {
   opacity: 0.65;
 }
-
-/* A numeric button expands only its transparent hit box; the compact 80px rhythm stays intact. */
-.value {
-  overflow: visible;
-  position: relative;
+/* Native page-container owns entry/exit; only its internal controls receive lightweight feedback. */
+.sheet button {
+  transition: opacity 120ms ease-out;
 }
-.value::before {
-  content: '';
-  position: absolute;
-  left: -8px;
-  right: -8px;
-  top: -4px;
-  bottom: -4px;
+.date-chevron {
+  transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.exact {
-  min-height: 36px;
-  font-variant-numeric: tabular-nums;
-}
-.field-error {
-  font-size: 12px;
-  color: #c52e3d;
-  line-height: 1.5;
-  padding: 0 0 8px;
-}
-
-/* style:v2 gives native buttons a default width; explicit sizing keeps this sheet's edge alignment stable. */
-.field-top .value {
-  width: auto;
-  min-width: 44px;
-  flex: none;
-  margin-left: auto;
-  margin-right: 0;
-  text-align: right;
-}
-.tools .tool-button,
-.date-top .tool-button {
-  width: auto;
-  min-width: 44px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-.tools .tool-button {
-  /* Native v2 buttons center children with flex; text-align alone cannot align their labels. */
-  flex: 1;
-  width: 50%;
-  text-align: left;
-}
-.tools .tool-button:last-child,
-.date-top .tool-button {
-  justify-content: flex-end;
-  text-align: right;
-}
-.date-top .tool-button {
-  width: 100%;
-}
-.sheet .note-toggle {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-}
-.sheet .close {
-  width: 44px;
-  min-width: 44px;
-  padding: 0;
-  margin: 0;
-}
-.sheet .clear-time {
-  /* Keep the native clear button from taking 184px away from the adjacent time picker. */
-  width: 44px;
-  min-width: 44px;
-  flex: 0 0 44px;
-  padding: 0;
-  margin: 0;
-}
-.sheet .save {
-  width: 100%;
-  display: block;
+@media (prefers-reduced-motion: reduce) {
+  .sheet button,
+  .date-chevron {
+    transition: none;
+  }
 }

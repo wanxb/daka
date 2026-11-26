@@ -1,10 +1,30 @@
-<!-- Equal side reservations keep the title clear of WeChat's system capsule. -->
-<view style="padding-top: {{top}}px;">
+<!-- The opaque fixed surface protects navigation; the spacer preserves page-flow geometry. -->
+<view class="navigation-spacer" style="height:{{top+height}}px;" />
+<view class="navigation-surface" style="padding-top: {{top}}px;">
   <view
     class="navigation"
     style="height: {{height}}px; padding-right: {{right}}px; padding-left: {{right}}px;"
   >
-    <button wx:if="{{showBack}}" class="back" bindtap="goBack" aria-label="返回">‹</button>
+    <!-- The visual pill sits inside a 44px target without adding another row below the navigation. -->
+    <button
+      wx:if="{{actionText}}"
+      class="leading-action"
+      bindtap="leadingAction"
+      disabled="{{actionDisabled}}"
+      aria-label="{{actionText}}"
+      hover-class="action-pressed"
+    >
+      <text>{{actionText}}</text>
+    </button>
+    <button
+      wx:elif="{{showBack}}"
+      class="back"
+      bindtap="goBack"
+      aria-label="{{backText || '返回'}}"
+    >
+      <ui-icon name="back" tone="navigation" size="22" />
+      <text wx:if="{{backText}}">{{backText}}</text>
+    </button>
     <text class="title">{{title}}</text>
   </view>
 </view>

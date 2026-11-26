@@ -1,14 +1,18 @@
+/* Shared generated stops cover every project theme without per-page palette drift. */
+@import 'appearance.wxss';
+@import 'motion.wxss';
 /* System tokens follow the approved light iPhone direction; the first release has no dark theme. */
 page {
   --ink: #1c1c1e;
-  --secondary: #696971;
+  --secondary: #6b6b73;
   --accent: #6745c6;
   --surface: #fff;
-  --line: #ededf2;
-  --danger: #c52e3d;
+  --line: #e6e6ec;
+  --danger: #b42318;
   background: #f2f2f7;
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 16px;
   line-height: 1.45;
 }
@@ -30,7 +34,7 @@ textarea {
 .page-content {
   max-width: 680px;
   margin: 0 auto;
-  padding: 12px 20px calc(40px + env(safe-area-inset-bottom));
+  padding: 0 16px max(36px, env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 .pressed {
@@ -40,13 +44,13 @@ textarea {
   color: var(--secondary);
 }
 .section-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--secondary);
-  margin: 24px 14px 8px;
+  margin: 22px 5px 9px;
 }
 .surface {
   background: var(--surface);
-  border-radius: 16px;
+  border-radius: 17px;
   overflow: hidden;
 }
 .error {
@@ -111,11 +115,26 @@ textarea {
   color: var(--secondary);
   background: #f0eef6;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   padding: 0 8px;
   box-sizing: border-box;
 }
 .segment.selected {
   color: #fff;
   background: var(--accent);
+}
+/* Paint-only feedback preserves native hit targets and avoids interfering with card drag transforms. */
+button {
+  transition: opacity 120ms ease-out;
+}
+.segment {
+  transition:
+    background-color 160ms ease-out,
+    color 160ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .segment {
+    transition: none;
+  }
 }
