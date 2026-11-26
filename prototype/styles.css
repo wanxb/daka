@@ -318,3 +318,6 @@ body.embedded{padding:0;display:block;background:transparent}.embedded .review-p
 
 /* The website statistics preview is a fixed viewport: chart controls stay live, while scrolling and back navigation do not expose another screen. */
 body.statistics-preview{overflow:hidden}.statistics-preview .screen{overflow:hidden;overflow:clip;overscroll-behavior:contain}.statistics-preview .header-back:disabled{cursor:default;opacity:.35}
+
+/* Match the mini-program's neutral disabled action without fading the surrounding project configuration. */
+.editor-save:disabled{background:#e5e5ea;color:#8e8e93;opacity:1;cursor:default}

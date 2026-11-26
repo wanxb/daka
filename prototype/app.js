@@ -1016,8 +1016,8 @@
 
   function updateEditorSave() {
     const button = document.querySelector(".editor-save");
-    // Incomplete forms use the action to reach missing input; real creation still requires a valid candidate.
-    if (button && state.editor) button.disabled = false;
+    // Mirror the native page: either metric restores the action; incomplete fields still use its focus guidance.
+    if (button && state.editor) button.disabled = state.editor.mode === "none";
   }
 
   function focusEditorRequired() {

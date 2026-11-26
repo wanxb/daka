@@ -332,12 +332,12 @@
     <view wx:if="{{!editing}}" class="storage-notice">
       数据仅保存在本机，不支持换机同步。清除小程序数据会丢失记录。
     </view>
-    <!-- Available actions guide incomplete forms to the relevant input; only busy storage disables interaction. -->
+    <!-- No metric means there is nothing to record; enabling either metric restores the action without discarding its draft. -->
     <button
       class="primary save"
       bindtap="save"
       loading="{{busy}}"
-      disabled="{{busy}}"
+      disabled="{{busy || (!form.timeEnabled && !form.quantityEnabled)}}"
       hover-class="pressed"
     >
       {{editing?'保存设置':'创建打卡'}}

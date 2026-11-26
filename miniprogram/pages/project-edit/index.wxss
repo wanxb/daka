@@ -242,6 +242,12 @@
   min-height: 52px;
   border-radius: 15px;
 }
+/* A neutral disabled action stays distinct from the chosen project color, including orange and pale palettes. */
+.editor .save[disabled] {
+  background: #e5e5ea;
+  color: #8e8e93;
+  opacity: 1;
+}
 /* Keep the retention notice readable above the action; narrow screens may wrap without clipping the disclosure. */
 .storage-notice {
   margin-top: 20px;
