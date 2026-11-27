@@ -16,6 +16,8 @@ const assets = new Map([
   ['/share-preview.css', 'share-preview.css'],
   // Only the official resized brand PNG is exposed as a binary asset.
   ['/brand.png', 'brand.png'],
+  // Serve only this supplied official code; preserve its encoded JPEG bytes.
+  ['/miniprogram-code.jpg', 'miniprogram-code.jpg'],
   // Only the selected local particle engine is exposed; arbitrary project paths remain inaccessible.
   ['/confetti-review.js', 'confetti-review.js'],
   ['/vendor/tsparticles-confetti-4.6.0.min.js', 'vendor/tsparticles-confetti-4.6.0.min.js'],
@@ -47,7 +49,7 @@ const server = createServer((request, response) => {
     response.end('Not found');
     return;
   }
-  readFile(root + asset, asset.endsWith('.png') ? null : 'utf8', (error, content) => {
+  readFile(root + asset, /\.(png|jpg)$/.test(asset) ? null : 'utf8', (error, content) => {
     if (error) {
       response.writeHead(500);
       response.end('Unable to read prototype');
@@ -55,13 +57,15 @@ const server = createServer((request, response) => {
     }
     const html = asset.endsWith('.html');
     response.writeHead(200, {
-      'Content-Type': asset.endsWith('.png')
-        ? 'image/png'
-        : html
-          ? 'text/html; charset=utf-8'
-          : asset.endsWith('.css')
-            ? 'text/css; charset=utf-8'
-            : 'text/javascript; charset=utf-8',
+      'Content-Type': asset.endsWith('.jpg')
+        ? 'image/jpeg'
+        : asset.endsWith('.png')
+          ? 'image/png'
+          : html
+            ? 'text/html; charset=utf-8'
+            : asset.endsWith('.css')
+              ? 'text/css; charset=utf-8'
+              : 'text/javascript; charset=utf-8',
       'Cache-Control': 'no-store',
     });
     response.end(

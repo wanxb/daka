@@ -33,6 +33,8 @@ for (const name of [
   'share-preview.css',
   // Same official app artwork as the native poster.
   'brand.png',
+  // Prototype review uses the user's smaller official code verbatim.
+  'miniprogram-code.jpg',
   'confetti-review.js',
   'vendor/tsparticles-confetti-4.6.0.min.js',
   'vendor/LICENSE-tsparticles-confetti.txt',

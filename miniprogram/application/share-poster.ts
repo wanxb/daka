@@ -97,34 +97,138 @@ function metric(
   text(ctx, value.unit, x + ctx.measureText(value.number).width + 10, y - 5, 30, '#45454f');
 }
 
-/** Low-contrast horizon bands are brand scenery, never a progress ring or a fabricated data curve. */
+/** Decorative light, paper grain and contours never encode quantities, completion or chart trends. */
 function drawBackdrop(ctx: Context, color: string, height: number, record: boolean) {
-  ctx.fillStyle = '#fcfcff';
+  ctx.fillStyle = '#fafbff';
   ctx.fillRect(0, 0, 900, height);
-  const light = ctx.createRadialGradient(860, 80, 0, 730, 170, 760);
-  light.addColorStop(0, color + '25');
-  light.addColorStop(0.7, color + '08');
+  const light = ctx.createRadialGradient(900, 0, 30, 760, 210, 920);
+  light.addColorStop(0, color + '48');
+  light.addColorStop(0.52, color + '16');
   light.addColorStop(1, color + '00');
   ctx.fillStyle = light;
   ctx.fillRect(0, 0, 900, height);
-  // Anchor the artwork to the footer so long notes expand the content without colliding with it.
+  const sky = ctx.createRadialGradient(0, height, 0, 100, height - 100, 630);
+  sky.addColorStop(0, '#8db9ee29');
+  sky.addColorStop(1, '#8db9ee00');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 900, height);
+  // Broad translucent folds enrich the paper without introducing another text or metric region.
+  ctx.beginPath();
+  ctx.moveTo(900, -80);
+  ctx.lineTo(900, height * 0.62);
+  ctx.quadraticCurveTo(635, height * 0.48, 526, 196);
+  ctx.closePath();
+  ctx.fillStyle = '#ffffff55';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(900, 20);
+  ctx.lineTo(900, height * 0.66);
+  ctx.quadraticCurveTo(724, height * 0.4, 620, 138);
+  ctx.closePath();
+  ctx.fillStyle = color + '0a';
+  ctx.fill();
+  // Deterministic fine grain avoids flicker and keeps every export of the same layout visually stable.
+  ctx.fillStyle = '#33435b07';
+  for (let i = 0; i < 1000; i++) {
+    const x = (i * 127 + 31) % 907,
+      y = (((i * 211 + 53) % 1237) / 1237) * height;
+    ctx.fillRect(x, y, 1.2, 1.2);
+  }
   for (let layer = 0; layer < 3; layer++) {
     ctx.beginPath();
-    ctx.moveTo(0, height - 108 + layer * 39);
-    ctx.quadraticCurveTo(400, height + 28, 900, height - 245 + layer * 72);
+    ctx.moveTo(0, height - 136 + layer * 42);
+    ctx.quadraticCurveTo(370, height + 18, 900, height - 274 + layer * 72);
     ctx.lineTo(900, height);
     ctx.lineTo(0, height);
     ctx.closePath();
-    ctx.fillStyle = color + ['09', '09', '0c'][layer];
+    ctx.fillStyle = color + ['12', '0c', '10'][layer];
     ctx.fill();
   }
+  // Open contour lines are scenery, deliberately detached from the plotted data surface.
+  ctx.save();
+  ctx.strokeStyle = color + '18';
+  ctx.lineWidth = 1.4;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(-70, height - 260 + i * 22);
+    ctx.bezierCurveTo(160, height - 352 + i * 20, 300, height + 56, 620, height - 126 + i * 16);
+    ctx.stroke();
+  }
+  ctx.restore();
   if (record) {
-    // A single north-star glint carries the identity without competing with the saved amount.
-    star(ctx, 765, 270, 26, color + '50');
-    star(ctx, 707, 230, 6, color + '38');
+    star(ctx, 742, 326, 91, color + '12');
+    star(ctx, 747, 321, 39, '#ffffffb0');
+    star(ctx, 780, 262, 11, color + '66');
+    star(ctx, 674, 393, 8, color + '44');
+    ctx.fillStyle = color + '42';
+    [
+      [705, 246, 3],
+      [810, 365, 3],
+      [652, 304, 2],
+    ].forEach(([x, y, r]) => {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  } else {
+    // The statistics variant is quieter near the graph and concentrates its geometry in the header.
+    ctx.save();
+    ctx.strokeStyle = color + '1c';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(914, 290, 116 + i * 24, Math.PI * 0.73, Math.PI * 1.55);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // Match the record card's large glint while retaining the statistics header placement.
+    star(ctx, 774, 274, 91, color + '12');
+    star(ctx, 774, 274, 39, '#ffffffc9');
   }
 }
 
+/** Fixed Canvas line icons keep the two result states consistent across platforms without emoji font variance. */
+function drawStatus(ctx: Context, d: ShareSnapshot, record: boolean) {
+  const x = 648,
+    y = 90;
+  rounded(ctx, x, y, 176, 52, 26, '#ffffffa8');
+  ctx.save();
+  ctx.translate(x + 26, y + 26);
+  ctx.strokeStyle = d.color;
+  ctx.lineWidth = 2.8;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  if (record) {
+    ctx.beginPath();
+    ctx.arc(0, 0, 13, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-6, 0);
+    ctx.lineTo(-1, 5);
+    ctx.lineTo(7, -5);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-12, -12);
+    ctx.lineTo(-12, 12);
+    ctx.lineTo(13, 12);
+    ctx.stroke();
+    [
+      [-5, 3],
+      [3, -4],
+      [11, -10],
+    ].forEach(([xx, yy]) => {
+      ctx.beginPath();
+      ctx.moveTo(xx, 7);
+      ctx.lineTo(xx, yy);
+      ctx.stroke();
+    });
+  }
+  ctx.restore();
+  ctx.textAlign = 'right';
+  text(ctx, d.title, 808, 125, 23, d.color, 500, 118);
+  ctx.textAlign = 'left';
+}
 /** Keep only the saved result and its date; brand and background share one quiet visual system. */
 export function drawPoster(
   ctx: Context,
@@ -132,16 +236,14 @@ export function drawPoster(
   glyph: WechatMiniprogram.Image | null,
   notes: string[],
   height: number,
-  brand: WechatMiniprogram.Image | null = null,
+  miniCode: WechatMiniprogram.Image | null = null,
 ) {
   const record = d.kind === 'record';
   drawBackdrop(ctx, d.color, height, record);
   if (glyph) ctx.drawImage(glyph, 76, 90, 52, 52);
   else star(ctx, 102, 116, 22, d.color);
   text(ctx, d.name, 148, 134, 50, '#222431', 600, 495);
-  ctx.textAlign = 'right';
-  text(ctx, d.title, 824, 128, 23, '#686a78', 400, 180);
-  ctx.textAlign = 'left';
+  drawStatus(ctx, d, record);
   text(ctx, d.date, 76, 197, 25, '#686a78');
   text(ctx, d.metrics[0].label, 76, 287, 27, '#686a78');
   metric(ctx, d.metrics[0], 76, 429, '#222431', record ? 158 : 140, 748);
@@ -162,9 +264,18 @@ export function drawPoster(
     rounded(ctx, 76, top, 3, notes.length * 42, 1.5, d.color + '66');
     notes.forEach((line, i) => text(ctx, line, 99, top + 30 + i * 42, 28, '#555866', 400, 715));
   }
-  // One official brand signature replaces repeated logos, slogans and unrelated record counts.
-  if (brand) ctx.drawImage(brand, 76, height - 96, 44, 44);
-  text(ctx, '北极星打卡', 132, height - 64, 24, '#626675', 500);
+  // Preserve the official image and its built-in white background; omit the extra rounded backing plate.
+  if (miniCode) {
+    // Raise the pair as one unit: the caption needs its own breathing room below the code.
+    const size = 164,
+      x = 900 - 76 - size,
+      y = height - 76 - size;
+    ctx.drawImage(miniCode, x + 8, y + 8, size - 16, size - 16);
+    // The code already contains the logo; one quiet caption identifies the app without duplicating artwork.
+    ctx.textAlign = 'center';
+    text(ctx, '北极星打卡', x + size / 2, height - 42, 27, '#555866', 400, size);
+    ctx.textAlign = 'left';
+  }
 }
 
 function drawGraph(ctx: Context, d: ShareSnapshot) {

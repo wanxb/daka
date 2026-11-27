@@ -15,7 +15,7 @@ export async function renderShareImage(
   // A saved record note is included automatically; an absent note reserves no poster space.
   const notes = snapshot.note ? wrap(ctx, snapshot.note, 690, 28) : [];
   // Only statistics require graph space; a record uses a compact metric-dependent paper.
-  const baseHeight = snapshot.kind === 'record' ? (snapshot.metrics[1] ? 840 : 730) : 1080;
+  const baseHeight = snapshot.kind === 'record' ? (snapshot.metrics[1] ? 840 : 730) : 1220;
   const height = baseHeight + (notes.length ? notes.length * 42 + 70 : 0);
   // Bound decoded/exported pixels: long legacy notes grow the paper vertically, never multiply device DPR.
   if (height > 16000) throw new Error('备注过长，暂时无法生成分享图片');
@@ -23,9 +23,10 @@ export async function renderShareImage(
   canvas.height = height;
 
   const glyph = await loadGlyph(canvas, iconSource(snapshot.icon, snapshot.colorId));
-  const brand = await loadGlyph(canvas, '/assets/brand.png');
-  if (!brand) throw new Error('品牌图标暂时无法加载，请重试');
-  drawPoster(ctx, snapshot, glyph, notes, height, brand);
+  // The supplied official code is mandatory; do not export an incomplete or fabricated scannable image.
+  const miniCode = await loadGlyph(canvas, '/assets/miniprogram-code.jpg');
+  if (!miniCode) throw new Error('小程序码暂时无法加载，请重试');
+  drawPoster(ctx, snapshot, glyph, notes, height, miniCode);
   const path = await new Promise<string>((resolve, reject) =>
     wx.canvasToTempFilePath(
       {
@@ -44,7 +45,7 @@ export async function renderShareImage(
   return path;
 }
 
-/** SVG decoding may fail on an older client; brand failure is handled explicitly by the caller. */
+/** SVG decoding may fail on an older client; official code failure is handled explicitly by the caller. */
 function loadGlyph(
   canvas: WechatMiniprogram.Canvas,
   path: string,

@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { renderShareImage } from '../miniprogram/application/share-render';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
@@ -306,5 +309,122 @@ test('预览页拒绝失效票据，旧图片错误不覆盖新预览，卸载�
     assert.deepEqual(removed, ['tmp-current']);
   } finally {
     Object.assign(globalThis, { Page: previousPage, wx: previousWx });
+  }
+});
+
+/** Exercise the real renderer boundary: mandatory official artwork must survive the export unchanged and never overlap data. */
+test('分享导出保留官方码原图，单次和三类统计的码区不遮挡内容，码加载失败不导出', async () => {
+  const nativeCode = readFileSync(
+    new URL('../miniprogram/assets/miniprogram-code.jpg', import.meta.url),
+  );
+  const prototypeCode = readFileSync(new URL('../prototype/miniprogram-code.jpg', import.meta.url));
+  assert.deepEqual(nativeCode, prototypeCode);
+  assert.equal(
+    createHash('sha256').update(nativeCode).digest('hex'),
+    '4c2c69ea2e25f52697f08a9584e88a88457741ae3da56eccd50203686289e202',
+  );
+  const previous = globalThis.wx;
+  let exports = 0;
+  const images: { source: string; x: number; y: number; width: number; height: number }[] = [];
+  const labels: { value: string; x: number; y: number }[] = [];
+  const ctx = new Proxy(
+    {
+      measureText: (v: string) => ({ width: Array.from(v).length * 20 }),
+      createRadialGradient: () => ({ addColorStop() {} }),
+      createLinearGradient: () => ({ addColorStop() {} }),
+      drawImage: (img: { source: string }, x: number, y: number, width: number, height: number) =>
+        images.push({ source: img.source, x, y, width, height }),
+      fillText: (value: string, x: number, y: number) =>
+        labels.push({ value: String(value), x, y }),
+    },
+    { get: (target: any, key) => (key in target ? target[key] : () => {}) },
+  );
+  const canvas = (failCode = false) => ({
+    width: 0,
+    height: 0,
+    getContext: () => ctx,
+    createImage: () => ({
+      source: '',
+      onload: () => {},
+      onerror: () => {},
+      set src(path: string) {
+        this.source = path;
+        if (failCode && path.endsWith('miniprogram-code.jpg')) this.onerror();
+        else this.onload();
+      },
+    }),
+  });
+  Object.assign(globalThis, {
+    wx: {
+      canvasToTempFilePath: (options: any) => {
+        exports++;
+        options.success({ tempFilePath: 'tmp-code-' + exports });
+      },
+      getFileSystemManager: () => ({ unlink() {} }),
+    },
+  });
+  try {
+    const { db, p } = fixture();
+    const selection = {
+      kind: 'statistics' as const,
+      projectId: p.id,
+      graph: 'cumulative' as const,
+      metric: 'quantity' as const,
+      period: 'month' as const,
+      offset: 0,
+      calendarOffset: 0,
+    };
+    const snapshots = [
+      shareSnapshot(db, { kind: 'record', projectId: p.id, recordId: 'first' }),
+      ...(['cumulative', 'distribution', 'calendar'] as const).map((graph) =>
+        shareSnapshot(db, { ...selection, graph }),
+      ),
+    ];
+    // Long remarks must push the code down instead of covering its dots or caption.
+    snapshots[0].note = '一'.repeat(100) + '\n' + '二'.repeat(100);
+    for (const snapshot of snapshots) {
+      images.length = 0;
+      labels.length = 0;
+      const buffer = canvas();
+      const path = await renderShareImage(
+        buffer as unknown as WechatMiniprogram.Canvas,
+        snapshot,
+        {} as WechatMiniprogram.Page.TrivialInstance,
+      );
+      assert.equal(buffer.width, 900);
+      const code = images.find((img) => img.source.endsWith('miniprogram-code.jpg'))!;
+      assert.ok(code);
+      assert.equal(code.width, code.height);
+      assert.ok(code.x > 600 && code.x + code.width < buffer.width);
+      const name = labels.filter((label) => label.value === '北极星打卡');
+      assert.equal(name.length, 1);
+      assert.ok(name[0].x > 600 && name[0].y > code.y + code.height + 27);
+      assert.ok(name[0].y <= buffer.height - 40);
+      assert.ok(labels.some((label) => label.value === snapshot.title));
+      if (snapshot.kind === 'statistics') {
+        assert.equal(buffer.height, 1220);
+        assert.ok(code.y > 950, 'code must be below the entire chart surface');
+      } else {
+        const remarkBottom = Math.max(
+          ...labels
+            .filter((label) => label.value.includes('一') || label.value.includes('二'))
+            .map((label) => label.y),
+        );
+        assert.ok(code.y > remarkBottom + 20);
+      }
+      releaseShareImage(path);
+    }
+    const before = exports;
+    await assert.rejects(
+      renderShareImage(
+        canvas(true) as unknown as WechatMiniprogram.Canvas,
+        snapshots[1],
+        {} as WechatMiniprogram.Page.TrivialInstance,
+      ),
+      /小程序码暂时无法加载/,
+    );
+    assert.equal(exports, before);
+  } finally {
+    Object.assign(globalThis, { wx: previous });
   }
 });
