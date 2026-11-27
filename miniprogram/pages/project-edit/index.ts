@@ -141,7 +141,11 @@ Page({
     this.setData({ navigationHeight: e.detail.height });
   },
   focusRequired() {
+    // Unsupported units guide editing back to their own control before any persistence attempt.
     const field = projectFocusTarget(this.data.form);
+    // A brief text-only hint explains the blocked save without adding a permanent error row or interrupting typing.
+    if (field === 'quantityUnit')
+      wx.showToast({ title: '不是有效单位', icon: 'none', duration: 1500, mask: false });
     const version = ++this._focusVersion;
     // Reset native focus before requesting it again, including repeated taps on the same incomplete field.
     this.setData({ focusedField: '' });

@@ -1,5 +1,11 @@
 /** Project configuration preserves legacy values and quantity-unit locks across edits. */
-import { inputLimits, storedTextLimits, timeInputLimits, textLength } from './input-limits';
+import {
+  inputLimits,
+  storedTextLimits,
+  timeInputLimits,
+  textLength,
+  quantityUnitAllowed,
+} from './input-limits';
 import { palettes, projectIcons, resolveProjectIcon } from './appearance';
 import {
   PracticeError,
@@ -136,6 +142,9 @@ export function makeProject(form: ProjectForm, now: number, original?: Project):
     throw new PracticeError('INVALID', '数量单位请填写1～4个字符，不含空格。');
   if (original?.quantityUnitLocked && quantityUnit !== original.quantityUnit)
     throw new PracticeError('INVALID', '已有数量记录，单位不可更改。');
+  // The write boundary enforces the same vocabulary even when callers bypass editor validation.
+  if (!quantityUnitAllowed(quantityUnit))
+    throw new PracticeError('INVALID', '请填写支持的常用数量单位。');
   if (
     !Object.prototype.hasOwnProperty.call(palettes, form.color) ||
     !projectIcons.some((icon) => icon.id === resolveProjectIcon(form.icon))

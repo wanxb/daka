@@ -19,6 +19,8 @@ test('正式页面与面板状态流程', async (t) => {
     componentOptions: any,
     modalCalls = 0;
   const scrollCalls: any[] = [];
+  // Capture native notifications to distinguish deliberate save-time hints from intrusive typing feedback.
+  const toastCalls: any[] = [];
   const api: any = {
     env: { USER_DATA_PATH: 'wxfile://usr' },
     getFileSystemManager: () => ({
@@ -55,7 +57,9 @@ test('正式页面与面板状态流程', async (t) => {
     getWindowInfo: () => ({ pixelRatio: 2 }),
     // Native nextTick waits for the refreshed view; controller tests provide layout explicitly below.
     nextTick: (callback: () => void) => callback(),
-    showToast: () => {},
+    showToast: (options: any) => {
+      toastCalls.push(options);
+    },
     hideKeyboard: () => {},
     enableAlertBeforeUnload: () => {},
     disableAlertBeforeUnload: () => {},
@@ -250,6 +254,34 @@ test('正式页面与面板状态流程', async (t) => {
       home.stopCelebration();
       api.getWindowInfo = oldWindow;
     }
+  });
+  // Unsupported units remain editable, but must never reach project persistence or trigger an unrelated error toast.
+  await t.test('数量单位不在常用名单时定位单位输入且不创建，改为毫升后才保存', async () => {
+    await reset();
+    const editor = make(editorOptions);
+    await editor.onLoad({});
+    editor.text(event({ field: 'name' }, '喝水'));
+    editor.toggle(event({ field: 'quantityEnabled' }, true));
+    const initialToasts = toastCalls.length;
+    editor.text(event({ field: 'quantityUnit' }, '乱填'));
+    assert.equal(toastCalls.length, initialToasts);
+    await editor.save();
+    assert.equal(toastCalls.length, initialToasts + 1);
+    assert.deepEqual(toastCalls.at(-1), {
+      title: '不是有效单位',
+      icon: 'none',
+      duration: 1500,
+      mask: false,
+    });
+    assert.equal(editor.data.canSave, false);
+    assert.equal(editor.data.focusedField, 'quantityUnit');
+    assert.equal(editor.data.error, '');
+    assert.equal((await service().snapshot()).projects.length, 0);
+    editor.text(event({ field: 'quantityUnit' }, '毫升'));
+    await editor.save();
+    assert.equal(toastCalls.length, initialToasts + 1);
+    assert.equal((await service().snapshot()).projects[0].quantityUnit, '毫升');
+    editor.onUnload();
   });
   await t.test(
     '空名称点击创建定位输入而不落库，补齐名称才创建；缺失类型和范围同样定位',
@@ -1272,6 +1304,8 @@ test('正式页面与面板状态流程', async (t) => {
     editor.text(event({ field: 'timeMax' }, '525601'));
     assert.equal(editor.data.form.timeMax, '120');
     editor.toggle(event({ field: 'quantityEnabled' }, true));
+    // The earlier length-limit probe is intentionally unsupported; choose a real unit before testing record input.
+    editor.text(event({ field: 'quantityUnit' }, '次'));
     await editor.save();
     const project = (await service().snapshot()).projects[0];
     const sheet = make(sheetOptions);

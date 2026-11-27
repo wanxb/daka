@@ -15,6 +15,32 @@ export const inputLimits = {
 } as const;
 // These are storage compatibility ceilings, not permission to enter new oversized values.
 export const storedTextLimits = { projectName: 24, note: 500 } as const;
+/** One strict vocabulary keeps quantity labels meaningful; arbitrary custom units have no compatibility exception. */
+export const quantityUnits: readonly string[] = [
+  '次',
+  '个',
+  '件',
+  '张',
+  '页',
+  '字',
+  '本',
+  '篇',
+  '题',
+  '道',
+  '组',
+  '遍',
+  '首',
+  '节',
+  '圈',
+  '步',
+  '米',
+  '千米',
+  '杯',
+  '毫升',
+];
+export function quantityUnitAllowed(unit: string): boolean {
+  return quantityUnits.includes(unit);
+}
 // Seconds remain a read/validation compatibility unit; new configuration exposes only 分、时、天.
 export const selectableTimeUnits = ['分', '时', '天'] as const;
 export const timeInputLimits = { 分: 525_600, 时: 8760, 天: 365, 秒: 31_536_000 } as const;

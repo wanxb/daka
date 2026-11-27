@@ -8,7 +8,7 @@ import {
   type ProjectForm,
   type TimeUnit,
 } from '../domain/model';
-import { timeInputLimits } from '../domain/input-limits';
+import { timeInputLimits, quantityUnitAllowed } from '../domain/input-limits';
 
 const defaults = initialForm();
 const metricFields = {
@@ -33,7 +33,9 @@ export function projectFocusTarget(form: ProjectForm): ProjectFocusTarget {
   if (!form.timeEnabled && !form.quantityEnabled) return 'types';
   for (const kind of ['time', 'quantity'] as const) {
     if (!form[`${kind}Enabled`]) continue;
-    if (kind === 'quantity' && !form.quantityUnit.trim()) return 'quantityUnit';
+    // Invalid vocabulary points back to its input rather than misleading users by focusing the name.
+    if (kind === 'quantity' && !quantityUnitAllowed(form.quantityUnit.trim()))
+      return 'quantityUnit';
     const minimum = `${kind}Min` as const,
       maximum = `${kind}Max` as const;
     if (!/^\d+$/.test(form[minimum])) return minimum;

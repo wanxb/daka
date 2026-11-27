@@ -23,6 +23,8 @@ import {
   type FileDriver,
 } from '../miniprogram/infrastructure/repository';
 import { PracticeService } from '../miniprogram/application/service';
+import { quantityUnits } from '../miniprogram/domain/input-limits';
+import { projectFocusTarget } from '../miniprogram/application/project-form';
 import { initialData } from '../miniprogram/application/initial-data';
 import { projectTile } from '../miniprogram/application/presentation';
 import { type Color, colorOptions, projectIcons } from '../miniprogram/domain/appearance';
@@ -347,19 +349,68 @@ test('时间只接收精确整秒，小数格式化不破坏数值', () => {
   assert.equal(byteLength('北极星打卡😀'), 19);
 });
 
-// Full duration captions must not alter stored unit keys or arbitrary quantity-unit text.
+// Duration captions use full names, while count labels keep the chosen whitelisted measure.
 test('完整时间单位与数值分离，数量单位保持原文', async () => {
   const { metricParts, projectTile } = await import('../miniprogram/application/presentation');
-  const p = makeProject({ ...initialForm(), name: '阅读', quantityUnit: '分' }, now);
+  const p = makeProject({ ...initialForm(), name: '阅读', quantityUnit: '页' }, now);
   assert.deepEqual(timeParts(5400, '分'), { number: '90', unit: '分钟' });
   assert.deepEqual(timeParts(82800, '时'), { number: '23', unit: '小时' });
   assert.equal(timeText(86400, '天'), '1天');
   assert.equal(timeText(1, '秒'), '1秒');
-  assert.deepEqual(metricParts(p, 'quantity', 90), { number: '90', unit: '分' });
+  assert.deepEqual(metricParts(p, 'quantity', 90), { number: '90', unit: '页' });
   const tile = projectTile(p, [], '2026-11-24');
   assert.equal(tile.unit, '分钟');
   assert.equal(tile.number, '0');
   assert.equal(p.timeUnit, '分');
+});
+
+/** The domain rejects unsupported measures even when callers bypass the editor's input and focus handling. */
+test('常用数量单位名单可保存，空值、任意文字及缩写不能新增或修改保存', async () => {
+  assert.equal(quantityUnits.length, 20);
+  assert.equal(new Set(quantityUnits).size, 20);
+  for (const quantityUnit of quantityUnits) {
+    const form = { ...initialForm(), name: '练习', quantityEnabled: true, quantityUnit };
+    assert.equal(makeProject(form, now).quantityUnit, quantityUnit);
+  }
+  const files = new MemoryFiles();
+  const api = new PracticeService(new LocalRepository(files), () => now);
+  const form = { ...initialForm(), name: '练习', quantityEnabled: true };
+  for (const quantityUnit of ['', '随便', 'abc', '123', 'km', '分钟', '😀', '毫 升']) {
+    await assert.rejects(api.saveProject({ ...form, quantityUnit }));
+    assert.equal((await api.snapshot()).projects.length, 0);
+    assert.equal(projectFocusTarget({ ...form, quantityUnit }), 'quantityUnit');
+  }
+  const project = await api.saveProject({ ...form, quantityUnit: ' 页 ' });
+  assert.equal(project.quantityUnit, '页');
+  await assert.rejects(
+    api.saveProject({ ...projectForm(project), quantityUnit: '随便' }, project.revision),
+  );
+  assert.equal((await new LocalRepository(files).snapshot()).projects[0].quantityUnit, '页');
+});
+
+/** Whitelisted measures can change before recording, but persisted quantities lock their meaning permanently. */
+test('数量单位无旧值豁免，首次记数前可改常用单位，记数后锁定且冷启动保留', async () => {
+  const files = new MemoryFiles();
+  const api = new PracticeService(new LocalRepository(files), () => now);
+  const project = await api.saveProject({ ...initialForm(), name: '练习', quantityEnabled: true });
+  // Supplying the same unsupported unit as an original must not bypass strict validation.
+  const unsupported = { ...project, quantityUnit: '公里' };
+  assert.throws(() => makeProject(projectForm(unsupported), now, unsupported), /常用数量单位/);
+  const cold = new PracticeService(new LocalRepository(files), () => now);
+  const existing = (await cold.snapshot()).projects[0];
+  const changed = await cold.saveProject(
+    { ...projectForm(existing), quantityUnit: '千米' },
+    existing.revision,
+  );
+  assert.equal(changed.quantityUnit, '千米');
+  const record = await cold.quickRecord(project.id);
+  assert.equal(record.quantityUnit, '千米');
+  const locked = (await cold.snapshot()).projects[0];
+  await assert.rejects(
+    cold.saveProject({ ...projectForm(locked), quantityUnit: '米' }, locked.revision),
+    /单位不可更改/,
+  );
+  assert.equal((await new LocalRepository(files).snapshot()).records[0].quantityUnit, '千米');
 });
 
 test('新输入的文字长度、数值格式与单次上限统一受限，Unicode文字不截断代理对', () => {

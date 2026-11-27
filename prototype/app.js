@@ -10,6 +10,9 @@
   // Standalone review mirrors the native policy in miniprogram/domain/input-limits.ts.
   // Mirror mini-program admission limits; existing demonstration data is never truncated to meet capacity.
   const INPUT_LIMITS = { projects: 15, name: 6, note: 100, breaks: 2, unit: 4, search: 20, quantity: 99999, seconds: 31536000, earliestDate: "1900-01-01" };
+  // Mirror the strict native vocabulary so browser review cannot save arbitrary quantity measures.
+  const QUANTITY_UNITS = ["次", "个", "件", "张", "页", "字", "本", "篇", "题", "道", "组", "遍", "首", "节", "圈", "步", "米", "千米", "杯", "毫升"];
+  const quantityUnitAllowed = unit => QUANTITY_UNITS.includes(unit);
   // Mirrors the shared native policy: a duration day is 86400 seconds; seconds are compatibility-only.
   const TIME_LIMITS = { "分": 525600, "时": 8760, "天": 365, "秒": 31536000 };
   const textLength = text => Array.from(text).length;
@@ -827,12 +830,13 @@
     celebrationTimer = setTimeout(clearCelebration, 2850);
   }
 
-  function showToast(message, undo = null) {
+  function showToast(message, undo = null, subtle = false) {
     clearTimeout(toastTimer); state.undo = undo;
     const toast = document.getElementById("toast");
-    toast.innerHTML = '<span class="toast-message">' + icon("check") + escape(message) + '</span>' + (undo ? '<button data-action="undo">撤销</button>' : "");
+    // Validation hints use short text only, avoiding a success checkmark or long-lived visual interruption.
+    toast.innerHTML = '<span class="toast-message">' + (subtle ? "" : icon("check")) + escape(message) + '</span>' + (undo ? '<button data-action="undo">撤销</button>' : "");
     toast.classList.add("visible");
-    toastTimer = setTimeout(hideToast, 5000);
+    toastTimer = setTimeout(hideToast, subtle ? 1500 : 5000);
   }
   function hideToast() { clearTimeout(toastTimer); document.getElementById("toast").classList.remove("visible"); state.undo = null; }
   function undoLast() {
@@ -987,6 +991,7 @@
       // Units are short literal text, never markup; changing a historical measure requires a new project.
       if (!quantityUnit || Array.from(quantityUnit).length > 4 || /[\s\u0000-\u001f\u007f]/.test(quantityUnit)) throw new Error("单位请填写1～4个字符，不能含空格。");
       if (previous?.quantityUnitLocked && quantityUnit !== unitFor(previous)) throw new Error("已有数量记录，单位不可更改。");
+      if (!quantityUnitAllowed(quantityUnit)) throw new Error("请填写支持的常用数量单位。");
       // Prepared hidden groups still pass the same range/default/unit checks as visible groups.
       const readRange = kind => {
         const range = validEditorRange(kind, editor);
@@ -1027,13 +1032,15 @@
       if (editor.mode === "none") field = "types";
       else for (const kind of ["time", "quantity"]) {
         if (!(kind === "time" ? ["duration", "both"] : ["quantity", "both"]).includes(editor.mode)) continue;
-        if (kind === "quantity" && !String(editor.quantityUnit).trim()) { field = "quantityUnit"; break; }
+        if (kind === "quantity" && !quantityUnitAllowed(String(editor.quantityUnit).trim())) { field = "quantityUnit"; break; }
         if (!/^\d+$/.test(String(editor[kind + "Min"]))) { field = kind + "Min"; break; }
         if (!validEditorRange(kind)) { field = kind + "Max"; break; }
         const key = kind === "time" ? "defaultTime" : "defaultQuantity";
         if (!/^\d+$/.test(String(editor[key])) || Number(editor[key]) <= 0) { field = key; break; }
       }
     }
+    // Match the native save-time hint without showing the whitelist or adding a persistent error block.
+    if (field === "quantityUnit") showToast("不是有效单位", null, true);
     const target = field === "types" ? screen.querySelector('.editor-config [data-action="editor-mode"]') : screen.querySelector('[data-editor="' + field + '"]');
     if (!target) return;
     // Scroll only the phone's content, keeping the surrounding review board in place.
