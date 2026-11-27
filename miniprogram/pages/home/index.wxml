@@ -197,4 +197,14 @@
   </view>
 </view>
 <!-- A stable component anchor supports checking transient executing states without changing stored records. -->
-<undo-toast id="undo-toast" message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />
+<undo-toast
+  id="undo-toast"
+  message="{{toast}}"
+  expires-at="{{expiresAt}}"
+  share-record-id="{{shareRecordId}}"
+  bind:undo="undo"
+  bind:share="shareRecord"
+/>
+
+<!-- Offscreen export keeps the current page in place; native canvas never joins scrolling content. -->
+<canvas id="share-buffer" type="2d" class="share-buffer" aria-hidden="true" />

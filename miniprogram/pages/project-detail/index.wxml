@@ -97,6 +97,7 @@
         </view>
         <view
           class="heat-grid"
+          style="grid-template-rows:repeat({{calendarRows}},minmax(44px,1fr))"
           aria-role="group"
           aria-label="每日{{metric==='quantity'?'数量':'时间'}}记录日历"
         >
@@ -120,20 +121,9 @@
             <text>{{item.inside?(item.missing?'—':item.day):''}}</text>
           </button>
         </view>
-        <!-- Readout and legend share one baseline; the reserved footer keeps all three cards the same height. -->
+        <!-- Readout and sharing use the same reserved footer as the other two statistical views. -->
         <view class="calendar-footer">
           <view class="calendar-reading" aria-role="status">{{calendarReading}}</view>
-          <view class="heat-legend">
-            <text>少</text>
-            <view
-              wx:for="{{calendarLegend}}"
-              wx:key="level"
-              class="heat-swatch"
-              style="background:{{item.color}}"
-              aria-label="{{item.label}}"
-            ></view>
-            <text>多</text>
-          </view>
         </view>
       </view>
       <view wx:else class="statistics-body standard-body">
@@ -181,8 +171,18 @@
           is-time="{{metric === 'durationSeconds'}}"
           obscured="{{sheetOpen}}"
           focus-baseline="{{period!=='all'}}"
+          bind:share="share"
         />
       </view>
+      <!-- One corner action serves all chart modes and stays clear of the reserved left readout. -->
+      <button
+        class="statistics-share"
+        bindtap="share"
+        aria-label="分享当前统计"
+        hover-class="pressed"
+      >
+        <text class="share-corner" style="background:{{color}}16;color:{{color}}">分享</text>
+      </button>
     </view>
     <view
       id="record-section"
@@ -265,3 +265,6 @@
 />
 <!-- Share the same stable component anchor as home for transient undo-state verification. -->
 <undo-toast id="undo-toast" message="{{toast}}" expires-at="{{expiresAt}}" bind:undo="undo" />
+
+<!-- Offscreen export keeps the current page in place; native canvas never joins scrolling content. -->
+<canvas id="share-buffer" type="2d" class="share-buffer" aria-hidden="true" />

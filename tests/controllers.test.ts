@@ -47,7 +47,7 @@ test('正式页面与面板状态流程', async (t) => {
         }),
       unlink: (o: any) => {
         disk.delete(o.filePath);
-        o.success({});
+        o.success?.({});
       },
     }),
     showModal: async () => {
@@ -1052,7 +1052,9 @@ test('正式页面与面板状态流程', async (t) => {
     await detail.load();
     const originalPeriod = detail.data.period;
     detail.mode(event({ mode: 'calendar' }));
-    assert.equal(detail.data.calendarCells.length, 42);
+    // UI weeks are adaptive; the domain snapshot still retains all 42 cells for statistics/export.
+    assert.equal(detail.data.calendarCells.length, detail.data.calendarRows * 7);
+    assert.ok(detail.data.calendarRows >= 4 && detail.data.calendarRows <= 6);
     assert.equal(detail.data.calendarReading, '');
     detail.calendarDay(event({ date: today }));
     assert.match(detail.data.calendarReading, /1,500次 · 2条/);
@@ -1411,6 +1413,129 @@ test('正式页面与面板状态流程', async (t) => {
       patches.some((patch) => 'tiles' in patch),
       false,
     );
+  });
+  await t.test('成功分享原地生成后直接调用微信，连续点击只弹一次，不延长撤销', async () => {
+    await reset();
+    const project = await service().saveProject({
+      ...initialForm(),
+      name: '分享验证',
+      directEntryEnabled: true,
+    });
+    const home = make(homeOptions);
+    // This case owns sharing/receipt semantics; motion already has separate measured-layout coverage.
+    home.celebrateRecord = () => {};
+    await home.load();
+    await home.record(event({ id: project.id }));
+    const db = await service().snapshot(),
+      record = db.records[0];
+    assert.equal(home.data.shareRecordId, record.id);
+    const deadline = db.undo!.expiresAt;
+    const previous = { ...api };
+    const paths: string[] = [],
+      urls: string[] = [],
+      printed: string[] = [];
+    let entered!: () => void, release!: () => void;
+    const menuEntered = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    // Exercise the real export orchestration with a deterministic Canvas2D port, no UI navigation.
+    const ctx = new Proxy(
+      {
+        measureText: (v: string) => ({ width: String(v).length * 20 }),
+        createRadialGradient: () => ({ addColorStop() {} }),
+        createLinearGradient: () => ({ addColorStop() {} }),
+        fillText: (v: string) => printed.push(String(v)),
+      },
+      { get: (target: any, key) => target[key] || (() => {}) },
+    );
+    const canvas = {
+      getContext: () => ctx,
+      createImage: () => ({
+        onload: () => {},
+        set src(_v: string) {
+          this.onload();
+        },
+      }),
+    };
+    home.createSelectorQuery = () => {
+      const query = {
+        select: () => query,
+        fields: () => query,
+        exec: (cb: any) => cb([{ node: canvas }]),
+      };
+      return query;
+    };
+    // Earlier layout tests queue nextTick; export needs its own immediately-ready canvas adapter.
+    api.nextTick = (callback: () => void) => callback();
+    api.getAppBaseInfo = () => ({ SDKVersion: '3.18.1' });
+    api.showLoading = () => {};
+    api.hideLoading = () => {};
+    api.canvasToTempFilePath = (o: any) => o.success({ tempFilePath: 'tmp-direct-share' });
+    api.navigateTo = (o: any) => urls.push(o.url);
+    api.showShareImageMenu = (o: any) => {
+      paths.push(o.path);
+      entered();
+      return new Promise<void>((resolve) => {
+        release = resolve;
+      });
+    };
+    try {
+      const first = home.shareRecord(),
+        second = home.shareRecord();
+      await Promise.race([
+        menuEntered,
+        first.then(() => {
+          throw new Error('Share returned before opening native menu');
+        }),
+      ]);
+      assert.equal(paths.length, 1);
+      assert.equal(urls.length, 0);
+      release();
+      await Promise.all([first, second]);
+      assert.ok(printed.includes('60'));
+      assert.ok(printed.includes('打卡成功'));
+      // A transient export failure can retry in place; cancellation never reports a successful publication.
+      let attempts = 0,
+        retryPrompts = 0;
+      api.canvasToTempFilePath = (o: any) => {
+        if (++attempts === 1) o.fail({ errMsg: 'temporary export failure' });
+        else o.success({ tempFilePath: 'tmp-direct-retry' });
+      };
+      api.showModal = async () => {
+        retryPrompts++;
+        return { confirm: true };
+      };
+      api.showShareImageMenu = async (o: any) => {
+        paths.push(o.path);
+      };
+      await home.shareRecord();
+      assert.equal(attempts, 2);
+      assert.equal(retryPrompts, 1);
+      assert.equal(paths.length, 2);
+      api.showShareImageMenu = async () => {
+        throw { errMsg: 'showShareImageMenu:fail cancel' };
+      };
+      await home.shareRecord();
+      assert.equal(retryPrompts, 1);
+      // Leaving during generation must clean the late file without opening native UI over another page.
+      api.canvasToTempFilePath = (o: any) => {
+        home._visible = false;
+        o.success({ tempFilePath: 'tmp-late-share' });
+      };
+      await home.shareRecord();
+      assert.equal(paths.length, 2);
+      home._visible = true;
+
+      assert.equal((await service().snapshot()).undo!.expiresAt, deadline);
+      await service().undo();
+      await home.load();
+      assert.equal(home.data.shareRecordId, '');
+      assert.equal(home.data.toast, '');
+      assert.equal((await service().snapshot()).records.length, 0);
+    } finally {
+      for (const key of Object.keys(api)) if (!(key in previous)) delete api[key];
+      Object.assign(api, previous);
+    }
   });
   await reset();
 });

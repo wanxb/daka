@@ -1,0 +1,64 @@
+/* Share UI inherits product typography and touch targets; review controls remain outside the phone. */
+.share-review{display:grid;gap:8px;margin-bottom:24px}
+.share-review label{font-size:13px;font-weight:600;color:var(--ink)}
+.share-review select{font:inherit;min-height:36px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#fff;color:var(--ink)}
+.share-review button{text-align:left;background:none;padding:6px 0;color:var(--blue);font-size:13px;min-height:36px}
+/* Tint only a small visible corner while keeping its transparent 44px touch height. */
+.chart-card { position:relative; overflow:hidden; }
+.chart-card .statistics-share-icon {position:absolute;right:0;bottom:0;width:56px;height:44px;margin:0;padding:0;background:transparent;border-radius:0;z-index:1;}
+.statistics-share-icon span {position:absolute;right:0;bottom:0;display:block;width:44px;height:25px;box-sizing:border-box;padding-left:3px;border-radius:12px 0 22px 0;background:color-mix(in srgb,var(--accent) 9%,white);color:var(--accent);font-size:12px;font-weight:400;line-height:25px;text-align:center;}
+.statistics-footer,.calendar-footer {padding-right:46px;}
+/* Keep the original reserved readout heights; the larger touch surface extends into the card's padding. */
+.statistics-footer{display:flex;align-items:center;gap:8px;height:24px;flex-shrink:0}
+.statistics-footer .chart-footer-reading{flex:1;min-width:0}
+.chart-card+.record-section .section-head{margin-top:20px}
+.toast-actions{display:flex;flex:none}
+.toast:has(.toast-actions){left:12px;right:12px;padding:10px 12px;font-size:12px;gap:4px}
+.toast .toast-actions button{font-size:13px;padding:4px 8px;min-height:44px}
+/* The preview owns the phone surface below the status bar and contains its own scroll and footer. */
+#share-root:empty{display:none}
+#share-root{position:absolute;inset:48px 0 0;z-index:35;background:var(--page)}
+.share-page{height:100%;display:flex;flex-direction:column;position:relative;background:#f2f2f7}
+.share-nav{height:52px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#f2f2f7}
+.share-nav h2{font-size:16px;font-weight:600;margin:0}
+.share-nav button{min-width:44px;min-height:44px;background:none;padding:0;text-align:left;color:var(--blue);font-size:16px}
+.share-nav>span{min-width:44px;text-align:right;font-size:12px;color:var(--secondary)}
+.share-body{flex:1;min-height:0;overflow:auto;padding:14px 28px 0;overscroll-behavior:contain;scrollbar-width:none}
+/* A fine paper edge frames the exported artwork; shadows remain in the preview, never baked into the PNG. */
+.share-paper{width:100%;max-width:330px;margin:0 auto;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px #ffffffc9,0 3px 5px #29244104,0 18px 40px #29244110;background:white}
+.share-paper img{display:block;width:100%;height:auto}
+.share-paper.not-ready{aspect-ratio:3/4;display:grid;place-items:center}
+.share-placeholder{padding:24px;text-align:center;font-size:14px;color:var(--secondary);line-height:1.6}
+.share-placeholder strong{font-size:15px;color:var(--ink);font-weight:500}
+.share-placeholder button{display:block;margin:16px auto 0;min-height:44px;background:none;color:var(--blue);font-size:15px}
+.share-spinner{display:block;width:24px;height:24px;margin:auto;border:2px solid #e1dfe9;border-top-color:var(--share-accent);border-radius:50%;animation:share-spin .8s linear infinite}
+.share-caption{margin:10px 0 14px;font-size:12px;line-height:1.6;text-align:center;color:var(--secondary)}
+.share-footer{flex:none;padding:10px 24px 23px;background:#f2f2f7}
+.share-primary{display:block;width:100%;min-height:50px;border-radius:14px;background:var(--share-accent);color:white;font-size:16px;font-weight:600}
+.share-save{display:block;width:100%;min-height:44px;background:none;color:var(--blue);font-size:15px;margin-top:4px}
+.share-status{font-size:11px;line-height:1.5;color:var(--secondary);text-align:center;margin:3px 0 0;min-height:17px}
+/* Native destinations are clearly labelled simulations; no fake send-success or permission claim is shown. */
+.share-scrim{position:absolute;inset:0;background:#19192755;display:flex;align-items:flex-end}
+.share-action-sheet{width:100%;border-radius:26px 26px 0 0;padding:25px 24px 30px;background:#fafafd;animation:sheet-in .2s ease-out}
+.share-simulation{display:block;text-align:center;font-size:11px;color:var(--secondary)}
+.share-action-sheet h3{text-align:center;font-size:20px;margin:15px 0 8px;font-weight:600}
+.share-action-sheet p{font-size:13px;line-height:1.7;color:var(--secondary);text-align:center;margin:8px 0 20px}
+.share-destinations{display:flex;gap:16px;justify-content:center;margin:22px 0}
+.share-destinations button{width:132px;min-height:110px;background:none;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:13px;color:var(--ink)}
+.share-destinations button span{width:62px;height:62px;border-radius:17px;display:grid;place-items:center;background:#e5f3e8;color:#226339;font-size:14px;font-weight:600}
+.share-destinations button:nth-child(2) span{background:#e9e9f8;color:#4b4b84}
+@keyframes share-spin{to{transform:rotate(360deg)}}
+@media(max-width:420px){.share-body{padding-left:24px;padding-right:24px}}
+
+
+/* A native-menu simulation overlays the originating screen without adding a preview navigation step. */
+#share-root { background:transparent; }
+.share-direct {position:absolute;inset:0;background:#17191cbb;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:40px 0 0;overflow:auto;}
+.share-direct-image {width:76%;max-height:64%;min-height:0;display:flex;align-items:center;justify-content:center;flex:1;margin-bottom:30px;}
+.share-direct-image img {display:block;max-width:100%;max-height:100%;object-fit:contain;}
+.share-direct-actions {width:100%;padding:18px 16px 24px;background:#f5f5f7;flex:none;}
+.share-direct-actions .share-destinations {gap:4px;margin:12px 0;}
+.share-direct-actions .share-destinations button {width:30%;min-height:94px;}
+.share-direct-close {display:block;width:100%;min-height:44px;background:none;font-size:16px;color:var(--blue);}
+.share-direct-progress {margin:auto;padding:24px 30px;background:#fff;border-radius:18px;text-align:center;font-size:14px;}
+.share-direct-progress button {min-height:44px;color:var(--blue);background:none;padding:0 14px;}

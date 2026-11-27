@@ -6,9 +6,12 @@
   <meta name="color-scheme" content="light">
   <title>北极星打卡 · 交互原型</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="share-preview.css">
   <script src="appearance.js" defer></script>
   <!-- The selected local particle engine loads on demand; production mini-program code is separate. -->
   <script src="confetti-review.js" defer></script>
+  <!-- Sharing exports actual local PNGs; WeChat-only actions stay explicitly simulated. -->
+  <script src="share-preview.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -41,6 +44,17 @@
       <button data-demo="empty">无项目状态<span>07</span></button>
     </nav>
     <div class="review-foot">
+      <div class="share-review">
+        <label for="share-review-mode">分享流程评审</label>
+        <select id="share-review-mode" aria-label="分享评审状态">
+          <option value="normal">正常流程</option>
+          <option value="generate-failure">图片生成失败</option>
+          <option value="legacy">低版本微信</option>
+          <option value="album-denied">相册权限拒绝</option>
+        </select>
+        <button data-demo="share-record">预览打卡结果</button>
+        <button data-demo="share-stats">预览统计结果</button>
+      </div>
       <!-- Disposable review actions stay outside the product and reuse its actual record-success path. -->
 
       <p>点卡片记录，点顶部图标或项目名查看统计。<br>示例数据仅用于体验，刷新可还原。</p>
@@ -55,6 +69,8 @@
     <div id="app-header" class="app-header"></div>
     <div id="screen" class="screen"></div>
     <div id="overlay-root"></div>
+    <!-- An independent modal preserves the record undo deadline beneath the sharing flow. -->
+    <div id="share-root"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div class="home-indicator" aria-hidden="true"></div>
   </main>

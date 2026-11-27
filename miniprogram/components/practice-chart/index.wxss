@@ -8,12 +8,19 @@
   flex-direction: column;
 }
 .reading-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* The page-level folded corner reserves the right edge without adding a footer row. */
+  padding-right: 46px;
   flex-shrink: 0;
   height: 24px;
   padding-top: 4px;
   box-sizing: border-box;
 }
 .reading {
+  flex: 1;
+  min-width: 0;
   color: #6b6b73;
   font-size: 12px;
   line-height: 20px;

@@ -28,6 +28,11 @@ for (const name of [
   'styles.css',
   'app.js',
   'appearance.js',
+  // The embedded prototype references these locally even when sharing controls are hidden.
+  'share-preview.js',
+  'share-preview.css',
+  // Same official app artwork as the native poster.
+  'brand.png',
   'confetti-review.js',
   'vendor/tsparticles-confetti-4.6.0.min.js',
   'vendor/LICENSE-tsparticles-confetti.txt',

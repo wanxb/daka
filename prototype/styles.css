@@ -271,8 +271,11 @@ body.embedded{padding:0;display:block;background:transparent}.embedded .review-p
 .chart-card .chart-top{flex-shrink:0}
 .statistics-body{flex:1;min-height:0;display:flex;flex-direction:column}
 .calendar-body>*{flex-shrink:0}
-/* A single compact footer removes the old second-row reservation without changing calendar touch targets. */
-.calendar-body .calendar-footer{margin-top:auto;height:34px;display:flex;align-items:center;gap:8px}
+/* Visible weeks fill the same fixed card as the plots; absent weeks never become blank rows above sharing. */
+.calendar-body .heat-grid{flex:1;min-height:0;grid-template-rows:repeat(var(--calendar-rows,6),minmax(44px,1fr))}
+.calendar-body .heat-day{height:100%;min-height:44px}
+/* Reserve a stable readout/share footer while allowing the date rows to absorb available height. */
+.calendar-body .calendar-footer{margin-top:0;height:34px;display:flex;align-items:center;gap:8px}
 .calendar-footer .calendar-reading{flex:1;min-width:0;height:34px;line-height:34px;padding-top:0;font-size:11px}
 .calendar-footer .heat-legend{flex-shrink:0}
 /* Let marks occupy the shared card body instead of pushing a short plot to its bottom. */

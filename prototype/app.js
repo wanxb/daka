@@ -363,6 +363,11 @@
     return markup;
   }
 
+  /** One footer action is shared by every graph mode, keeping the title and readout independent. */
+  function statisticsShareMarkup() {
+    return statisticsPreview ? "" : '<button class="statistics-share-icon" data-action="share-stats" aria-label="\u5206\u4eab\u5f53\u524d\u7edf\u8ba1"><span>分享</span></button>';
+  }
+
   function detailMarkup(project) {
     const records = recordsFor(project.id), data = series(project);
     const calendarView = state.graph === "calendar", heat = calendarView ? calendarData(project) : null;
@@ -378,12 +383,13 @@
     // Daily aggregation remains available internally; hide its entry until repeated daily records warrant it.
     const periods = [ ["week", "周"], ["month", "月"], ["year", "年"], ["all", "全部"]].map(([value, label]) => `<button data-action="range" data-value="${value}" class="${state.range === value ? 'active' : ''}" aria-pressed="${state.range === value}">${label}</button>`).join("");
     // A fixed statistics preview omits offscreen editing/navigation controls instead of leaving hidden focus targets.
+    // Sharing stays inside its chart card; the gap before history contains no detached actions.
     const trailing = statisticsPreview ? "" : recordSectionMarkup(records, selectedRows) + '<button class="settings-link" data-action="settings"><span>项目设置</span>' + icon("chevron") + '</button><button class="project-delete" data-action="delete-project">删除项目</button>';
     // Collapse only genuine single-metric summaries; historical values of disabled types retain the dual layout.
     return `<div class="detail-heading"><span class="project-badge">${icon(project.icon)}</span><h1>${escape(project.name)}</h1><span class="frequency-badge">${frequencyName(project)}</span></div>
       <div class="lifetime-caption">累计${project.primary === "durationSeconds" ? "时间" : "数量"}</div><div class="lifetime-number">${totalMarkup}</div>${hasBoth ? '<div class="lifetime-secondary">' + escape(secondary) + '</div>' : ''}${tabs}
       <section class="chart-card ${hasBoth ? '' : 'single-metric'}" aria-label="练习统计"><div class="chart-top"><div class="small-segment" role="group" aria-label="图表类型">${[["cumulative", "累计"], ["distribution", "分布"], ["calendar", "日历"]].map(([id, label]) => `<button data-action="graph" data-value="${id}" class="${state.graph === id ? 'active' : ''}" aria-pressed="${state.graph === id}">${label}</button>`).join("")}</div></div>
-      <div class="statistics-body ${heat ? 'calendar-body' : 'standard-body'}">${heat ? `<div class="period-nav calendar-nav"><button data-action="calendar-month" data-delta="-1" aria-label="上个月" ${heat.previous ? '' : 'disabled'}>${icon("back")}</button><strong>${heat.label}</strong><button data-action="calendar-month" data-delta="1" aria-label="下个月" ${(state.calendarOffset || 0) >= 0 ? 'disabled' : ''}>${icon("chevron")}</button></div>${calendarMarkup(heat, reading)}` : `<div class="period-selector">${periods}</div><div class="period-nav ${state.range === 'all' ? 'period-nav-all' : ''}"><button data-action="period" data-delta="-1" aria-label="${state.range === 'week' ? '上一周' : state.range === 'month' ? '上个月' : '上一年'}" ${state.range === 'all' ? 'disabled' : ''}>${icon("back")}</button><strong>${data.periodLabel}</strong><button data-action="period" data-delta="1" aria-label="${state.range === 'week' ? '下一周' : state.range === 'month' ? '下个月' : '下一年'}" ${state.range === 'all' || state.offset >= 0 ? 'disabled' : ''}>${icon("chevron")}</button></div><div class="chart-plot" tabindex="0" role="group" aria-label="${state.graph === 'cumulative' ? '累计' : '分布'}${state.metric === 'durationSeconds' ? '时间' : '数量'}图，点选或使用左右方向键查看准确读数，Esc收起">${chartMarkup(data, project)}</div>`}${heat ? "" : `<div class="chart-footer-reading" role="status">${reading}</div>`}</div></section>
+      <div class="statistics-body ${heat ? 'calendar-body' : 'standard-body'}">${heat ? `<div class="period-nav calendar-nav"><button data-action="calendar-month" data-delta="-1" aria-label="上个月" ${heat.previous ? '' : 'disabled'}>${icon("back")}</button><strong>${heat.label}</strong><button data-action="calendar-month" data-delta="1" aria-label="下个月" ${(state.calendarOffset || 0) >= 0 ? 'disabled' : ''}>${icon("chevron")}</button></div>${calendarMarkup(heat, reading)}` : `<div class="period-selector">${periods}</div><div class="period-nav ${state.range === 'all' ? 'period-nav-all' : ''}"><button data-action="period" data-delta="-1" aria-label="${state.range === 'week' ? '上一周' : state.range === 'month' ? '上个月' : '上一年'}" ${state.range === 'all' ? 'disabled' : ''}>${icon("back")}</button><strong>${data.periodLabel}</strong><button data-action="period" data-delta="1" aria-label="${state.range === 'week' ? '下一周' : state.range === 'month' ? '下个月' : '下一年'}" ${state.range === 'all' || state.offset >= 0 ? 'disabled' : ''}>${icon("chevron")}</button></div><div class="chart-plot" tabindex="0" role="group" aria-label="${state.graph === 'cumulative' ? '累计' : '分布'}${state.metric === 'durationSeconds' ? '时间' : '数量'}图，点选或使用左右方向键查看准确读数，Esc收起">${chartMarkup(data, project)}</div>`}${heat ? "" : `<div class="statistics-footer"><div class="chart-footer-reading" role="status">${reading}</div></div>`}</div>${statisticsShareMarkup()}</section>
       ${trailing}`;
   }
 
@@ -410,8 +416,11 @@
   }
 
   function calendarMarkup(heat, reading) {
-    // Stable six-row geometry and independent selection rings keep touch targets and the record list in place.
-    return `<div class="heat-weekdays" aria-hidden="true">${["一", "二", "三", "四", "五", "六", "日"].map(day => `<span>${day}</span>`).join("")}</div><div class="heat-grid" role="group" aria-label="每日${state.metric === 'quantity' ? '数量' : '时间'}记录日历">${heat.cells.map(cell => `<button class="heat-day level-${cell.level} ${cell.today ? 'is-today' : ''} ${state.calendarDate === cell.date ? 'selected' : ''} ${cell.future ? 'future' : ''}" data-action="calendar-day" data-date="${cell.date}" ${cell.disabled ? 'disabled' : ''} aria-pressed="${state.calendarDate === cell.date}" aria-hidden="${!cell.day}" aria-label="${escape(cell.future ? cell.date + "，未来日期" : cell.reading)}"><span>${cell.missing ? '—' : cell.day}</span></button>`).join("")}</div><div class="calendar-footer"><div class="chart-footer-reading calendar-reading" role="status">${reading}</div><div class="heat-legend"><span>少</span>${[1, 2, 3, 4].map(level => `<i class="level-${level}" aria-label="本年单日最多记录${state.metric === 'quantity' ? '数量' : '时间'}的${(level - 1) * 25}%至${level * 25}%"></i>`).join("")}<span>多</span></div></div>`;
+    // Keep the shared 42-cell data model, but omit wholly empty trailing weeks from the visible month.
+    // Remaining weeks stretch evenly inside the fixed card; future dates in this month stay visible.
+    const weekCount = Math.max(4, Math.ceil((heat.cells.findLastIndex(cell => cell.day) + 1) / 7));
+    const visibleCells = heat.cells.slice(0, weekCount * 7);
+    return `<div class="heat-weekdays" aria-hidden="true">${["一", "二", "三", "四", "五", "六", "日"].map(day => `<span>${day}</span>`).join("")}</div><div class="heat-grid" style="--calendar-rows:${weekCount}" role="group" aria-label="每日${state.metric === 'quantity' ? '数量' : '时间'}记录日历">${visibleCells.map(cell => `<button class="heat-day level-${cell.level} ${cell.today ? 'is-today' : ''} ${state.calendarDate === cell.date ? 'selected' : ''} ${cell.future ? 'future' : ''}" data-action="calendar-day" data-date="${cell.date}" ${cell.disabled ? 'disabled' : ''} aria-pressed="${state.calendarDate === cell.date}" aria-hidden="${!cell.day}" aria-label="${escape(cell.future ? cell.date + "，未来日期" : cell.reading)}"><span>${cell.missing ? '—' : cell.day}</span></button>`).join("")}</div><div class="calendar-footer"><div class="chart-footer-reading calendar-reading" role="status">${reading}</div></div>`;
   }
 
   // Stable date/creation ordering prevents duplicate or skipped rows when successive slices are appended.
@@ -467,10 +476,60 @@
       if (record[metric] != null) values.push(metric === "durationSeconds" ? timeText(record[metric], project) : quantityText(record[metric], project));
     });
     const date = record.date === DEMO_TODAY ? "今天" : shortDate(record.date);
+    // The full row opens editing; sharing is intentionally absent from individual history entries.
     return '<button class="record-row" data-action="edit-record" data-id="' + record.id + '" aria-label="编辑' + escape(date + values.join("、")) + '"><span><span class="record-main">' + escape(values.join(" · ")) + '</span><span class="record-meta" style="display:block">' + date + (record.time ? " " + record.time : "") + (record.notes ? " · " + escape(record.notes.length > 16 ? record.notes.slice(0, 16) + "…" : record.notes) : "") + '</span></span>' + icon("chevron") + '</button>';
   }
 
+  /** Only committed demonstration records cross into the read-only sharing renderer. */
+  function openShareRecord(id) {
+    const record = state.records.find(row => row.id === id);
+    const original = record && projectById(record.projectId);
+    if (!record || !original) return;
+    const project = { ...original, quantityUnit: record.quantityUnit || unitFor(original) };
+    // Validate all source revisions so editing invalidates an open preview.
+    const fingerprint = JSON.stringify([original, recordsFor(project.id)]);
+    const metricParts = (value, metric) => metric === "durationSeconds" ? timeDisplay(value, project) : { number: number(value), unit: unitFor(project) };
+    const metrics = metricOrder(project).filter(metric => record[metric] != null).map(metric => ({ ...metricParts(record[metric], metric), label: metric === "durationSeconds" ? "本次时间" : "本次数量" }));
+    clearCelebration();
+    window.DakaShare.open({
+      kind: "record", name: project.name, color: palettes[project.color].start, icon: icon(project.icon),
+      date: record.date.replaceAll("-", ".") + (record.time ? "  " + record.time : ""),
+      title: "打卡成功", metrics, note: record.notes,
+      // Only this committed record belongs on its poster.
+      summary: "", count: "", filename: project.name + "-打卡-" + record.date,
+    }, () => JSON.stringify([projectById(record.projectId), recordsFor(project.id)]) === fingerprint);
+  }
+
+  /** Freeze chart scope, units and source revision together; pagination and point selections never alter totals. */
+  function openShareStatistics() {
+    const project = projectById(state.projectId);
+    if (!project) return;
+    const rows = recordsFor(project.id), fingerprint = JSON.stringify([project, rows]);
+    const data = series(project), heat = state.graph === "calendar" ? calendarData(project) : null;
+    const selected = heat ? heat.rows : data.selected;
+    const start = heat ? heat.cells.find(cell => cell.day === 1).date : data.start;
+    const end = heat ? [moveDay(start, new Date(Number(start.slice(0, 4)), Number(start.slice(5, 7)), 0).getDate() - 1), DEMO_TODAY].sort()[0] : data.actualEnd;
+    const format = value => state.metric === "durationSeconds" ? timeDisplay(value, project) : { number: number(value), unit: unitFor(project) };
+    const added = sum(selected, state.metric);
+    const cumulative = state.graph === "cumulative";
+    const result = cumulative ? data.baseline + added : added;
+    clearCelebration();
+    window.DakaShare.open({
+      kind: "statistics", graph: state.graph, name: project.name, color: palettes[project.color].start, icon: icon(project.icon),
+      title: ({ cumulative: "累计统计", distribution: "分布统计", calendar: "日历统计" })[state.graph],
+      date: start.replaceAll("-", ".") + " — " + end.replaceAll("-", "."),
+      metrics: [{ ...format(result), label: cumulative ? "当前累计" : "本期新增" }],
+      summary: cumulative ? "截至 " + (end > DEMO_TODAY ? DEMO_TODAY : end).replaceAll("-", ".") + " · 本期新增 " + (state.metric === "durationSeconds" ? timeText(added, project) : quantityText(added, project)) : "按发生日期统计实际投入",
+      count: selected.length + " 条记录 · " + new Set(selected.filter(row => row[state.metric] > 0).map(row => row.date)).size + " 个投入日",
+      values: data.values.map(value => value == null ? null : state.metric === "durationSeconds" ? value / timeFactor(project) : value),
+      labels: data.labels, baseline: state.metric === "durationSeconds" ? data.baseline / timeFactor(project) : data.baseline,
+      cells: heat?.cells, filename: project.name + "-" + state.graph + "-" + start,
+    }, () => JSON.stringify([projectById(project.id), recordsFor(project.id)]) === fingerprint);
+  }
+
   function render() {
+    // A deleted/edited source invalidates its preview instead of exporting a stale success result.
+    window.DakaShare?.validate();
     // Navigation, undo and rerenders must not leave feedback anchored to a replaced card.
     clearCelebration();
     // Replaced nodes must not leave a pagination callback attached to an earlier project or period.
@@ -835,7 +894,8 @@
     clearTimeout(toastTimer); state.undo = undo;
     const toast = document.getElementById("toast");
     // Validation hints use short text only, avoiding a success checkmark or long-lived visual interruption.
-    toast.innerHTML = '<span class="toast-message">' + (subtle ? "" : icon("check")) + escape(message) + '</span>' + (undo ? '<button data-action="undo">撤销</button>' : "");
+    // Keep undo before the optional share action in both visual and keyboard order without extending its deadline.
+    toast.innerHTML = '<span class="toast-message">' + (subtle ? "" : icon("check")) + escape(message) + '</span>' + (undo ? '<span class="toast-actions"><button data-action="undo">撤销</button>' + (undo.type === 'create' ? '<button data-action="share-record" data-id="' + escape(undo.record.id) + '">分享</button>' : '') + '</span>' : "");
     toast.classList.add("visible");
     toastTimer = setTimeout(hideToast, subtle ? 1500 : 5000);
   }
@@ -1125,6 +1185,8 @@
   }
 
   function demoScene(scene) {
+    // Review navigation dismisses temporary previews; no sharing state enters project drafts.
+    window.DakaShare?.close();
     clearCelebration();
     closeSheet();
     // Review-only shortcuts exercise the real success path using disposable fixture records.
@@ -1158,6 +1220,8 @@
     else if (scene === "quantity") { showHome(); openRecord("basketball", { fresh: true }); }
     else if (scene === "both") { showHome(); openRecord("rope", { fresh: true }); }
     else if (scene === "detail") showDetail("rope");
+    else if (scene === "share-record") { if (!projectById("reading")) resetFixtures(); showHome(); openShareRecord("reading-today"); }
+    else if (scene === "share-stats") { if (!projectById("rope")) resetFixtures(); showDetail("rope"); openShareStatistics(); }
     else if (scene === "create") openEditor();
     else if (scene === "empty") { state.projects = []; state.records = []; showHome(); }
     document.querySelectorAll("[data-demo]").forEach(button => button.classList.toggle("active", button.dataset.demo === scene));
@@ -1318,7 +1382,9 @@
     if (state.view === 'home' && ['record','detail','create'].includes(action) && (state.arranging || Date.now() < suppressCardClickUntil)) return;
     if (action === 'finish-arrange') { finishArrange(true); return; }
     if (action === 'remove-card') { state.projectId = button.dataset.id; confirmDelete('project'); return; }
-    if (action === "record") recordProject(button.dataset.id);
+    if (action === "share-record") openShareRecord(button.dataset.id);
+    else if (action === "share-stats") openShareStatistics();
+    else if (action === "record") recordProject(button.dataset.id);
     else if (action === "detail") showDetail(button.dataset.id);
     else if (action === "create") openEditor();
     else if (action === "clear-search") {

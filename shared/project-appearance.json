@@ -150,7 +150,8 @@
     "chart": "chart-bar",
     "bolt": "lightning",
     "edit": "pencil-simple",
-    "expand": "caret-down"
+    "expand": "caret-down",
+    "share": "export"
   },
   "projectIconAliases": {
     "rope": "run",

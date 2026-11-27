@@ -14,7 +14,11 @@ export const feedbackMethods = {
     await this.load();
     if (!this._alive || !this._visible || version !== this._celebrationVersion) return;
     const p = this._db?.projects.find((p) => p.id === e.detail.record.projectId);
-    if (p) this.notify('已记录 ' + recordText(p, e.detail.record));
+    if (p)
+      this.notify(
+        '已记录 ' + recordText(p, e.detail.record),
+        e.detail.editing ? undefined : e.detail.record,
+      );
     if (!e.detail.editing && e.detail.record.occurredOn === dateKey()) {
       // The native after-leave event may precede or follow storage refresh; support either ordering.
       if (this._sheetOpen) this._pendingCelebration = e.detail.record;
@@ -86,7 +90,12 @@ export const feedbackMethods = {
         .exec();
     });
   },
-  notify(this: HomePage, message: string) {
-    this.setData({ toast: message, expiresAt: this._db?.undo?.expiresAt || 0 });
+  notify(this: HomePage, message: string, record?: PracticeRecord) {
+    // Only the newly committed record can offer sharing; deletion undo and edits never reuse an old result.
+    this.setData({
+      toast: message,
+      expiresAt: this._db?.undo?.expiresAt || 0,
+      shareRecordId: record?.id || '',
+    });
   },
 };

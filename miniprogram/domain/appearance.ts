@@ -154,6 +154,7 @@ export const iconNames = [
   'bolt',
   'edit',
   'expand',
+  'share',
 ];
 export const iconTones: Record<string, string[]> = {
   book: [
@@ -399,6 +400,7 @@ export const iconTones: Record<string, string[]> = {
     'teal',
     'white',
   ],
+  share: ['muted'],
   search: ['muted'],
   close: ['ink', 'muted'],
   plus: ['muted'],

@@ -1,5 +1,17 @@
 <!-- The absolute repository deadline controls visibility; time in the background never extends undo. -->
 <view wx:if="{{visible}}" class="toast" aria-role="alert">
   <text class="message">{{message}}</text>
-  <button class="undo" bindtap="undo" disabled="{{busy}}" hover-class="pressed">撤销</button>
+  <!-- DOM order matches the approved left-to-right actions and keyboard/reader order. -->
+  <view class="actions">
+    <button class="undo" bindtap="undo" disabled="{{busy}}" hover-class="pressed">撤销</button>
+    <button
+      wx:if="{{shareRecordId}}"
+      class="undo"
+      bindtap="share"
+      disabled="{{busy}}"
+      hover-class="pressed"
+    >
+      分享
+    </button>
+  </view>
 </view>

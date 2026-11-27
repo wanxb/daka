@@ -1,5 +1,10 @@
 {
-  "pages": ["pages/home/index", "pages/project-detail/index", "pages/project-edit/index"],
+  "pages": [
+    "pages/home/index",
+    "pages/project-detail/index",
+    "pages/project-edit/index",
+    "pages/share-preview/index"
+  ],
   "window": {
     "navigationStyle": "custom",
     "navigationBarTextStyle": "black",

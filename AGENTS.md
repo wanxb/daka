@@ -50,3 +50,5 @@ Unless the user explicitly consents to a specific write action, do not create, s
 - All new or modified code must include meaningful comments that explain responsibilities, invariants, security boundaries, tradeoffs, or non-obvious behavior.
 - Comments must explain why the code exists or which constraints it protects; do not repeat obvious syntax line by line.
 - Public extension points and security-sensitive code require documentation comments or concise boundary comments.
+
+- 分享以 `docs/product/分享.md` 为准：新记录成功提示依次撤销、分享；累计/分布/日历右下角统一项目主题浅色的小圆角翻页式「分享」文字入口（可见44×25px、56×44px命中区、12px主题色文字），不在项目名或历史单条记录上放分享入口。日历不显示少—多图例，实际占用的4/5/6周自适应填满固定卡片，不留整行月外空白。

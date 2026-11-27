@@ -24,7 +24,9 @@ test('正式源码根独立，所有路由与公共组件文件齐全', () => {
   assert.equal(app.renderer, 'webview');
   assert.equal(app.window.navigationStyle, 'custom');
   assert.equal(app.tabBar, undefined);
-  assert.equal(app.pages.length, 3);
+  // The private compatibility save route remains available only for clients without an image menu.
+  assert.equal(app.pages.length, 4);
+  assert.ok(app.pages.includes('pages/share-preview/index'));
   for (const route of [...app.pages, 'components/app-navigation/index']) {
     for (const ext of ['ts', 'json', 'wxml', 'wxss']) {
       assert.ok(existsSync(resolve(root, 'miniprogram', `${route}.${ext}`)), `${route}.${ext}`);

@@ -11,6 +11,11 @@ const assets = new Map([
   ['/app.js', 'app.js'],
   ['/appearance.js', 'appearance.js'],
   ['/styles.css', 'styles.css'],
+  // Share preview assets remain in the same explicit loopback allowlist as the core prototype.
+  ['/share-preview.js', 'share-preview.js'],
+  ['/share-preview.css', 'share-preview.css'],
+  // Only the official resized brand PNG is exposed as a binary asset.
+  ['/brand.png', 'brand.png'],
   // Only the selected local particle engine is exposed; arbitrary project paths remain inaccessible.
   ['/confetti-review.js', 'confetti-review.js'],
   ['/vendor/tsparticles-confetti-4.6.0.min.js', 'vendor/tsparticles-confetti-4.6.0.min.js'],
@@ -42,7 +47,7 @@ const server = createServer((request, response) => {
     response.end('Not found');
     return;
   }
-  readFile(root + asset, 'utf8', (error, content) => {
+  readFile(root + asset, asset.endsWith('.png') ? null : 'utf8', (error, content) => {
     if (error) {
       response.writeHead(500);
       response.end('Unable to read prototype');
@@ -50,11 +55,13 @@ const server = createServer((request, response) => {
     }
     const html = asset.endsWith('.html');
     response.writeHead(200, {
-      'Content-Type': html
-        ? 'text/html; charset=utf-8'
-        : asset.endsWith('.css')
-          ? 'text/css; charset=utf-8'
-          : 'text/javascript; charset=utf-8',
+      'Content-Type': asset.endsWith('.png')
+        ? 'image/png'
+        : html
+          ? 'text/html; charset=utf-8'
+          : asset.endsWith('.css')
+            ? 'text/css; charset=utf-8'
+            : 'text/javascript; charset=utf-8',
       'Cache-Control': 'no-store',
     });
     response.end(
@@ -69,7 +76,17 @@ const server = createServer((request, response) => {
 // Reload only when the visual prototype changes; native WXML/WXSS is intentionally a separate runtime.
 let debounce;
 const watcher = watch(root, (_event, name) => {
-  if (!name || !['index.html', 'board.html', 'app.js', 'styles.css'].includes(name.toString()))
+  if (
+    !name ||
+    ![
+      'index.html',
+      'board.html',
+      'app.js',
+      'styles.css',
+      'share-preview.js',
+      'share-preview.css',
+    ].includes(name.toString())
+  )
     return;
   clearTimeout(debounce);
   debounce = setTimeout(() => {

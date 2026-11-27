@@ -104,7 +104,8 @@ test('所有可保存外观和界面图标均有本地Regular资源，卡片白�
     .filter((file) => file.endsWith('.svg'))
     .map((file) => file.replaceAll('\\', '/'));
   assert.deepEqual(actual.sort(), expected.sort());
-  assert.equal(iconNames.length, 27);
+  // The approved share/export control joins the existing local Phosphor vocabulary.
+  assert.equal(iconNames.length, 28);
   const source = JSON.parse(
     readFileSync(new URL('../shared/phosphor-regular.json', import.meta.url), 'utf8'),
   );

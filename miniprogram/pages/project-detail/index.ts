@@ -1,3 +1,4 @@
+import { shareDirect } from '../../application/share-direct';
 import { prepare, service } from '../../application/service';
 import { frequencyNames } from '../../domain/frequency';
 import { recordPage, type RecordCursor } from '../../application/query';
@@ -23,7 +24,11 @@ import {
 } from '../../domain/model';
 import { statistics, type ChartPoint, type Period } from '../../domain/statistics';
 import { calendarHeatmap, type HeatmapDay } from '../../domain/calendar-heatmap';
-import { heatmapColors, heatmapReading } from '../../application/calendar-presentation';
+import {
+  heatmapColors,
+  heatmapReading,
+  visibleCalendarWeeks,
+} from '../../application/calendar-presentation';
 /** Chart scope and full-history pagination are independent: expanding records never changes chart totals. */
 Page({
   data: {
@@ -55,12 +60,12 @@ Page({
     calendarPrevious: false,
     calendarNext: false,
     calendarReading: '',
+    calendarRows: 6,
     calendarCells: [] as (HeatmapDay & {
       background: string;
       reading: string;
       disabled: boolean;
     })[],
-    calendarLegend: [] as { level: number; color: string; label: string }[],
     weekdays: ['一', '二', '三', '四', '五', '六', '日'],
     points: [] as ChartPoint[],
     baseline: 0,
@@ -87,6 +92,10 @@ Page({
   _cursor: null as RecordCursor | null,
   _request: 0,
   _alive: true,
+  _visible: true,
+  // Invalidates unfinished exports even if the user returns to the same page quickly.
+  _shareEpoch: 0,
+  _sharing: false,
   _scrollTop: 0,
   _titleThreshold: Infinity,
   onLoad(options: Record<string, string | undefined>) {
@@ -94,7 +103,12 @@ Page({
   },
   onShow() {
     this._alive = true;
+    this._visible = true;
     void this.load();
+  },
+  onHide() {
+    this._shareEpoch++;
+    this._visible = false;
   },
   onUnload() {
     this._alive = false;
@@ -196,7 +210,9 @@ Page({
         dateKey(),
       );
       const colors = heatmapColors(this.data.color);
-      const cells = heat.cells.map((day) => ({
+      // Crop only wholly empty trailing weeks in the view; domain and share snapshots keep all cells.
+      const visible = visibleCalendarWeeks(heat.cells);
+      const cells = visible.cells.map((day) => ({
         ...day,
         background: colors[day.level],
         reading: heatmapReading(day, p, this.data.metric),
@@ -213,14 +229,9 @@ Page({
         calendarDateLabel: selected ? displayDate(selected.date) : '',
         calendarReading: selected?.reading || '',
         calendarCells: cells,
+        calendarRows: visible.rows,
         calendarPrevious: heat.previous,
         calendarNext: heat.next,
-        calendarLegend: [1, 2, 3, 4].map((level) => ({
-          level,
-          color: colors[level],
-          // The reference remains the selected year's largest day, independently for each metric.
-          label: `本年单日最多记录${this.data.metric === 'quantity' ? '数量' : '时间'}的${(level - 1) * 25}%至${level * 25}%`,
-        })),
         selectedCount: this._selected.length,
       });
       return;
@@ -247,6 +258,32 @@ Page({
       unit: this.data.metric === 'quantity' ? p.quantityUnit : p.timeUnit,
       factor: this.data.metric === 'quantity' ? 1 : factors[p.timeUnit],
     });
+  },
+  /** Share the graph scope, independently of selected calendar dates and loaded history pages. */
+  async share() {
+    if (!this.data.project || this.data.sheetOpen || this._sharing) return;
+    this._sharing = true;
+    const shareEpoch = this._shareEpoch;
+    try {
+      if (!this._alive || !this._visible) return;
+      await shareDirect(
+        this,
+        {
+          kind: 'statistics',
+          projectId: this._id,
+          graph: this.data.chartMode as 'cumulative' | 'distribution' | 'calendar',
+          metric: this.data.metric,
+          period: this.data.period,
+          offset: this.data.offset,
+          calendarOffset: this.data.calendarOffset,
+        },
+        () => this._alive && this._visible && shareEpoch === this._shareEpoch,
+      );
+    } catch (error) {
+      wx.showToast({ title: errorText(error), icon: 'none' });
+    } finally {
+      this._sharing = false;
+    }
   },
   viewRows(rows: PracticeRecord[]) {
     return recordRows(this.data.project!, rows);

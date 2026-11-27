@@ -65,6 +65,12 @@
 .pressed {
   opacity: 0.6;
 }
+/* Keep both actions compact while preserving each button's established 44px touch surface. */
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+}
 /* Confirmation appears only after persistence; CSS never extends the authoritative undo deadline. */
 .toast {
   animation: confirmation-in 220ms cubic-bezier(0.22, 0.8, 0.3, 1);

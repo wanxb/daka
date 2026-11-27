@@ -111,7 +111,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: auto;
+  margin-top: 0;
   height: 34px;
 }
 .calendar-footer .heat-legend {
@@ -121,4 +121,56 @@
   display: block;
   flex: 1;
   min-height: 0;
+}
+
+/* Actual weeks fill the fixed card; absent weeks never become a blank strip above sharing. */
+.calendar-body .heat-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  flex: 1;
+  min-height: 0;
+}
+.calendar-body .heat-day {
+  width: auto;
+  height: 100%;
+  min-height: 44px;
+}
+/* A small tinted corner supplies the visual cue; the transparent button retains a 44px touch height. */
+.chart-card {
+  position: relative;
+  overflow: hidden;
+}
+.chart-card .statistics-share {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 56px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  z-index: 1;
+}
+.share-corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: block;
+  /* Only the painted corner shrinks; the outer button keeps its 56×44 touch target. */
+  width: 44px;
+  height: 25px;
+  box-sizing: border-box;
+  padding-left: 3px;
+  border-radius: 12px 0 22px 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 25px;
+  text-align: center;
+}
+.statistics-share::after {
+  border: 0;
+}
+.calendar-footer {
+  padding-right: 46px;
 }

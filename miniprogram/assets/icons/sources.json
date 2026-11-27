@@ -29,7 +29,8 @@
     "chart": "chart-bar",
     "bolt": "lightning",
     "edit": "pencil-simple",
-    "expand": "caret-down"
+    "expand": "caret-down",
+    "share": "export"
   },
   "usage": {
     "book": [
@@ -275,6 +276,7 @@
       "teal",
       "white"
     ],
+    "share": ["muted"],
     "search": ["muted"],
     "close": ["ink", "muted"],
     "plus": ["muted"],

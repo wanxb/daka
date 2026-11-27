@@ -138,3 +138,13 @@ button {
     transition: none;
   }
 }
+
+/* Export buffers are fixed outside the viewport so native layers cannot cover navigation or records. */
+.share-buffer {
+  position: fixed;
+  left: -2000px;
+  top: 0;
+  width: 300px;
+  height: 400px;
+  pointer-events: none;
+}

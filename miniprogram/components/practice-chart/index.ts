@@ -67,6 +67,10 @@ Component({
     },
   },
   methods: {
+    /** The parent owns the selected scope; the rendering component emits only intent. */
+    share() {
+      this.triggerEvent('share');
+    },
     plottedPoints(): ChartPoint[] {
       // Use actual statistical buckets directly so the first month and its hit target cannot become a synthetic origin.
       return this.data.points.length

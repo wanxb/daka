@@ -27,6 +27,7 @@ export const homeData = {
   error: '',
   busyId: '',
   toast: '',
+  shareRecordId: '',
   expiresAt: 0,
   limits: inputLimits,
   celebration: null as SuccessCelebration | null,
@@ -69,6 +70,9 @@ export const homeState = {
   _celebrationSequence: null as ReturnType<typeof createCelebrationSequence> | null,
   _celebrationTimer: null as ReturnType<typeof setTimeout> | null,
   _loadVersion: 0,
+  // A hide/show cycle must not revive an export started before the page was hidden.
+  _shareEpoch: 0,
+  _sharing: false,
 };
 /** Narrow runtime contract for extracted actions; Page remains the sole owner of their lifecycle. */
 export type HomePage = WechatMiniprogram.Page.Instance<
@@ -78,7 +82,7 @@ export type HomePage = WechatMiniprogram.Page.Instance<
     filter(): void;
     stopCelebration(): void;
     celebrateRecord(record: PracticeRecord): void;
-    notify(message: string): void;
+    notify(message: string, record?: PracticeRecord): void;
     cancelDrag(): void;
     previewDrag(): void;
   }

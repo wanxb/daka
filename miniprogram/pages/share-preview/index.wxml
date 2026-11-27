@@ -1,0 +1,47 @@
+<!-- The exported file is also the preview; ordinary images participate in scrolling, never the native canvas. -->
+<app-navigation title="分享预览" show-back bind:layout="navLayout" />
+<!-- app-navigation already inserts its own spacer; only subtract that space from the minimum body height. -->
+<view class="share-page" style="--nav-height:{{navHeight}}px;--accent:{{color}}">
+  <view class="share-body">
+    <image
+      wx:if="{{image && !loading && !error}}"
+      class="share-paper"
+      src="{{image}}"
+      data-path="{{image}}"
+      binderror="imageFailed"
+      mode="widthFix"
+      aria-label="{{snapshot.description}}{{snapshot.note?'，备注：'+snapshot.note:''}}"
+    />
+    <view wx:else class="share-placeholder" aria-role="status">
+      <text>{{loading?'正在生成图片':error}}</text>
+      <button wx:if="{{!loading && !invalid}}" class="retry" bindtap="generate">重新生成</button>
+      <button wx:if="{{invalid}}" class="retry" bindtap="back">返回</button>
+    </view>
+    <text class="caption">
+      {{snapshot.kind==='record'?'分享本次打卡的数据。':'保留当前图表、指标与日期范围。'}}
+    </text>
+  </view>
+  <view class="share-actions">
+    <button
+      wx:if="{{canShare}}"
+      class="share-primary"
+      bindtap="share"
+      disabled="{{loading || invalid || busy || !image || !!error}}"
+    >
+      分享图片
+    </button>
+    <button
+      class="share-save"
+      bindtap="save"
+      disabled="{{loading || invalid || busy || !image || !!error}}"
+    >
+      保存图片
+    </button>
+    <text wx:if="{{!timeline}}" class="compatibility">
+      当前版本如无法直接发朋友圈，可保存图片后手动发布。
+    </text>
+  </view>
+</view>
+<!-- A bounded offscreen buffer is never a visible native scrolling layer. -->
+<canvas id="poster-buffer" type="2d" class="poster-buffer" aria-hidden="true" />
+<undo-toast message="{{undoMessage}}" expires-at="{{expiresAt}}" bind:undo="undo" />

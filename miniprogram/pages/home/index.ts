@@ -5,6 +5,7 @@ import { inputLimits, limitText } from '../../domain/input-limits';
 import { homeData, homeState } from './state';
 import { arrangingMethods } from './arranging';
 import { feedbackMethods } from './feedback';
+import { shareDirect } from '../../application/share-direct';
 /** The page composes cohesive actions without changing native handler names or lifecycle ordering. */
 Page({
   data: homeData,
@@ -33,6 +34,7 @@ Page({
     void this.load();
   },
   onHide() {
+    this._shareEpoch++;
     this._visible = false;
     this.stopCelebration();
     // Backgrounding abandons only an unfinished sort; confirmed deletions have already committed.
@@ -57,6 +59,14 @@ Page({
       const db = await prepare();
       if (!this._alive || version !== this._loadVersion) return;
       this._db = db;
+      // Returning from a preview must not restore sharing for an expired, superseded or undone record.
+      if (
+        this.data.shareRecordId &&
+        (db.undo?.type !== 'create' ||
+          db.undo.record.id !== this.data.shareRecordId ||
+          db.undo.expiresAt <= Date.now())
+      )
+        this.setData({ shareRecordId: '', toast: '' });
       if (this.data.arranging) {
         const current = db.projects.map((p) => p.id);
         this._orderIds = this._orderIds
@@ -160,12 +170,38 @@ Page({
       const record = await service().quickRecord(id, this._quickId);
       this._quickId = '';
       await this.load();
-      this.notify('已记录 ' + recordText(p, record));
+      this.notify('已记录 ' + recordText(p, record), record);
       this.celebrateRecord(record);
     } catch (error) {
       this.setData({ error: errorText(error) });
     } finally {
       this.setData({ busyId: '' });
+    }
+  },
+  /** Share the committed result in place; exporting never changes the undo deadline. */
+  async shareRecord() {
+    if (this._sharing || !this.data.shareRecordId) return;
+    const recordId = this.data.shareRecordId;
+    this._sharing = true;
+    const shareEpoch = this._shareEpoch;
+    this.stopCelebration();
+    try {
+      const db = await prepare(),
+        record = db.records.find((r) => r.id === recordId);
+      if (!record || recordId !== this.data.shareRecordId || !this._alive || !this._visible) return;
+      await shareDirect(
+        this,
+        {
+          kind: 'record',
+          projectId: record.projectId,
+          recordId: record.id,
+        },
+        () => this._alive && this._visible && shareEpoch === this._shareEpoch,
+      );
+    } catch (error) {
+      wx.showToast({ title: errorText(error), icon: 'none' });
+    } finally {
+      this._sharing = false;
     }
   },
   async undo() {
