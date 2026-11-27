@@ -103,7 +103,8 @@
 /* Expanded history uses the page's scroll, with a sticky collapse action and incremental row insertion. */
 /* Graph type is the primary switch; a quieter, flat period row keeps attention on the data. */
 .chart-card{padding:16px 16px 10px;border-radius:22px}
-.chart-card .chart-top{display:block;margin-bottom:10px}
+/* Compact spacing groups the controls while preserving disjoint 44px hit areas. */
+.chart-card .chart-top{display:block;margin-bottom:4px}
 .chart-top .small-segment{width:100%;padding:3px;border-radius:10px;background:#f0f0f4}
 .chart-top .small-segment button{position:relative;flex:1;min-width:0;height:30px;padding:0;border-radius:7px;font-size:13px}
 .chart-top .small-segment button.active{box-shadow:0 1px 3px #24243b10}

@@ -137,7 +137,13 @@
             aria-pressed="{{period===item.id}}"
             hover-class="pressed"
           >
-            <text class="period-pill {{period===item.id?'active':''}}">{{item.label}}</text>
+            <!-- Keep label content inline: native text preserves formatting newlines inside a fixed-height pill. -->
+            <view
+              class="period-pill {{period===item.id?'active':''}}"
+              style="background:{{period===item.id?color+'14':'transparent'}}"
+            >
+              <text>{{item.label}}</text>
+            </view>
           </button>
         </view>
         <view class="date-navigation">
