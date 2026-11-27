@@ -295,6 +295,30 @@ test('正式页面与面板状态流程', async (t) => {
     assert.equal((await service().snapshot()).projects[0].quantityUnit, '毫升');
     editor.onUnload();
   });
+  // A joined emoji is one visible name symbol; input, draft restore and domain persistence must agree.
+  await t.test(
+    '名称组合Emoji完整保留，插入第七个符号不丢原内容，草稿和创建后保持原文',
+    async () => {
+      await reset();
+      const editor = make(editorOptions);
+      await editor.onLoad({});
+      const name = '👨‍👩‍👧‍👦👩🏽‍💻🇨🇳1️⃣🏳️‍🌈阅';
+      editor.text(event({ field: 'name' }, name));
+      assert.equal(editor.data.form.name, name);
+      assert.equal(editor.data.canSave, true);
+      assert.equal(editor.text(event({ field: 'name' }, '新' + name)), name);
+      assert.equal(editor.data.form.name, name);
+      await editor.flushDraft();
+      assert.equal((await service().snapshot()).newProjectDraft!.name, name);
+      editor.onUnload();
+      const reopened = make(editorOptions);
+      await reopened.onLoad({});
+      assert.equal(reopened.data.form.name, name);
+      await reopened.save();
+      assert.equal((await service().snapshot()).projects[0].name, name);
+      reopened.onUnload();
+    },
+  );
   await t.test(
     '空名称点击创建定位输入而不落库，补齐名称才创建；缺失类型和范围同样定位',
     async () => {

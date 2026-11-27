@@ -21,6 +21,7 @@
       </view>
     </view>
     <view class="surface name-row">
+      <!-- Native maxlength counts UTF-16 and can split joined Emoji before bindinput; the controller enforces six whole symbols. -->
       <input
         id="editor-name"
         focus="{{focusedField === 'name'}}"
@@ -28,7 +29,7 @@
         value="{{form.name}}"
         data-field="name"
         bindinput="text"
-        maxlength="{{limits.projectName*2}}"
+        maxlength="-1"
         placeholder="打卡名称"
         aria-label="打卡名称"
       />

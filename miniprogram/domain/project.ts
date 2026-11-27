@@ -5,6 +5,7 @@ import {
   timeInputLimits,
   textLength,
   quantityUnitAllowed,
+  projectNameLength,
 } from './input-limits';
 import { palettes, projectIcons, resolveProjectIcon } from './appearance';
 import {
@@ -87,7 +88,8 @@ export function makeProject(form: ProjectForm, now: number, original?: Project):
   const unchangedName = original?.name === name;
   if (
     !name ||
-    textLength(name) > (unchangedName ? storedTextLimits.projectName : inputLimits.projectName)
+    projectNameLength(name) >
+      (unchangedName ? storedTextLimits.projectName : inputLimits.projectName)
   )
     throw new PracticeError('INVALID', `打卡名称请填写1～${inputLimits.projectName}个字。`);
   if (!unchangedName && /[\u0000-\u001f\u007f\u2028\u2029]/.test(name))

@@ -16,6 +16,9 @@
   // Mirrors the shared native policy: a duration day is 86400 seconds; seconds are compatibility-only.
   const TIME_LIMITS = { "分": 525600, "时": 8760, "天": 365, "秒": 31536000 };
   const textLength = text => Array.from(text).length;
+  // Mirror native whole-Emoji name counting; do not apply this name-specific policy to notes or search.
+  const projectNameSymbols = /\p{Regional_Indicator}{2}|[#*0-9]\uFE0F?\u20E3|\p{Extended_Pictographic}[\p{M}\u{1F3FB}-\u{1F3FF}\u{E0020}-\u{E007F}]*(?:\u200D\p{Extended_Pictographic}[\p{M}\u{1F3FB}-\u{1F3FF}\u{E0020}-\u{E007F}]*)*|[\s\S]/gu;
+  const projectNameLength = text => (text.match(projectNameSymbols) || []).length;
   const clipText = (text, maximum) => Array.from(text).slice(0, maximum).join("");
   const oneLine = text => text.replace(/[\r\n\t\u2028\u2029]+/g, " ").replace(/[\u0000-\u001f\u007f]/g, "");
   const normalizeNote = text => text.replace(/\r\n?/g, "\n").replace(/\t/g, " ");
@@ -1016,7 +1019,7 @@
     const primary = editor.mode === "both" ? editor.primary : timeEnabled ? "durationSeconds" : quantityEnabled ? "quantity" : null;
     const primaryButtons = [["durationSeconds", "时间", timeEnabled], ["quantity", "数量", quantityEnabled]].map(([value, label, enabled]) => `<button data-action="editor-primary" data-value="${value}" class="${primary === value ? 'active' : ''}" aria-pressed="${primary === value}" ${enabled ? '' : 'disabled'}>${label}</button>`).join("");
     const config = `<div class="setting-box editor-config">${metricGroupMarkup("duration", "时间", timeParameters)}${metricGroupMarkup("quantity", "数量", quantityParameters)}${frequencySettingMarkup(editor)}<div class="setting-row primary-metric-row config-heading-row">${configRowLabel("主要指标", "chart")}<div class="editor-metric-toggle" role="group" aria-label="主要指标">${primaryButtons}</div></div><label class="setting-row direct-entry-row config-heading-row">${configRowLabel("快速打卡", "bolt")}<input class="toggle" type="checkbox" role="switch" data-editor="direct" ${editor.direct ? 'checked' : ''} aria-label="快速打卡"></label></div>`;
-    return `<div class="editor-preview" style="${cssColor(editor)}">${icon(editor.icon)}<div><strong id="preview-name">${escape(editor.name || "打卡名称")}</strong><span>${frequencyName(editor)} · ${modeLabel(editor.mode)}</span></div></div><div class="setting-box"><label class="setting-row"><input class="full-name-input" data-editor="name" value="${escape(editor.name)}" placeholder="打卡名称" maxlength="12" aria-label="打卡名称"></label></div><div class="editor-label">外观样式</div><div class="setting-box"><div class="color-options">${colors}</div><div class="icon-options">${icons}</div><button class="appearance-more" data-action="appearance-more" aria-expanded="${Boolean(state.appearanceExpanded)}"><span>${state.appearanceExpanded ? "收起外观" : "更多外观"}</span><span class="appearance-arrow ${state.appearanceExpanded ? "expanded" : ""}">${icon("expand")}</span></button></div><div class="editor-label">打卡类型</div>${config}<button class="primary-button editor-save" data-action="save-project">${editor.id ? "保存设置" : "创建打卡"}</button>`;
+    return `<div class="editor-preview" style="${cssColor(editor)}">${icon(editor.icon)}<div><strong id="preview-name">${escape(editor.name || "打卡名称")}</strong><span>${frequencyName(editor)} · ${modeLabel(editor.mode)}</span></div></div><div class="setting-box"><label class="setting-row"><input class="full-name-input" data-editor="name" value="${escape(editor.name)}" placeholder="打卡名称" aria-label="打卡名称"></label></div><div class="editor-label">外观样式</div><div class="setting-box"><div class="color-options">${colors}</div><div class="icon-options">${icons}</div><button class="appearance-more" data-action="appearance-more" aria-expanded="${Boolean(state.appearanceExpanded)}"><span>${state.appearanceExpanded ? "收起外观" : "更多外观"}</span><span class="appearance-arrow ${state.appearanceExpanded ? "expanded" : ""}">${icon("expand")}</span></button></div><div class="editor-label">打卡类型</div>${config}<button class="primary-button editor-save" data-action="save-project">${editor.id ? "保存设置" : "创建打卡"}</button>`;
   }
 
   // Submission eligibility and persistence share one prepared clone; raw text remains untouched until blur or a write.
@@ -1047,7 +1050,7 @@
       if (!["day", "week", "month"].includes(editor.frequency)) throw new Error("请选择有效的打卡频率。");
       const previous = projectById(editor.id);
       if (editor.timeUnit === "秒" && previous?.timeUnit !== "秒") throw new Error("时间单位请选择分、时或天。");
-      if (textLength(name) > (name === previous?.name ? 24 : INPUT_LIMITS.name) || (name !== previous?.name && /[\u0000-\u001f\u007f\u2028\u2029]/.test(name))) throw new Error("打卡名称最多6字，不能包含换行。");
+      if (projectNameLength(name) > (name === previous?.name ? 24 : INPUT_LIMITS.name) || (name !== previous?.name && /[\u0000-\u001f\u007f\u2028\u2029]/.test(name))) throw new Error("打卡名称最多6字，不能包含换行。");
       const quantityUnit = String(editor.quantityUnit ?? "次").trim();
       // Units are short literal text, never markup; changing a historical measure requires a new project.
       if (!quantityUnit || Array.from(quantityUnit).length > 4 || /[\s\u0000-\u001f\u007f]/.test(quantityUnit)) throw new Error("单位请填写1～4个字符，不能含空格。");
@@ -1508,7 +1511,7 @@
       if (field === "name") {
         const value = oneLine(element.value), previous = state.editor.name;
         // Reject an insertion/paste as a whole instead of sacrificing the original suffix; old names may shrink gradually.
-        element.value = textLength(value) <= INPUT_LIMITS.name || textLength(value) < textLength(previous) ? value : previous;
+        element.value = projectNameLength(value) <= INPUT_LIMITS.name || projectNameLength(value) < projectNameLength(previous) ? value : previous;
       }
       else if (field === "quantityUnit") {
         if (state.editor.quantityUnitLocked) { element.value = state.editor.quantityUnit; return; }

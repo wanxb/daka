@@ -29,6 +29,7 @@ import {
   selectableTimeUnits,
   timeIntegerLengths,
   acceptTextDraft,
+  acceptProjectNameDraft,
   singleLine,
   acceptNumericDraft,
 } from '../../domain/input-limits';
@@ -182,8 +183,8 @@ Page({
     let value = raw;
     if (field === 'name') {
       value = singleLine(raw);
-      if (!acceptTextDraft(value, this.data.form.name, inputLimits.projectName))
-        return this.data.form.name;
+      // Count a complete emoji as one name symbol; the same rule guards the domain save boundary.
+      if (!acceptProjectNameDraft(value, this.data.form.name)) return this.data.form.name;
     } else if (field === 'quantityUnit') {
       if (this.data.locked) return;
       value = singleLine(raw).replace(/\s/g, '');
