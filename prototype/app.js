@@ -1224,7 +1224,14 @@
     else if (scene === "both") { showHome(); openRecord("rope", { fresh: true }); }
     else if (scene === "detail") showDetail("rope");
     else if (scene === "share-record") { if (!projectById("reading")) resetFixtures(); showHome(); openShareRecord("reading-today"); }
-    else if (scene === "share-stats") { if (!projectById("rope")) resetFixtures(); showDetail("rope"); openShareStatistics(); }
+    else if (scene === "share-stats") {
+      if (!projectById("rope")) resetFixtures();
+      showDetail("rope");
+      // Freeze the requested period before rendering the showcase poster, using the same allowed scopes as detail links.
+      const range = new URLSearchParams(location.search).get("range");
+      if (["week", "month", "year", "all"].includes(range)) state.range = range;
+      openShareStatistics();
+    }
     else if (scene === "create") openEditor();
     else if (scene === "empty") { state.projects = []; state.records = []; showHome(); }
     document.querySelectorAll("[data-demo]").forEach(button => button.classList.toggle("active", button.dataset.demo === scene));

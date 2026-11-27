@@ -3,6 +3,9 @@
 (() => {
   "use strict";
   const root = document.getElementById("share-root");
+  // Only an embedded showcase may remove the simulated share controls; normal reviews retain the complete flow.
+  const posterOnly = parent !== window && new URLSearchParams(location.search).get("preview") === "poster";
+  if (posterOnly) document.body.classList.add("poster-preview");
   const escape = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
   // Prototype-only Phosphor Regular "export", @phosphor-icons/core 2.1.1 (MIT; shared/LICENSE-Phosphor.txt).
@@ -48,6 +51,11 @@
     if (!session) return;
     const s = session, d = s.data, ready = s.status === "ready";
     const description = [d.name, d.title, d.date, ...d.metrics.map(m => m.label + m.number + m.unit), d.note].filter(Boolean).join("，");
+    // The public illustration uses the same frozen snapshot and renderer as sharing, without fake destination buttons.
+    if (posterOnly) {
+      root.innerHTML = ready ? `<div class="share-poster-art"><img src="${s.url}" alt="${escape(description)}"></div>` : `<div class="share-poster-art" role="status">${s.status === "loading" ? "" : "海报暂未生成"}</div>`;
+      return;
+    }
     // This is the browser simulation of the native menu; no intermediate product preview is inserted.
     const status = s.status === "loading" ? '<span class="share-spinner"></span><p>正在生成图片</p>' : `<p>${s.status === "invalid" ? "记录已变更，请重新分享" : "图片未能生成，请重试"}</p>${s.status === "error" ? '<button data-share="retry">重试</button>' : ''}`;
     root.innerHTML = `<section class="share-direct" style="--share-accent:${d.color}" role="dialog" aria-modal="true" aria-label="${ready ? '微信图片分享面板模拟' : '正在生成分享图片'}">
