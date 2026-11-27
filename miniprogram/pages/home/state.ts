@@ -1,6 +1,9 @@
 /** Modules share the same native page instance: no second state store, lifecycle or event dispatch is introduced. */
 import type { projectTile } from '../../application/presentation';
-import type { createCelebration } from '../../application/celebration';
+import type {
+  SuccessCelebration,
+  createCelebrationSequence,
+} from '../../application/celebration-sequence';
 import type { CardSlot } from '../../application/project-order';
 import { inputLimits } from '../../domain/input-limits';
 import type { Database, PracticeRecord } from '../../domain/model';
@@ -26,7 +29,7 @@ export const homeData = {
   toast: '',
   expiresAt: 0,
   limits: inputLimits,
-  celebration: null as ReturnType<typeof createCelebration>,
+  celebration: null as SuccessCelebration | null,
 };
 export const homeState = {
   _orderIds: [] as string[],
@@ -62,6 +65,8 @@ export const homeState = {
   _sheetOpen: false,
   _pendingCelebration: null as PracticeRecord | null,
   _celebrationVersion: 0,
+  // Lazily initialize per instance: module-level closures would leak the sequence between home pages.
+  _celebrationSequence: null as ReturnType<typeof createCelebrationSequence> | null,
   _celebrationTimer: null as ReturnType<typeof setTimeout> | null,
   _loadVersion: 0,
 };

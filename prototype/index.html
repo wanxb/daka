@@ -17,6 +17,20 @@
     <span class="review-mark">北极星打卡</span>
     <h1>让投入<br>慢慢有形。</h1>
     <p class="review-description">时间与数量记录工具<br>第一版交互原型 · 2026.11</p>
+      <div class="celebration-review" aria-label="成功特效评审">
+        <!-- Keep replay tools outside the product after the user selected the dimensional effect. -->
+        <!-- Motion comparisons stay in the review shell and never become saved project preferences. -->
+        <label for="celebration-material">成功反馈预览</label>
+        <select id="celebration-material" aria-label="成功反馈素材">
+          <option value="emoji" selected>Emoji · 轻盈散花（推荐）</option>
+          <option value="emoji-fountain">Emoji · 短弧喷泉</option>
+          <option value="emoji-pop">Emoji · 分批跳出</option>
+          <option value="paper">立体彩纸</option>
+        </select>
+        <p id="confetti-review-status" role="status">选择素材后，可保存记录或点下方按钮播放。</p>
+        <button data-demo="celebration-first">播放首次成功特效</button>
+        <button data-demo="celebration-repeat">播放再次打卡特效</button>
+      </div>
     <nav class="review-nav" aria-label="选择预览页面">
       <button data-demo="home" class="active">首页卡片<span>01</span></button>
       <button data-demo="duration">记录时间<span>02</span></button>
@@ -28,12 +42,7 @@
     </nav>
     <div class="review-foot">
       <!-- Disposable review actions stay outside the product and reuse its actual record-success path. -->
-      <div class="celebration-review" aria-label="成功特效评审">
-        <!-- Keep replay tools outside the product after the user selected the dimensional effect. -->
-        <p id="confetti-review-status" role="status">成功反馈 · 立体彩纸</p>
-        <button data-demo="celebration-first">播放首次成功特效</button>
-        <button data-demo="celebration-repeat">播放再次打卡特效</button>
-      </div>
+
       <p>点卡片记录，点顶部图标或项目名查看统计。<br>示例数据仅用于体验，刷新可还原。</p>
       <button data-demo="reset" class="reset-button">重置示例</button>
       <a href="board.html">查看多屏设计稿</a>

@@ -1,0 +1,190 @@
+/* Ordinary text views share the paper stage: no Canvas overlay or per-frame bridge traffic. */
+.celebration-emoji {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  animation: celebration-emoji 2800ms linear both;
+}
+.celebration-emoji-glyph {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 40px;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  color: #ffe08a;
+  text-shadow: 0 1px 2px #32234030;
+  transform: translate(-50%, -50%);
+}
+/* Independent frame properties protect the approved paper projection and shading from Emoji changes. */
+@keyframes celebration-emoji {
+  0% {
+    transform: var(--e0);
+    opacity: var(--a0);
+  }
+  2.5% {
+    transform: var(--e1);
+    opacity: var(--a1);
+  }
+  5% {
+    transform: var(--e2);
+    opacity: var(--a2);
+  }
+  7.5% {
+    transform: var(--e3);
+    opacity: var(--a3);
+  }
+  10% {
+    transform: var(--e4);
+    opacity: var(--a4);
+  }
+  12.5% {
+    transform: var(--e5);
+    opacity: var(--a5);
+  }
+  15% {
+    transform: var(--e6);
+    opacity: var(--a6);
+  }
+  17.5% {
+    transform: var(--e7);
+    opacity: var(--a7);
+  }
+  20% {
+    transform: var(--e8);
+    opacity: var(--a8);
+  }
+  22.5% {
+    transform: var(--e9);
+    opacity: var(--a9);
+  }
+  25% {
+    transform: var(--e10);
+    opacity: var(--a10);
+  }
+  27.5% {
+    transform: var(--e11);
+    opacity: var(--a11);
+  }
+  30% {
+    transform: var(--e12);
+    opacity: var(--a12);
+  }
+  32.5% {
+    transform: var(--e13);
+    opacity: var(--a13);
+  }
+  35% {
+    transform: var(--e14);
+    opacity: var(--a14);
+  }
+  37.5% {
+    transform: var(--e15);
+    opacity: var(--a15);
+  }
+  40% {
+    transform: var(--e16);
+    opacity: var(--a16);
+  }
+  42.5% {
+    transform: var(--e17);
+    opacity: var(--a17);
+  }
+  45% {
+    transform: var(--e18);
+    opacity: var(--a18);
+  }
+  47.5% {
+    transform: var(--e19);
+    opacity: var(--a19);
+  }
+  50% {
+    transform: var(--e20);
+    opacity: var(--a20);
+  }
+  52.5% {
+    transform: var(--e21);
+    opacity: var(--a21);
+  }
+  55% {
+    transform: var(--e22);
+    opacity: var(--a22);
+  }
+  57.5% {
+    transform: var(--e23);
+    opacity: var(--a23);
+  }
+  60% {
+    transform: var(--e24);
+    opacity: var(--a24);
+  }
+  62.5% {
+    transform: var(--e25);
+    opacity: var(--a25);
+  }
+  65% {
+    transform: var(--e26);
+    opacity: var(--a26);
+  }
+  67.5% {
+    transform: var(--e27);
+    opacity: var(--a27);
+  }
+  70% {
+    transform: var(--e28);
+    opacity: var(--a28);
+  }
+  72.5% {
+    transform: var(--e29);
+    opacity: var(--a29);
+  }
+  75% {
+    transform: var(--e30);
+    opacity: var(--a30);
+  }
+  77.5% {
+    transform: var(--e31);
+    opacity: var(--a31);
+  }
+  80% {
+    transform: var(--e32);
+    opacity: var(--a32);
+  }
+  82.5% {
+    transform: var(--e33);
+    opacity: var(--a33);
+  }
+  85% {
+    transform: var(--e34);
+    opacity: var(--a34);
+  }
+  87.5% {
+    transform: var(--e35);
+    opacity: var(--a35);
+  }
+  90% {
+    transform: var(--e36);
+    opacity: var(--a36);
+  }
+  92.5% {
+    transform: var(--e37);
+    opacity: var(--a37);
+  }
+  95% {
+    transform: var(--e38);
+    opacity: var(--a38);
+  }
+  97.5% {
+    transform: var(--e39);
+    opacity: var(--a39);
+  }
+  100% {
+    transform: var(--e40);
+    opacity: var(--a40);
+  }
+}
+/* Keep the static mark and toast when the OS requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .celebration-emoji {
+    display: none;
+  }
+}

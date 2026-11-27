@@ -1,6 +1,7 @@
 /** Feedback waits for both native sheet exit and durable refresh, and invalidates every late selector callback on dismissal. */
 import { recordText } from '../../application/presentation';
-import { createCelebration, celebrationTiming } from '../../application/celebration';
+import { celebrationTiming } from '../../application/celebration';
+import { createCelebrationSequence } from '../../application/celebration-sequence';
 import { dateKey, type PracticeRecord } from '../../domain/model';
 import type { HomePage } from './state';
 export const feedbackMethods = {
@@ -68,10 +69,13 @@ export const feedbackMethods = {
             rect.top + rect.height > info.windowHeight
           )
             return;
-          const celebration = createCelebration(
+          // Only this eligible, current layout callback can advance the disposable visual sequence.
+          const sequence = (this._celebrationSequence ||= createCelebrationSequence());
+          const celebration = sequence.next(
             { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
             project.color,
             Date.now() + version,
+            info.windowWidth,
           );
           if (!celebration) return;
           this.setData({ celebration });

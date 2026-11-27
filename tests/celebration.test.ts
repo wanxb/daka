@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  celebrationPaper,
   createCelebration,
   celebrationTiming,
   paperProjection,
@@ -33,15 +34,17 @@ test('庆祝忽略无效卡片尺寸，有限轨迹保持56片且不依赖运行
 });
 
 // Known flat/edge-on poses guard the source of the prototype/native discrepancy: matrix projection, not 3D boxes.
-test('方纸片以二维矩阵翻面，不拉成长彩带；落下和侧向漂移均持续累积', () => {
+test('方纸片以二维矩阵翻面，不拉成长彩带；缩小范围后仍保留原有落下和侧向漂移', () => {
   assert.deepEqual(paperProjection(0, Math.PI / 2, 0, 1, 1), [1, 0, -0, 1]);
   const edge = paperProjection(0, 0, 0, 1, 1);
   assert.equal(edge[3], 0);
+  // Only displacement is compressed; keep the restored physical projection and fade contract.
+  assert.equal(celebrationPaper.rangeScale, 0.7);
   const result = createCelebration({ left: 0, top: 100, width: 170, height: 180 }, 'purple', 42)!;
   const ends = result.papers.map((paper) => {
     const match = /--f40:translate3d\((-?[\d.]+)px,(-?[\d.]+)px,0\)/.exec(paper.style)!;
     return { x: Number(match[1]), y: Number(match[2]) };
   });
-  assert.ok(ends.reduce((sum, end) => sum + end.y, 0) / ends.length > 150);
-  assert.ok(Math.max(...ends.map((end) => end.x)) - Math.min(...ends.map((end) => end.x)) > 200);
+  assert.ok(ends.reduce((sum, end) => sum + end.y, 0) / ends.length > 100);
+  assert.ok(Math.max(...ends.map((end) => end.x)) - Math.min(...ends.map((end) => end.x)) > 140);
 });

@@ -153,7 +153,7 @@ test('正式页面与面板状态流程', async (t) => {
     await home.load();
     return { home, callbacks };
   };
-  await t.test('首次与再次快速打卡提交后同强度，滚动和撤销立即清理', async () => {
+  await t.test('快速打卡按彩纸与Emoji交替，滚动和撤销清理但不回退序列', async () => {
     await reset();
     const project = await service().saveProject({
       ...initialForm(),
@@ -161,7 +161,7 @@ test('正式页面与面板状态流程', async (t) => {
       directEntryEnabled: true,
     });
     const oldWindow = api.getWindowInfo;
-    api.getWindowInfo = () => ({ windowHeight: 844 });
+    api.getWindowInfo = () => ({ windowHeight: 844, windowWidth: 390 });
     const { home } = await feedbackHome(project.id);
     try {
       await home.record(event({ id: project.id }));
@@ -172,11 +172,18 @@ test('正式页面与面板状态流程', async (t) => {
       home._lastTap = 0;
       await home.record(event({ id: project.id }));
       assert.equal((await service().snapshot()).records.length, 2);
-      assert.equal(home.data.celebration.papers.length, 56);
+      assert.equal(home.data.celebration.kind, 'emoji');
+      assert.equal(home.data.celebration.emojis.length, 16);
+      assert.equal(home.data.celebration.papers.length, 0);
       await home.undo();
       assert.equal((await service().snapshot()).records.length, 1);
       assert.equal(home.data.celebration, null);
       assert.equal(home._celebrationTimer, null);
+      // Undo cancels decoration but does not rewind presentation order or weaken the next success.
+      home._lastTap = 0;
+      await home.record(event({ id: project.id }));
+      assert.equal(home.data.celebration.kind, 'paper');
+      assert.equal(home.data.celebration.papers.length, 56);
     } finally {
       home.stopCelebration();
       api.getWindowInfo = oldWindow;
@@ -187,7 +194,7 @@ test('正式页面与面板状态流程', async (t) => {
     const project = await service().saveProject({ ...initialForm(), name: '阅读' });
     const record = await service().quickRecord(project.id);
     const oldWindow = api.getWindowInfo;
-    api.getWindowInfo = () => ({ windowHeight: 844 });
+    api.getWindowInfo = () => ({ windowHeight: 844, windowWidth: 390 });
     const { home } = await feedbackHome(project.id);
     try {
       home._sheetOpen = true;
@@ -200,7 +207,8 @@ test('正式页面与面板状态流程', async (t) => {
       home.stopCelebration();
       home.recordClosed();
       await home.saved({ detail: { record, editing: false } });
-      assert.equal(home.data.celebration.papers.length, 56);
+      assert.equal(home.data.celebration.kind, 'emoji');
+      assert.equal(home.data.celebration.emojis.length, 16);
       assert.equal(home._pendingCelebration, null);
       await home.saved({ detail: { record, editing: true } });
       assert.equal(home.data.celebration, null);
@@ -226,7 +234,7 @@ test('正式页面与面板状态流程', async (t) => {
     });
     const record = await service().quickRecord(project.id);
     const oldWindow = api.getWindowInfo;
-    api.getWindowInfo = () => ({ windowHeight: 844 });
+    api.getWindowInfo = () => ({ windowHeight: 844, windowWidth: 390 });
     const { home, callbacks } = await feedbackHome(project.id, true);
     const originalQuick = service().quickRecord;
     try {
@@ -235,11 +243,14 @@ test('正式页面与面板状态流程', async (t) => {
       callbacks[0]();
       assert.equal(home.data.celebration, null);
       assert.equal(home._celebrationTimer, null);
+      // A callback invalidated by backgrounding must not consume the initial paper turn.
+      assert.equal(home._celebrationSequence, null);
       home._visible = true;
       home.celebrateRecord(record);
       home.onUnload();
       callbacks[1]();
       assert.equal(home.data.celebration, null);
+      assert.equal(home._celebrationSequence, null);
       home._alive = home._visible = true;
       service().quickRecord = async () => {
         throw new Error('storage failed');
@@ -249,6 +260,7 @@ test('正式页面与面板状态流程', async (t) => {
       assert.equal(home.data.toast, '');
       assert.ok(home.data.error);
       assert.equal((await service().snapshot()).records.length, 1);
+      assert.equal(home._celebrationSequence, null);
     } finally {
       service().quickRecord = originalQuick;
       home.stopCelebration();

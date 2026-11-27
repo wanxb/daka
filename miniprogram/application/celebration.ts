@@ -18,6 +18,8 @@ export const celebrationPaper = {
   gravity: 0.65,
   drift: 0.4,
   samples: 40,
+  // Shrink displacement only: retain the original spray timing, roll/tilt, shading and gradual fade.
+  rangeScale: 0.7,
 } as const;
 const rounded = (value: number, places = 2) => Number(value.toFixed(places));
 const tau = Math.PI * 2;
@@ -135,7 +137,7 @@ export function createCelebration(rect: CelebrationRect, color: Color, seed: num
       const progress = index / celebrationPaper.samples;
       // Match the preview's gradual particle fade and final container fade rather than holding full opacity.
       const opacity = (1 - progress * 0.9) * (progress <= 0.8 ? 1 : (1 - progress) / 0.2);
-      return `--f${index}:translate3d(${rounded(frame.x)}px,${rounded(frame.y)}px,0) matrix(${matrix},0,0);--c${index}:${frame.shade};--o${index}:${rounded(opacity, 3)};`;
+      return `--f${index}:translate3d(${rounded(frame.x * celebrationPaper.rangeScale)}px,${rounded(frame.y * celebrationPaper.rangeScale)}px,0) matrix(${matrix},0,0);--c${index}:${frame.shade};--o${index}:${rounded(opacity, 3)};`;
     }).join('');
     return { id, style };
   });

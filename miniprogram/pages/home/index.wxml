@@ -183,6 +183,15 @@
   >
     <!-- The single projected square follows the same roll/tilt matrix as the approved particle renderer. -->
   </view>
+  <!-- Text stays planar and atomic; phrases such as 666 and paired emoji are never wrapped or skewed. -->
+  <view
+    wx:for="{{celebration.emojis}}"
+    wx:key="id"
+    class="celebration-emoji"
+    style="left:{{celebration.x}}px;top:{{celebration.y}}px;font-size:{{item.size}}px;{{item.style}}"
+  >
+    <text class="celebration-emoji-glyph">{{item.text}}</text>
+  </view>
   <view class="celebration-mark" style="left:{{celebration.x}}px;top:{{celebration.y}}px;">
     <image class="celebration-ink" src="/assets/celebration-check.svg" mode="aspectFit" />
   </view>

@@ -822,8 +822,9 @@
       const canvas = document.createElement("canvas");
       canvas.className = "record-confetti-canvas";
       layer.prepend(canvas);
-      // The selected dimensional effect is identical for every successful new record today.
-      celebrationEmitter = window.DAKA_CONFETTI_REVIEW.play(canvas, { x: x / device.clientWidth, y: y / device.clientHeight, colors: [palettes[project.color].start, "#f0bd58", "#e993aa", "#8bc8ba", "#b7a5e4"] });
+      // Review-only artwork choice shares the success boundary, intensity and lifetime; it is never persisted.
+      const variant = document.getElementById('celebration-material')?.value || 'emoji';
+      celebrationEmitter = window.DAKA_CONFETTI_REVIEW.play(canvas, { variant, x: x / device.clientWidth, y: y / device.clientHeight, colors: [palettes[project.color].start, "#f0bd58", "#e993aa", "#8bc8ba", "#b7a5e4"] });
     }
     // Cleanup is independent of animationend so reduced motion and interrupted animations cannot leak nodes.
     // Allow the longer mark and falling paper to settle, while subsequent actions can still dismiss immediately.

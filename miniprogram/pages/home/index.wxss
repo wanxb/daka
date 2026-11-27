@@ -1,4 +1,6 @@
 @import 'celebration.wxss';
+/* Emoji owns separate keyframes so alternation cannot change the existing paper animation. */
+@import 'celebration-emoji.wxss';
 /* Geometry, weights and palette stops mirror the prototype; exceptional data may use a full row. */
 .home {
   padding-top: 4px;
