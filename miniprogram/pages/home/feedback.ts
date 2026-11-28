@@ -2,7 +2,7 @@
 import { recordText } from '../../application/presentation';
 import { celebrationTiming } from '../../application/celebration';
 import { createCelebrationSequence } from '../../application/celebration-sequence';
-import { dateKey, type PracticeRecord } from '../../domain/model';
+import { type PracticeRecord } from '../../domain/model';
 import type { HomePage } from './state';
 export const feedbackMethods = {
   async saved(
@@ -19,7 +19,8 @@ export const feedbackMethods = {
         '已记录 ' + recordText(p, e.detail.record),
         e.detail.editing ? undefined : e.detail.record,
       );
-    if (!e.detail.editing && e.detail.record.occurredOn === dateKey()) {
+    // A new backdated record deserves the same confirmation; occurrence date/time only affect statistics.
+    if (!e.detail.editing) {
       // The native after-leave event may precede or follow storage refresh; support either ordering.
       if (this._sheetOpen) this._pendingCelebration = e.detail.record;
       else this.celebrateRecord(e.detail.record);
@@ -48,7 +49,6 @@ export const feedbackMethods = {
       !this._visible ||
       this.data.arranging ||
       !project ||
-      record.occurredOn !== dateKey() ||
       !this._db?.records.some((r) => r.id === record.id)
     )
       return;

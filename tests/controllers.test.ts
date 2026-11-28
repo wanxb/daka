@@ -4,6 +4,7 @@ import {
   dateKey,
   emptyDatabase,
   initialForm,
+  moveDay,
   type PracticeRecord,
 } from '../miniprogram/domain/model';
 import { service } from '../miniprogram/application/service';
@@ -189,9 +190,13 @@ test('正式页面与面板状态流程', async (t) => {
       api.getWindowInfo = oldWindow;
     }
   });
-  await t.test('普通记录等待面板离场，编辑和补记过去日期不庆祝', async () => {
+  await t.test('关闭快速打卡后可从首页选日期与时刻补卡，保存离场后庆祝，编辑不庆祝', async () => {
     await reset();
-    const project = await service().saveProject({ ...initialForm(), name: '阅读' });
+    const project = await service().saveProject({
+      ...initialForm(),
+      name: '阅读',
+      directEntryEnabled: true,
+    });
     const record = await service().quickRecord(project.id);
     const oldWindow = api.getWindowInfo;
     api.getWindowInfo = () => ({ windowHeight: 844, windowWidth: 390 });
@@ -212,12 +217,52 @@ test('正式页面与面板状态流程', async (t) => {
       assert.equal(home._pendingCelebration, null);
       await home.saved({ detail: { record, editing: true } });
       assert.equal(home.data.celebration, null);
-      const past = await service().saveRecord({
-        ...record,
-        id: 'feedback_past',
-        occurredOn: '2026-01-01',
-      });
+      const editor = make(editorOptions),
+        sheet = make(sheetOptions);
+      await editor.onLoad({ id: project.id });
+      editor.toggle(event({ field: 'directEntryEnabled' }, false));
+      await editor.save();
+      // Returning home must use the saved switch; picking a date/time cannot create a quick record.
+      await home.load();
+      home.selectComponent = () => sheet;
+      await home.record(event({ id: project.id }));
+      assert.equal(sheet.data.opened, true);
+      assert.equal(sheet.data.dateOpen, false);
+      const yesterday = moveDay(dateKey(), -1);
+      sheet.toggleDate();
+      sheet.dateChange(event({}, yesterday));
+      sheet.timeChange(event({}, '08:15'));
+      assert.equal((await service().snapshot()).records.length, 1);
+      await sheet.save();
+      const saved = sheet.events.find((e: any) => e.name === 'saved');
+      const past = saved.detail.record;
+      const db = await service().snapshot();
+      assert.equal(db.records.length, 2);
+      const stored = db.records.find((r) => r.id === past.id);
+      assert.equal(stored?.occurredOn, yesterday);
+      assert.equal(stored?.localTime, '08:15');
+      await home.saved(saved);
+      assert.equal(home.data.celebration, null);
+      assert.equal(home._pendingCelebration.id, past.id);
+      home.recordClosed();
+      assert.equal(home.data.celebration.kind, 'paper');
+      assert.equal(home.data.celebration.papers.length, 56);
+      home.stopCelebration();
       await home.saved({ detail: { record: past, editing: false } });
+      assert.equal(home.data.celebration.kind, 'emoji');
+      // Selecting a concrete time today must also preserve successful new-record feedback.
+      const timed = await service().saveRecord({
+        ...record,
+        id: 'feedback_timed',
+        localTime: '08:15',
+      });
+      assert.equal(
+        (await service().snapshot()).records.find((r) => r.id === timed.id)?.localTime,
+        '08:15',
+      );
+      await home.saved({ detail: { record: timed, editing: false } });
+      assert.equal(home.data.celebration.kind, 'paper');
+      await home.saved({ detail: { record: past, editing: true } });
       assert.equal(home.data.celebration, null);
       assert.equal(home._pendingCelebration, null);
     } finally {

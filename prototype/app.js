@@ -817,8 +817,8 @@
       closeSheet(); render();
       const summary = metricOrder(project).filter(metric => record[metric] != null).map(metric => metric === "durationSeconds" ? timeText(record[metric], project) : quantityText(record[metric], project)).join(" · ");
       showToast((existing ? "已保存修改 " : "已记录 ") + summary, existing ? null : { type: "create", record });
-      // Every new record for today receives equal feedback; edits and past-date entries stay quiet.
-      if (!existing && record.date === DEMO_TODAY) celebrateRecord(project);
+      // Confirmation follows a successful new record regardless of its occurrence date or chosen time.
+      if (!existing) celebrateRecord(project);
     } catch { updateSubmitButton(); }
   }
 
